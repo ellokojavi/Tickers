@@ -2,8 +2,8 @@ package cl.ufchile.app.ui.nav
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.ShowChart
-import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
@@ -20,7 +20,10 @@ enum class Tab(
     val icon: ImageVector,
 ) {
     VALUE("uf", "Valor UF", Icons.Outlined.ShowChart),
-    INFLATION("inflation", "Inflación", Icons.Outlined.TrendingUp),
+    // A calculator, not a trend line: the screen is a calculator, and the
+    // rising-arrow icon was near-indistinguishable from the chart icon next
+    // to it in the bar.
+    INFLATION("inflation", "Inflación", Icons.Outlined.Calculate),
     CREDITS("credits", "Créditos", Icons.Outlined.AccountBalance),
 }
 
