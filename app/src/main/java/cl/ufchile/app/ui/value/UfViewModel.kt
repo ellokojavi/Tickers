@@ -27,9 +27,8 @@ enum class Range(val label: String, val months: Long?) {
  * State of the single "Valor UF" screen.
  *
  * Today's value and the historical series are one subject, not two, so they
- * live in one state object. The history controls are opt-in via [historyOpen];
- * everything above that flag renders identically whether it is set or not, so
- * opening the app is never slower for the common case.
+ * live in one state object: the screen shows today's value and the series that
+ * produced it, always, with no mode to toggle between them.
  */
 data class UfUiState(
     val loading: Boolean = true,
@@ -44,8 +43,7 @@ data class UfUiState(
     val ufText: String = "1",
     val clpText: String = "",
 
-    // --- history, revealed on demand
-    val historyOpen: Boolean = false,
+    // --- history
     val range: Range = Range.M3,
     val all: List<UfValue> = emptyList(),
 
@@ -64,6 +62,8 @@ data class UfUiState(
     val lookup: LookupResult = LookupResult.Loading,
     val loadingOlder: Boolean = false,
     val historyMessage: String? = null,
+    /** The full day-by-day list is long, so it starts folded away. */
+    val detailExpanded: Boolean = false,
 ) {
     val dailyDelta: BigDecimal?
         get() = if (current != null && previous != null)
@@ -120,6 +120,7 @@ class UfViewModel(
             // The bundled series lands first so the charts are complete before
             // the network is even reachable.
             repo.ensureSeeded()
+            lookup(_ui.value.lookupDate)
             refresh(force = false)
         }
     }
@@ -137,7 +138,7 @@ class UfViewModel(
             val target = c.date.minusMonths(1)
             series.filter { !it.date.isAfter(target) }.maxByOrNull { it.date }
         }
-        val windowed = window(series, _ui.value.historyOpen, _ui.value.range)
+        val windowed = window(series, _ui.value.range)
         _ui.value = _ui.value.copy(
             loading = false,
             current = current,
@@ -198,23 +199,12 @@ class UfViewModel(
 
     // -------------------------------------------------------------- history
 
-    fun toggleHistory() {
-        val opening = !_ui.value.historyOpen
-        val windowed = window(_ui.value.all, opening, _ui.value.range)
-        _ui.value = _ui.value.copy(
-            historyOpen = opening,
-            scrubIndex = null,
-            rangeValues = windowed,
-            chartValues = UfEngine.downsample(windowed, MAX_CHART_POINTS),
-        )
-        if (opening) {
-            ensureFrom(LocalDate.now().minusMonths(_ui.value.range.months ?: 12).year)
-            if (_ui.value.lookup == LookupResult.Loading) lookup(_ui.value.lookupDate)
-        }
+    fun toggleDetail() {
+        _ui.value = _ui.value.copy(detailExpanded = !_ui.value.detailExpanded)
     }
 
     fun setRange(range: Range) {
-        val windowed = window(_ui.value.all, _ui.value.historyOpen, range)
+        val windowed = window(_ui.value.all, range)
         _ui.value = _ui.value.copy(
             range = range,
             scrubIndex = null,
@@ -265,11 +255,8 @@ class UfViewModel(
         }
     }
 
-    /** Collapsed shows a fixed recent window; expanded honours [range]. */
-    private fun window(series: List<UfValue>, historyOpen: Boolean, range: Range): List<UfValue> {
-        if (!historyOpen) {
-            return series.filter { !it.date.isAfter(LocalDate.now()) }.takeLast(60)
-        }
+    /** The slice of the series the selected range covers. */
+    private fun window(series: List<UfValue>, range: Range): List<UfValue> {
         val months = range.months ?: return series
         val from = LocalDate.now().minusMonths(months)
         return series.filter { !it.date.isBefore(from) }

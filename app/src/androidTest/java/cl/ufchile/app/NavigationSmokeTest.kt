@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextReplacement
@@ -40,7 +41,6 @@ class NavigationSmokeTest {
     fun the_app_launches_showing_todays_value() {
         rule.onNodeWithText("Unidad de Fomento").assertIsDisplayed()
         rule.onNodeWithText("CONVERSOR").assertIsDisplayed()
-        rule.onNodeWithText("ÚLTIMOS 60 DÍAS").assertIsDisplayed()
     }
 
     @Test
@@ -50,34 +50,33 @@ class NavigationSmokeTest {
         }
     }
 
-    /** History is opt-in, so none of its controls may be visible up front. */
+    /** The history is part of the screen, not a mode to switch into. */
     @Test
-    fun history_controls_stay_hidden_until_requested() {
-        rule.onAllNodesWithText("CONSULTAR UNA FECHA").assertCountEquals(0)
-        rule.onAllNodesWithText("1M").assertCountEquals(0)
-        rule.onNodeWithText("Ver histórico").assertIsDisplayed()
-    }
-
-    @Test
-    fun expanding_history_reveals_ranges_and_the_date_lookup() {
-        rule.onNodeWithText("Ver histórico").performClick()
-        rule.waitForIdle()
-
-        // These land above the fold, so expanding is immediately useful.
+    fun the_history_and_its_ranges_are_visible_without_any_interaction() {
         rule.onNodeWithText("HISTÓRICO").assertIsDisplayed()
         rule.onNodeWithText("1M").assertIsDisplayed()
         rule.onNodeWithText("Máx").assertIsDisplayed()
+    }
 
-        // The date lookup sits just below it and has to be scrolled to.
+    @Test
+    fun the_date_lookup_is_present_on_arrival() {
         rule.onNode(hasScrollAction()).performScrollToNode(hasText("CONSULTAR UNA FECHA"))
+
         rule.onNodeWithText("CONSULTAR UNA FECHA").assertIsDisplayed()
         rule.onNodeWithText("Cambiar").assertIsDisplayed()
+    }
 
-        rule.onNode(hasScrollAction()).performScrollToNode(hasText("Ocultar"))
-        // Collapsing puts the screen back to the at-a-glance state.
-        rule.onNodeWithText("Ocultar").performClick()
+    /** Hundreds of rows stay folded away until the user asks for them. */
+    @Test
+    fun the_daily_detail_starts_collapsed_and_expands_on_demand() {
+        rule.onNode(hasScrollAction()).performScrollToNode(hasText("DETALLE DIARIO"))
+        rule.onNodeWithText("DETALLE DIARIO").assertIsDisplayed()
+        rule.onAllNodesWithContentDescription("Ocultar el detalle diario").assertCountEquals(0)
+
+        rule.onNodeWithContentDescription("Mostrar el detalle diario").performClick()
         rule.waitForIdle()
-        rule.onAllNodesWithText("1M").assertCountEquals(0)
+
+        rule.onNodeWithContentDescription("Ocultar el detalle diario").assertIsDisplayed()
     }
 
     @Test

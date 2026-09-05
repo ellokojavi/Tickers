@@ -86,4 +86,31 @@ class UfDailySeedParseTest {
 
         assertThat(cl.ufchile.app.domain.engine.UfSanity.filter(parsed)).hasSize(parsed.size)
     }
+
+    /**
+     * The source serves 608,15 and 607,38 for 29 and 30 December 2014. The UF
+     * was frozen at 24.627,10 for that whole re-adjustment period — November
+     * 2014's CPI was 0,0% — so the true values are recovered exactly from the
+     * surrounding days rather than left as holes.
+     */
+    @Test
+    fun `the corrupt December 2014 days carry their real value`() {
+        val byDate = UfDailySeed.parse(File("src/main/assets/uf_daily.txt").readLines())
+            .associateBy { it.date }
+
+        listOf(28, 29, 30, 31).forEach { day ->
+            val value = byDate[LocalDate.of(2014, 12, day)]
+            assertThat(value).isNotNull()
+            assertThat(value!!.value.toDouble()).isWithin(0.005).of(24627.10)
+        }
+    }
+
+    @Test
+    fun `the series has no missing day at all`() {
+        val parsed = UfDailySeed.parse(File("src/main/assets/uf_daily.txt").readLines())
+        val span = java.time.temporal.ChronoUnit.DAYS
+            .between(parsed.first().date, parsed.last().date) + 1
+
+        assertThat(parsed.size.toLong()).isEqualTo(span)
+    }
 }

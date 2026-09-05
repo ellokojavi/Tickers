@@ -77,6 +77,46 @@ if len(rejected) > 20:
     sys.exit("demasiados valores descartados; revisar la fuente antes de publicar")
 
 daily = clean
+
+# --- reconstruccion de dias faltantes -------------------------------------
+#
+# Dentro de un periodo de reajuste (del 10 de un mes al 9 del siguiente) la UF
+# crece a factor diario constante por construccion, asi que un dia perdido se
+# reconstruye exactamente desde sus vecinos: no es interpolacion a ojo, es
+# recuperar un termino de una progresion geometrica conocida. Solo se hace
+# cuando el hueco no cruza un cambio de periodo, donde el factor cambia.
+
+
+def period_start(d):
+    return date(d.year, d.month, 10) if d.day >= 10 else (
+        date(d.year - 1, 12, 10) if d.month == 1 else date(d.year, d.month - 1, 10))
+
+
+known = sorted(date.fromisoformat(k) for k in daily)
+repaired = []
+first, last = known[0], known[-1]
+index = {d: i for i, d in enumerate(known)}
+
+cursor = first
+while cursor <= last:
+    if cursor.isoformat() not in daily:
+        before = max((d for d in known if d < cursor), default=None)
+        after = min((d for d in known if d > cursor), default=None)
+        if before and after and period_start(before) == period_start(cursor) == period_start(after):
+            span = (after - before).days
+            step = (cursor - before).days
+            value = daily[before.isoformat()] * (
+                daily[after.isoformat()] / daily[before.isoformat()]
+            ) ** (step / span)
+            daily[cursor.isoformat()] = round(value, 2)
+            repaired.append((cursor.isoformat(), round(value, 2)))
+    cursor += timedelta(days=1)
+
+if repaired:
+    print("\ndias reconstruidos desde el periodo de reajuste:")
+    for key, value in repaired:
+        print(f"  {key}: {value}")
+
 keys = sorted(daily)
 start = date.fromisoformat(keys[0])
 end = date.fromisoformat(keys[-1])
