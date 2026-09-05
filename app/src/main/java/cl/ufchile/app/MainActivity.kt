@@ -1,0 +1,125 @@
+package cl.ufchile.app
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import cl.ufchile.app.data.prefs.ThemeMode
+import cl.ufchile.app.ui.credit.CreditEditorScreen
+import cl.ufchile.app.ui.credit.CreditListScreen
+import cl.ufchile.app.ui.history.HistoryScreen
+import cl.ufchile.app.ui.inflation.InflationScreen
+import cl.ufchile.app.ui.nav.Routes
+import cl.ufchile.app.ui.nav.Tab
+import cl.ufchile.app.ui.theme.UfChileTheme
+import cl.ufchile.app.ui.today.TodayScreen
+import kotlinx.coroutines.launch
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+        setContent { UfChileRoot() }
+    }
+}
+
+@Composable
+private fun UfChileRoot() {
+    val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as UfChileApp
+    val themeMode by app.container.settings.theme.collectAsState(initial = ThemeMode.SYSTEM)
+    val scope = rememberCoroutineScope()
+
+    UfChileTheme(themeMode = themeMode) {
+        val navController = rememberNavController()
+        val backStack by navController.currentBackStackEntryAsState()
+        val route = backStack?.destination?.route
+
+        // The editor is a full-screen task; the tab bar would only be a way to
+        // lose unsaved work.
+        val showBar = Tab.entries.any { it.route == route }
+
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            bottomBar = {
+                if (showBar) {
+                    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+                        Tab.entries.forEach { tab ->
+                            NavigationBarItem(
+                                selected = route == tab.route,
+                                onClick = {
+                                    if (route != tab.route) {
+                                        navController.navigate(tab.route) {
+                                            popUpTo(Tab.TODAY.route) { saveState = true }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                },
+                                icon = { Icon(tab.icon, contentDescription = tab.label) },
+                                label = { Text(tab.label) },
+                            )
+                        }
+                    }
+                }
+            },
+        ) { padding ->
+            NavHost(
+                navController = navController,
+                startDestination = Tab.TODAY.route,
+                modifier = Modifier.fillMaxSize().padding(padding),
+            ) {
+                composable(Tab.TODAY.route) {
+                    TodayScreen(
+                        onCycleTheme = {
+                            scope.launch {
+                                app.container.settings.setTheme(
+                                    when (themeMode) {
+                                        ThemeMode.SYSTEM -> ThemeMode.LIGHT
+                                        ThemeMode.LIGHT -> ThemeMode.DARK
+                                        ThemeMode.DARK -> ThemeMode.SYSTEM
+                                    }
+                                )
+                            }
+                        },
+                        themeMode = themeMode,
+                    )
+                }
+                composable(Tab.HISTORY.route) { HistoryScreen() }
+                composable(Tab.INFLATION.route) { InflationScreen() }
+                composable(Tab.CREDITS.route) {
+                    CreditListScreen(onOpen = { id ->
+                        navController.navigate(Routes.creditEditor(id))
+                    })
+                }
+                composable(
+                    route = "${Routes.CREDIT_EDITOR}/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.LongType }),
+                ) { entry ->
+                    CreditEditorScreen(
+                        simulationId = entry.arguments?.getLong("id") ?: 0L,
+                        onBack = { navController.popBackStack() },
+                    )
+                }
+            }
+        }
+    }
+}

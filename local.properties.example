@@ -1,0 +1,6 @@
+# Copy to local.properties and fill in.
+sdk.dir=/path/to/your/android/sdk
+
+# Free key from https://api.cmfchile.cl — optional.
+# Leave blank to use the mindicador.cl fallback source only.
+CMF_API_KEY=
