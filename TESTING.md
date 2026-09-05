@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 66 JVM tests   — seconds, no device
+./gradlew test                  # 83 JVM tests   — seconds, no device
 ./gradlew connectedAndroidTest  # 9 UI tests     — needs a device or emulator
 ```
 
@@ -15,7 +15,7 @@ without a device, and anything a user can tap must be verified on one.**
 
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
-| Pure calculation | JUnit | 39 | Mortgage maths, due dates, inflation index, UF conversions |
+| Pure calculation | JUnit | 56 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
 | Formatting & parsing | JUnit | 8 | `es-CL` output and input round trips |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 14 | Room schema, type converters, bundled dataset |
@@ -88,7 +88,7 @@ The seed test reads `app/src/main/assets/uf_monthly_seed.json` directly — the
 same file that ships in the APK — so regenerating it badly fails the build
 rather than the phone.
 
-### `UfEngineTest` — 7 tests
+### `UfEngineTest` — 13 tests
 
 Centred on the app's defining subtlety: **the series legitimately contains
 future dates.**
@@ -98,6 +98,30 @@ future dates.**
 - Conversions round trip; a zero rate does not divide by zero.
 - Deltas carry the correct sign.
 - An empty series returns null rather than crashing.
+- Annualisation: a full year returns its own change, six months compound
+  correctly, declines stay negative, short windows magnify as the arithmetic
+  requires, and impossible inputs return zero instead of NaN.
+
+### `UfLookupTest` — 11 tests
+
+Added after a real defect: asking for a date past the published horizon
+answered with the last published day's value **and labelled it official**. Two
+faults compounded — the lookup fell back to "nearest earlier" in the future
+direction, and the UI checked "is future" before "is not exact".
+
+The rules now live in a pure resolver with a closed set of outcomes:
+
+- A date beyond the horizon is never answered with another day's value.
+- The day after the horizon is already unpublished; the horizon itself is a
+  valid published future value.
+- Today and past dates resolve exactly and are not marked as future.
+- A substitute is offered only for gaps **inside** coverage, and is labelled.
+- Dates before August 1977 are rejected; the first day of the series is not.
+- Nothing cached and nothing nearby is "unavailable", never a wrong number.
+- An empty cache does not fabricate a horizon.
+
+The calendar is bounded by the same horizon, so an unpublished day cannot be
+picked in the first place — the resolver is the second line of defence.
 
 ### `FormatTest` — 8 tests
 
@@ -167,7 +191,7 @@ machine with poor connectivity.
 
 ---
 
-## Three bugs this suite already caught
+## Four bugs this suite already caught
 
 Worth recording, because both would have shipped otherwise:
 
@@ -183,7 +207,11 @@ sits in a slot that is not merged into the node's semantics, so TalkBack
 announced only "Button". Found because the UI test could not locate it either.
 Fixed with an explicit `contentDescription`.
 
-**3. Expanding the history put its own controls off screen.** The range chips
+**3. A future date was answered with another day's value, labelled official.**
+See `UfLookupTest` above. The fix is a closed set of outcomes plus a bounded
+calendar, and the regression is pinned by its own test.
+
+**4. Expanding the history put its own controls off screen.** The range chips
 sat below a chart that grows to 200dp, which pushed them past the fold on a
 1080×2400 device: tapping "Ver histórico" revealed a taller chart and no way to
 change its range without scrolling. The test failed on `assertIsDisplayed`,
@@ -224,7 +252,9 @@ before a release.
 - [ ] Light and dark themes, and following the system setting
 - [ ] Font scale at maximum: no clipped or overlapping text
 - [ ] Landscape orientation
-- [ ] Expanding the history keeps its range selector on screen
+- [ ] Expanding the history keeps its range selector and its change figures on screen
+- [ ] Sharing today's card produces readable text in WhatsApp and in mail
+- [ ] The launcher icon reads correctly under circular, squircle and themed masks
 - [ ] A 25-year payment table scrolls smoothly in both axes
 - [ ] CSV export opens correctly in a spreadsheet under a Chilean locale
 - [ ] TalkBack reaches and announces every interactive control

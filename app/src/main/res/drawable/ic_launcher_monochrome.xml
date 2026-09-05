@@ -12,7 +12,8 @@
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:viewportHeight="108"
+    android:tint="#FFFFFF">
 
     <group
         android:scaleX="0.94"
@@ -27,17 +28,17 @@
             android:strokeLineCap="round" />
 
         <path
-            android:fillColor="#E4536B"
+            android:fillColor="#FFFFFF"
             android:pathData="M52,34 C37,44 33,59 38,72 C41,80 46,86 52,90 C58,86 63,80 66,72 C71,59 67,44 52,34z" />
         <path
-            android:fillColor="#E4536B"
+            android:fillColor="#FFFFFF"
             android:pathData="M38,68 C32,73 26,76 20,78 C26,73 32,68 36,62z" />
         <path
-            android:fillColor="#E4536B"
+            android:fillColor="#FFFFFF"
             android:pathData="M66,68 C72,73 78,76 84,78 C78,73 72,68 68,62z" />
         <path
             android:pathData="M52,90 L52,96"
-            android:strokeColor="#E4536B"
+            android:strokeColor="#FFFFFF"
             android:strokeWidth="3.6"
             android:strokeLineCap="round" />
     </group>

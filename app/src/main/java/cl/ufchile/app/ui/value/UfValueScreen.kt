@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.BrightnessAuto
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
@@ -28,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,10 +43,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cl.ufchile.app.R
 import cl.ufchile.app.core.format.Fmt
 import cl.ufchile.app.data.prefs.ThemeMode
+import cl.ufchile.app.domain.engine.LookupResult
+import cl.ufchile.app.domain.engine.UfLookup
 import cl.ufchile.app.domain.model.DataSource
 import cl.ufchile.app.ui.appViewModel
 import cl.ufchile.app.ui.components.AppCard
@@ -50,6 +59,7 @@ import cl.ufchile.app.ui.components.ChipRow
 import cl.ufchile.app.ui.components.KeyValueRow
 import cl.ufchile.app.ui.components.NumberField
 import cl.ufchile.app.ui.components.Pill
+import cl.ufchile.app.ui.components.ScreenHeader
 import cl.ufchile.app.ui.components.SectionTitle
 import cl.ufchile.app.ui.components.Sparkline
 import cl.ufchile.app.ui.components.signColor
@@ -73,6 +83,7 @@ fun UfValueScreen(
 ) {
     val vm = appViewModel { UfViewModel(it.ufRepository, it.settings) }
     val ui by vm.ui.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var showPicker by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -81,35 +92,28 @@ fun UfValueScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("Unidad de Fomento", style = MaterialTheme.typography.titleLarge)
-                Row {
-                    IconButton(onClick = onCycleTheme) {
-                        Icon(
-                            when (themeMode) {
-                                ThemeMode.SYSTEM -> Icons.Outlined.BrightnessAuto
-                                ThemeMode.LIGHT -> Icons.Outlined.LightMode
-                                ThemeMode.DARK -> Icons.Outlined.DarkMode
-                            },
-                            contentDescription = "Cambiar tema",
-                        )
-                    }
-                    IconButton(onClick = vm::refresh) {
-                        if (ui.refreshing) {
-                            CircularProgressIndicator(Modifier.height(20.dp), strokeWidth = 2.dp)
-                        } else {
-                            Icon(Icons.Filled.Refresh, contentDescription = "Actualizar")
-                        }
+            ScreenHeader(title = "Unidad de Fomento") {
+                IconButton(onClick = onCycleTheme) {
+                    Icon(
+                        when (themeMode) {
+                            ThemeMode.SYSTEM -> Icons.Outlined.BrightnessAuto
+                            ThemeMode.LIGHT -> Icons.Outlined.LightMode
+                            ThemeMode.DARK -> Icons.Outlined.DarkMode
+                        },
+                        contentDescription = "Cambiar tema",
+                    )
+                }
+                IconButton(onClick = vm::refresh) {
+                    if (ui.refreshing) {
+                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Filled.Refresh, contentDescription = "Actualizar")
                     }
                 }
             }
         }
 
-        item { HeroCard(ui) }
+        item { HeroCard(ui, onShare = { ShareToday.share(context, ShareToday.buildMessage(ui)) }) }
 
         ui.error?.let { message ->
             item {
@@ -166,19 +170,33 @@ fun UfValueScreen(
     }
 
     if (showPicker) {
+        // The horizon is a hard bound, not a warning: a day with no published
+        // value cannot be picked in the first place.
+        val maxDate = ui.lastPublished ?: LocalDate.now()
+        val minDate = UfLookup.SERIES_START
         val state = rememberDatePickerState(
-            initialSelectedDateMillis = ui.lookupDate
-                .atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+            initialSelectedDateMillis = ui.lookupDate.toUtcMillis(),
+            yearRange = minDate.year..maxDate.year,
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val d = utcTimeMillis.toUtcDate()
+                    return !d.isBefore(minDate) && !d.isAfter(maxDate)
+                }
+
+                override fun isSelectableYear(year: Int): Boolean =
+                    year in minDate.year..maxDate.year
+            },
         )
         DatePickerDialog(
             onDismissRequest = { showPicker = false },
             confirmButton = {
-                TextButton(onClick = {
-                    state.selectedDateMillis?.let { millis ->
-                        vm.lookup(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate())
-                    }
-                    showPicker = false
-                }) { Text("Aceptar") }
+                TextButton(
+                    enabled = state.selectedDateMillis != null,
+                    onClick = {
+                        state.selectedDateMillis?.let { vm.lookup(it.toUtcDate()) }
+                        showPicker = false
+                    },
+                ) { Text("Aceptar") }
             },
             dismissButton = {
                 TextButton(onClick = { showPicker = false }) { Text("Cancelar") }
@@ -187,14 +205,37 @@ fun UfValueScreen(
     }
 }
 
+/** The Material date picker speaks UTC milliseconds; the app speaks dates. */
+private fun LocalDate.toUtcMillis(): Long =
+    atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+
+private fun Long.toUtcDate(): LocalDate =
+    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
+
 @Composable
-private fun HeroCard(ui: UfUiState) {
+private fun HeroCard(ui: UfUiState, onShare: () -> Unit) {
     AppCard {
-        Text(
-            ui.current?.let { Fmt.longDate(it.date) } ?: "Cargando…",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                ui.current?.let { Fmt.longDate(it.date) } ?: "Cargando…",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (ui.current != null) {
+                IconButton(onClick = onShare, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        Icons.Filled.Share,
+                        contentDescription = "Compartir el valor de la UF",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(6.dp))
         Text(
             ui.current?.let { Fmt.clpExact(it.value) } ?: "—",
@@ -279,19 +320,45 @@ private fun ChartCard(ui: UfUiState, vm: UfViewModel) {
             }
         }
 
-        // The scrubbed reading lives here, never in the hero: the headline must
-        // keep telling the truth about what the UF is worth today.
+        // One line above the chart carries either the period summary or, while
+        // a finger is down, the day being explored. Below the chart it would
+        // fall past the fold, which is where the range chips used to be.
         val scrubbed = ui.scrubbed
-        Text(
-            text = if (scrubbed != null)
-                "${Fmt.shortDate(scrubbed.date)}   ${Fmt.clpExact(scrubbed.value)}"
-            else if (ui.historyOpen)
-                "Arrastra sobre el gráfico para explorar"
-            else " ",
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (scrubbed != null) MaterialTheme.colorScheme.onSurface
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        when {
+            scrubbed != null -> Text(
+                "${Fmt.shortDate(scrubbed.date)}   ${Fmt.clpExact(scrubbed.value)}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            ui.historyOpen && ui.rangeChangePct != null -> Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                val pct = ui.rangeChangePct!!
+                Text(
+                    "${Fmt.pctSigned(pct)} en el período",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = signColor(pct),
+                )
+                ui.rangeAnnualisedPct?.let { annual ->
+                    Text(
+                        "·",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                    Text(
+                        "${Fmt.pctSigned(annual)} anualizado",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = signColor(annual),
+                    )
+                }
+            }
+
+            else -> Text(
+                " ",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
         Spacer(Modifier.height(6.dp))
 
         Sparkline(
@@ -311,13 +378,6 @@ private fun ChartCard(ui: UfUiState, vm: UfViewModel) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                ui.rangeChangePct?.let { pct ->
-                    Text(
-                        "${Fmt.pctSigned(pct)} en el período",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = signColor(pct),
-                    )
-                }
                 Text(
                     ui.chartValues.lastOrNull()?.let { Fmt.shortDate(it.date) }.orEmpty(),
                     style = MaterialTheme.typography.bodySmall,
@@ -340,29 +400,106 @@ private fun LookupCard(ui: UfUiState, onChangeDate: () -> Unit) {
             Text(Fmt.longDate(ui.lookupDate), style = MaterialTheme.typography.bodyLarge)
             OutlinedButton(onClick = onChangeDate) { Text("Cambiar") }
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            ui.lookupValue?.let { Fmt.clpExact(it.value) } ?: "Sin dato",
-            style = MaterialTheme.typography.headlineMedium,
-        )
-        Spacer(Modifier.height(8.dp))
-        when {
-            ui.lookupIsFuture -> Pill(
-                text = "Valor oficial ya publicado",
-                container = MaterialTheme.colorScheme.primaryContainer,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            ui.lookupMissing && ui.lookupValue != null -> Text(
-                "Sin dato exacto para esa fecha. Se muestra el " +
-                    "${Fmt.shortDate(ui.lookupValue!!.date)}, el más cercano anterior.",
-                style = MaterialTheme.typography.bodySmall,
+        Spacer(Modifier.height(10.dp))
+
+        when (val result = ui.lookup) {
+            is LookupResult.Exact -> {
+                Text(
+                    Fmt.clpExact(result.value.value),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+                if (result.isFuture) {
+                    Pill(
+                        text = "Valor oficial ya publicado",
+                        container = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                } else {
+                    Text(
+                        "Valor publicado para esa fecha.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            is LookupResult.Nearest -> {
+                Text(
+                    Fmt.clpExact(result.value.value),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Sin dato para el ${Fmt.shortDate(result.requested)}. Se muestra el " +
+                        "${Fmt.shortDate(result.value.date)}, el día publicado más cercano " +
+                        "anterior.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            is LookupResult.NotPublishedYet -> {
+                Text(
+                    "Sin valor",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    result.lastPublished?.let {
+                        "La UF de esa fecha todavía no se publica. El último valor oficial " +
+                            "es el del ${Fmt.shortDate(it)}; el siguiente tramo se publica " +
+                            "el día 9 del mes que viene."
+                    } ?: "Todavía no hay valores publicados para esa fecha.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            is LookupResult.BeforeCoverage -> {
+                Text(
+                    "Sin valor",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "La serie diaria de la UF parte el ${Fmt.shortDate(result.earliest)}.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            LookupResult.Unavailable -> {
+                Text(
+                    "Sin datos",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "No se pudo descargar ese período. Revisa tu conexión y vuelve a " +
+                        "intentar.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            LookupResult.Loading -> Text(
+                "Buscando…",
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            ui.lookupValue == null -> Text(
-                "Fuera de la cobertura disponible. La serie diaria de la UF parte en " +
-                    "agosto de 1977.",
+        }
+
+        ui.lastPublished?.let { last ->
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Puedes consultar entre el ${Fmt.shortDate(UfLookup.SERIES_START)} y el " +
+                    "${Fmt.shortDate(last)}.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = MaterialTheme.colorScheme.outline,
             )
         }
     }

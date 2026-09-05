@@ -76,4 +76,55 @@ class UfEngineTest {
         assertThat(UfEngine.currentOf(emptyList(), today)).isNull()
         assertThat(UfEngine.futureOf(emptyList(), today)).isEmpty()
     }
+
+    // --------------------------------------------------------- annualisation
+
+    @Test
+    fun `a full year annualises to its own change`() {
+        val annual = UfEngine.annualisedPct(BigDecimal("100"), BigDecimal("104"), 365)
+
+        assertThat(annual.toDouble()).isWithin(0.05).of(4.0)
+    }
+
+    @Test
+    fun `a half year annualises to roughly the compounded rate`() {
+        // 2% in six months compounds to about 4.04% a year.
+        val annual = UfEngine.annualisedPct(BigDecimal("100"), BigDecimal("102"), 183)
+
+        assertThat(annual.toDouble()).isWithin(0.1).of(4.04)
+    }
+
+    @Test
+    fun `a decline annualises negative`() {
+        val annual = UfEngine.annualisedPct(BigDecimal("100"), BigDecimal("98"), 365)
+
+        assertThat(annual.toDouble()).isWithin(0.05).of(-2.0)
+    }
+
+    @Test
+    fun `annualising a short window magnifies the move, as it should`() {
+        // 1% in a month is a much larger annual rate; the UI labels it so.
+        val annual = UfEngine.annualisedPct(BigDecimal("100"), BigDecimal("101"), 30)
+
+        assertThat(annual.toDouble()).isGreaterThan(12.0)
+    }
+
+    @Test
+    fun `annualisation refuses impossible inputs instead of returning nonsense`() {
+        assertThat(UfEngine.annualisedPct(BigDecimal("100"), BigDecimal("110"), 0))
+            .isEqualTo(BigDecimal.ZERO)
+        assertThat(UfEngine.annualisedPct(BigDecimal.ZERO, BigDecimal("110"), 365))
+            .isEqualTo(BigDecimal.ZERO)
+        assertThat(UfEngine.annualisedPct(BigDecimal("100"), BigDecimal.ZERO, 365))
+            .isEqualTo(BigDecimal.ZERO)
+    }
+
+    @Test
+    fun `real UF movement annualises close to Chilean inflation`() {
+        // 5-sep-2025 to 5-sep-2026 in the real series.
+        val annual = UfEngine.annualisedPct(BigDecimal("39434.60"), BigDecimal("40880.36"), 365)
+
+        assertThat(annual.toDouble()).isGreaterThan(2.0)
+        assertThat(annual.toDouble()).isLessThan(6.0)
+    }
 }

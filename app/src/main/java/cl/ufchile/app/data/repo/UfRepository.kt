@@ -40,8 +40,19 @@ class UfRepository(
             list.map { Indicator(it.code, it.name, it.unit, it.date, it.value) }
         }
 
-    suspend fun ufOn(date: LocalDate): UfValue? =
-        (ufDao.byDate(date) ?: ufDao.atOrBefore(date))?.let { UfValue(it.date, it.value) }
+    /** The value published for exactly [date], or null. Never a substitute. */
+    suspend fun exactUfOn(date: LocalDate): UfValue? =
+        ufDao.byDate(date)?.let { UfValue(it.date, it.value) }
+
+    /** The closest published day at or before [date]. */
+    suspend fun nearestUfOn(date: LocalDate): UfValue? =
+        ufDao.atOrBefore(date)?.let { UfValue(it.date, it.value) }
+
+    /**
+     * Convenience read used where a substitute is acceptable, such as pricing
+     * a simulation in pesos. Date lookups must not use this.
+     */
+    suspend fun ufOn(date: LocalDate): UfValue? = exactUfOn(date) ?: nearestUfOn(date)
 
     suspend fun isEmpty(): Boolean = ufDao.count() == 0
 

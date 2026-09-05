@@ -35,6 +35,7 @@ import cl.ufchile.app.ui.appViewModel
 import cl.ufchile.app.ui.components.AppCard
 import cl.ufchile.app.ui.components.KeyValueRow
 import cl.ufchile.app.ui.components.NumberField
+import cl.ufchile.app.ui.components.ScreenHeader
 import cl.ufchile.app.ui.components.SectionTitle
 import java.time.YearMonth
 
@@ -49,11 +50,7 @@ fun InflationScreen() {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text(
-                "Inflación",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(vertical = 8.dp),
-            )
+            ScreenHeader(title = "Calculadora de inflación")
         }
 
         item {
