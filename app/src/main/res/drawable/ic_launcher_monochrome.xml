@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copihue (Lapageria rosea), Chile's national flower.
-
-  Authored in a 100-unit space and scaled by the group transform so everything
-  sits inside the 72dp circle an adaptive mask can crop to. Two things were
-  learned the hard way: a long stem pushed the flower off centre and touched
-  the mask edge, and a narrow bell with steeply recurved tepals stopped reading
-  as a flower. The bell is therefore wide and the tepals flare at about 35°.
+  Themed icons are tinted a single colour, so the flag cannot survive here.
+  The ascending series is the part of the mark that still reads in one tone.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -14,32 +9,13 @@
     android:viewportWidth="108"
     android:viewportHeight="108"
     android:tint="#FFFFFF">
-
-    <group
-        android:scaleX="0.94"
-        android:scaleY="0.94"
-        android:translateX="4"
-        android:translateY="2">
-
-        <path
-            android:pathData="M34,22 C42,26 48,30 51,35"
-            android:strokeColor="#FFFFFF"
-            android:strokeWidth="4.6"
-            android:strokeLineCap="round" />
-
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M52,34 C37,44 33,59 38,72 C41,80 46,86 52,90 C58,86 63,80 66,72 C71,59 67,44 52,34z" />
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M38,68 C32,73 26,76 20,78 C26,73 32,68 36,62z" />
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M66,68 C72,73 78,76 84,78 C78,73 72,68 68,62z" />
-        <path
-            android:pathData="M52,90 L52,96"
-            android:strokeColor="#FFFFFF"
-            android:strokeWidth="3.6"
-            android:strokeLineCap="round" />
-    </group>
+    <path
+        android:pathData="M31.2,81.1 C36,74.5 39,71 42.1,70.5 C46.5,69.8 50.5,66.5 53,62.3 C56.5,56.5 61,50 70.6,42.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M76.5,35.73 L74.53,45.93 L66.67,39.11 Z"
+        android:fillColor="#FFFFFF" />
 </vector>

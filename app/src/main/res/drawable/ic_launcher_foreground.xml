@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copihue (Lapageria rosea), Chile's national flower.
+  Bandera de Chile en círculo, con la serie de la UF ascendiendo sobre ella.
 
-  Authored in a 100-unit space and scaled by the group transform so everything
-  sits inside the 72dp circle an adaptive mask can crop to. Two things were
-  learned the hard way: a long stem pushed the flower off centre and touched
-  the mask edge, and a narrow bell with steeply recurved tepals stopped reading
-  as a flower. The bell is therefore wide and the tepals flare at about 35°.
+  A launcher crops the central 72x72 of this 108x108 canvas and scales it up,
+  so the circle is drawn at exactly r=36 centred: on a circular mask it fills
+  edge to edge like the source artwork, and on a squircle it stays a clean
+  circle instead of being cut into a rounded square.
+
+  The original artwork used a green glow to separate the line from the red
+  field. A vector drawable cannot blur, so the same job is done by a white
+  underlay stroke: without it the bright green vibrates against the red.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -14,31 +17,45 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <group
-        android:scaleX="0.94"
-        android:scaleY="0.94"
-        android:translateX="4"
-        android:translateY="2">
+    <group>
+        <clip-path android:pathData="M18,54 A36,36 0 0,1 90,54 A36,36 0 0,1 18,54 Z" />
 
+        <!-- Bandera: azul arriba-izquierda, blanco arriba-derecha, rojo abajo -->
+        <path android:fillColor="#0F3E9F" android:pathData="M18,18 H54 V54 H18 Z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M54,18 H90 V54 H54 Z" />
+        <path android:fillColor="#D63B2C" android:pathData="M18,54 H90 V90 H18 Z" />
+
+        <!-- Estrella solitaria, centrada en el cantón azul -->
         <path
-            android:pathData="M34,22 C42,26 48,30 51,35"
+            android:fillColor="#FFFFFF"
+            android:pathData="M36.41,30.28 L38.15,35.65 L43.8,35.65 L39.23,38.97 L40.98,44.34 L36.41,41.02 L31.84,44.34 L33.59,38.97 L29.02,35.65 L34.67,35.65 Z" />
+
+        <!-- Separación clara entre el verde y el rojo -->
+        <path
+            android:pathData="M31.2,81.1 C36,74.5 39,71 42.1,70.5 C46.5,69.8 50.5,66.5 53,62.3 C56.5,56.5 61,50 70.6,42.5"
             android:strokeColor="#FFFFFF"
-            android:strokeWidth="4.6"
-            android:strokeLineCap="round" />
-
+            android:strokeAlpha="0.9"
+            android:strokeWidth="7.8"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
         <path
-            android:fillColor="#E4536B"
-            android:pathData="M52,34 C37,44 33,59 38,72 C41,80 46,86 52,90 C58,86 63,80 66,72 C71,59 67,44 52,34z" />
-        <path
-            android:fillColor="#E4536B"
-            android:pathData="M38,68 C32,73 26,76 20,78 C26,73 32,68 36,62z" />
-        <path
-            android:fillColor="#E4536B"
-            android:pathData="M66,68 C72,73 78,76 84,78 C78,73 72,68 68,62z" />
-        <path
-            android:pathData="M52,90 L52,96"
-            android:strokeColor="#E4536B"
+            android:pathData="M76.5,35.73 L74.53,45.93 L66.67,39.11 Z"
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.9"
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.9"
             android:strokeWidth="3.6"
-            android:strokeLineCap="round" />
+            android:strokeLineJoin="round" />
+
+        <!-- La serie -->
+        <path
+            android:pathData="M31.2,81.1 C36,74.5 39,71 42.1,70.5 C46.5,69.8 50.5,66.5 53,62.3 C56.5,56.5 61,50 70.6,42.5"
+            android:strokeColor="#5CE06A"
+            android:strokeWidth="4.6"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M76.5,35.73 L74.53,45.93 L66.67,39.11 Z"
+            android:fillColor="#1E9E45" />
     </group>
 </vector>

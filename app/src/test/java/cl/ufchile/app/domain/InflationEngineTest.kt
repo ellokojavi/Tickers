@@ -1,9 +1,8 @@
 package cl.ufchile.app.domain
 
-import cl.ufchile.app.data.seed.UfSeedFile
+import cl.ufchile.app.data.seed.UfDailySeed
 import cl.ufchile.app.domain.engine.InflationEngine
 import com.google.common.truth.Truth.assertThat
-import kotlinx.serialization.json.Json
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -18,16 +17,14 @@ class InflationEngineTest {
 
     @Before
     fun setUp() {
-        // Reads the very asset that ships in the APK, so a corrupted or
-        // truncated regeneration fails the build instead of the phone.
-        val file = File("src/main/assets/uf_monthly_seed.json")
+        // Reads the very asset that ships in the APK, through the very parser
+        // the app uses, so a corrupted or truncated regeneration fails the
+        // build instead of the phone.
+        val file = File("src/main/assets/uf_daily.txt")
         assertThat(file.exists()).isTrue()
-        val parsed = Json { ignoreUnknownKeys = true }
-            .decodeFromString(UfSeedFile.serializer(), file.readText())
-        anchors = parsed.anchors.entries.associate { (key, value) ->
-            val (y, m) = key.split("-")
-            YearMonth.of(y.toInt(), m.toInt()) to BigDecimal.valueOf(value)
-        }
+        anchors = UfDailySeed.parse(file.readLines())
+            .filter { it.date.dayOfMonth == 9 }
+            .associate { YearMonth.from(it.date) to it.value }
         engine = InflationEngine(anchors)
     }
 

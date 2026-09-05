@@ -157,7 +157,7 @@ fun UfValueScreen(
 
         if (ui.historyOpen) {
             item { SectionTitle("Detalle diario") }
-            items(ui.chartValues.reversed().take(180), key = { it.date.toString() }) { v ->
+            items(ui.rangeValues.reversed().take(180), key = { it.date.toString() }) { v ->
                 KeyValueRow(
                     label = Fmt.shortDate(v.date) +
                         if (v.date.isAfter(LocalDate.now())) "  ·  futuro publicado" else "",
