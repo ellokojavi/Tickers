@@ -143,7 +143,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-1 | Android 8.0+ (minSdk 26), targetSdk 35 |
 | RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`) |
 | RNF-3 | Functional with no network connection; never a blank screen |
-| RNF-4 | APK under 15 MB |
+| RNF-4 | APK under 15 MB — the minified release build is **1.6 MB** |
 | RNF-5 | Cold start under 1.5 s |
 | RNF-6 | No analytics, no account, no personal data; `INTERNET` is the only sensitive permission |
 | RNF-7 | All monetary arithmetic in `BigDecimal`; `Double` is never used for money |
@@ -302,11 +302,26 @@ The APK lands in `app/build/outputs/apk/debug/`.
 
 ```bash
 ./gradlew installDebug          # install on a connected device
-./gradlew assembleRelease       # minified release build (needs signing config)
+./gradlew assembleRelease       # minified, signed release build
 ```
 
 Debug builds use the `.debug` application ID suffix, so they install alongside a
 release build.
+
+### Release signing
+
+Create a keystore and a `keystore.properties` at the project root (both are
+gitignored):
+
+```properties
+storeFile=ufchile-release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Without that file the release variant still builds, unsigned. The minified
+release APK is about 1.6 MB.
 
 ---
 
@@ -345,6 +360,7 @@ UFChile/
 
 **v0.1 — current**
 Today, History, Inflation, full mortgage simulator with CRUD and CSV export.
+68 tests passing; debug and minified release builds verified on an emulator.
 
 **Toward v1.0**
 - PDF export of payment schedules

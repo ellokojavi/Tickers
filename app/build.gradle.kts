@@ -15,6 +15,13 @@ val cmfApiKey: String = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }.getProperty("CMF_API_KEY", "").trim()
 
+// Release signing comes from keystore.properties, which is not committed.
+// Without it the release variant simply builds unsigned.
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
 android {
     namespace = "cl.ufchile.app"
     compileSdk = 35
@@ -31,6 +38,17 @@ android {
         resourceConfigurations += listOf("es")
     }
 
+    signingConfigs {
+        if (keystoreProps.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -38,6 +56,7 @@ android {
             isMinifyEnabled = false
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
