@@ -25,6 +25,20 @@ object UfEngine {
             .setScale(2, RoundingMode.HALF_UP)
 
     /**
+     * Constant annual rate that reproduces the change from [from] to [to] over
+     * [days]. Short windows produce large figures; that is arithmetic, not a
+     * bug, and is why the UI labels it "anualizado".
+     */
+    fun annualisedPct(from: BigDecimal, to: BigDecimal, days: Long): BigDecimal {
+        if (days <= 0L || from.signum() <= 0 || to.signum() <= 0) return BigDecimal.ZERO
+        val years = days.toDouble() / 365.25
+        val factor = to.toDouble() / from.toDouble()
+        val annual = (Math.pow(factor, 1.0 / years) - 1.0) * 100.0
+        if (annual.isNaN() || annual.isInfinite()) return BigDecimal.ZERO
+        return BigDecimal(annual).setScale(2, RoundingMode.HALF_UP)
+    }
+
+    /**
      * The last value in [series] that is not in the future.
      * The series may legitimately contain published future dates.
      */

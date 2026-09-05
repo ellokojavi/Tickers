@@ -32,6 +32,16 @@ val LightColors = lightColorScheme(
     onSurface = Color(0xFF171D1C),
     surfaceVariant = Color(0xFFECF1F0),
     onSurfaceVariant = Color(0xFF4A5453),
+    // Dialogs and menus pull from these. Left undefined they fall back to the
+    // Material baseline, which is lavender and fights the palette.
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF6F8F8),
+    surfaceContainer = Color(0xFFF1F5F4),
+    surfaceContainerHigh = Color(0xFFEBF0EF),
+    surfaceContainerHighest = Color(0xFFE5EBEA),
+    surfaceTint = Teal40,
+    inverseSurface = Color(0xFF2B3231),
+    inverseOnSurface = Color(0xFFEFF1F0),
     outline = Color(0xFF7A8483),
     outlineVariant = Color(0xFFDDE4E3),
     error = Color(0xFFBA1A1A),
@@ -55,6 +65,14 @@ val DarkColors = darkColorScheme(
     onSurface = Color(0xFFDDE4E2),
     surfaceVariant = Color(0xFF1E2726),
     onSurfaceVariant = Color(0xFFBEC9C7),
+    surfaceContainerLowest = Color(0xFF090E0E),
+    surfaceContainerLow = Color(0xFF141B1A),
+    surfaceContainer = Color(0xFF181F1E),
+    surfaceContainerHigh = Color(0xFF222A29),
+    surfaceContainerHighest = Color(0xFF2D3534),
+    surfaceTint = Teal80,
+    inverseSurface = Color(0xFFDDE4E2),
+    inverseOnSurface = Color(0xFF2B3231),
     outline = Color(0xFF889392),
     outlineVariant = Color(0xFF2C3634),
     error = Color(0xFFFFB4AB),
@@ -70,6 +88,11 @@ data class SignColors(
     val negative: Color,
     val neutral: Color,
     val future: Color,
+    /**
+     * Copihue crimson. Decorative only — never used to encode a value, so it
+     * cannot be mistaken for the negative sign colour.
+     */
+    val copihue: Color,
 )
 
 val LightSignColors = SignColors(
@@ -77,6 +100,7 @@ val LightSignColors = SignColors(
     negative = Color(0xFFB3261E),
     neutral = Color(0xFF6F7977),
     future = Color(0xFF5B4B8A),
+    copihue = Color(0xFFC8384F),
 )
 
 val DarkSignColors = SignColors(
@@ -84,6 +108,7 @@ val DarkSignColors = SignColors(
     negative = Color(0xFFFF9A90),
     neutral = Color(0xFF8B9694),
     future = Color(0xFFC0B0F0),
+    copihue = Color(0xFFE7607A),
 )
 
 val LocalSignColors = staticCompositionLocalOf { LightSignColors }

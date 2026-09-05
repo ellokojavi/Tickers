@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,12 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cl.ufchile.app.R
 import cl.ufchile.app.core.format.Fmt
 import cl.ufchile.app.domain.engine.UfEngine
 import cl.ufchile.app.ui.appViewModel
 import cl.ufchile.app.ui.components.AppCard
 import cl.ufchile.app.ui.components.EmptyState
 import cl.ufchile.app.ui.components.KeyValueRow
+import cl.ufchile.app.ui.components.ScreenHeader
 
 @Composable
 fun CreditListScreen(onOpen: (Long) -> Unit) {
@@ -71,6 +74,10 @@ fun CreditListScreen(onOpen: (Long) -> Unit) {
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
+        // The outer Scaffold already consumed the system bars. Without this the
+        // inset is applied twice and this title sits lower than every other
+        // screen's.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -78,11 +85,7 @@ fun CreditListScreen(onOpen: (Long) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                Text(
-                    "Créditos hipotecarios",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
+                ScreenHeader(title = "Créditos hipotecarios")
             }
 
             if (!ui.loading && ui.items.isEmpty()) {
@@ -90,6 +93,7 @@ fun CreditListScreen(onOpen: (Long) -> Unit) {
                     EmptyState(
                         title = "Sin simulaciones",
                         subtitle = "Crea una para modelar un crédito UF + tasa y guardar la tabla de pagos.",
+                        illustration = R.drawable.ic_copihue,
                     )
                 }
             }

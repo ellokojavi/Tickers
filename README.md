@@ -58,7 +58,11 @@ are the same question at different points in time.
 
 - Current UF value in Chilean pesos, with the exact publication date.
 - Change versus the previous day (absolute) and versus 30 days ago (percentage).
-- Two-way UF ⇄ CLP converter.
+- Two-way UF ⇄ CLP converter. The peso side is whole pesos: Chile has not used
+  centavos for decades. The headline keeps its two decimals because the UF
+  itself is published that way.
+- **Share the card** as preformatted text through the system share sheet —
+  WhatsApp, Telegram, mail, notes, anywhere.
 - 60-day sparkline.
 - Already-published future values, explained and marked as official.
 - Companion indicators: IVP, US dollar, euro, UTM, monthly CPI.
@@ -74,7 +78,10 @@ are the same question at different points in time.
 - Touch scrubbing. **The headline value never changes while scrubbing** — the
   explored day is reported separately, so the screen cannot misstate what the
   UF is worth today.
-- Date lookup for any single day.
+- Change over the selected range, both cumulative and annualised.
+- Date lookup for any single day, with the calendar **bounded by the published
+  horizon**: a day whose UF does not exist yet cannot be selected at all, and
+  the lookup never answers with a neighbouring day's value.
 - Daily detail list.
 
 Published future values are drawn as a dashed segment and labelled as official,
@@ -136,9 +143,11 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-4 | Display companion indicators (IVP, USD, EUR, UTM, CPI) |
 | RF-5 | Query the UF value for any date within coverage |
 | RF-5b | Present today's value and the historical series as one destination, with history opt-in and not persisted |
+| RF-5c | Refuse to answer for a date with no published value, and make such dates unselectable |
 | RF-6 | Display already-published future UF values, explicitly marked as official |
 | RF-7 | Never extrapolate or project a UF value that has not been published |
 | RF-8 | Chart the series over selectable ranges with touch scrubbing, without ever altering the headline value |
+| RF-8b | Report the range's change both cumulatively and annualised |
 | RF-9 | Restate an amount between any two months using the CPI index |
 | RF-10 | Show the same restatement expressed in UF units |
 | RF-11 | Report adjustment factor, cumulative inflation and annualised rate |
@@ -153,6 +162,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-18b | Open a saved simulation on its result; open a new one on its form |
 | RF-19 | Persist simulations across app restarts and updates |
 | RF-20 | Export a schedule to CSV and share it |
+| RF-20b | Share today's UF card as preformatted text via the system share sheet |
 | RF-21 | Refresh data daily in the background and on manual pull |
 | RF-22 | Operate fully offline from cached and bundled data |
 | RF-23 | Label the origin of every value and whether the source is official |
@@ -171,6 +181,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-8 | WCAG AA contrast, font-scaling support, TalkBack labels |
 | RNF-9 | Light and dark themes, following the system or set manually |
 | RNF-10 | Calculation engines are pure Kotlin, testable without a device |
+| RNF-11 | Chilean iconography — the copihue as the app mark, the condor as an empty-state illustration — without breaking the minimalist palette |
 
 ---
 
@@ -383,9 +394,9 @@ UFChile/
 ## Roadmap
 
 **v0.1 — current**
-UF value (today plus opt-in history), Inflation, and a full mortgage simulator
-with CRUD and CSV export. 75 tests passing; debug and minified release builds
-verified on an emulator.
+UF value (today plus opt-in history), an inflation calculator, and a full
+mortgage simulator with CRUD and CSV export. 92 tests passing; debug and
+minified release builds verified on an emulator.
 
 **Toward v1.0**
 - PDF export of payment schedules
@@ -398,6 +409,19 @@ verified on an emulator.
 UF change notifications; UTM and tax calculators; iOS.
 
 ---
+
+## Iconography
+
+The app mark is the **copihue** (*Lapageria rosea*), Chile's national flower,
+hanging from a stem that doubles as the ascending series line. It was chosen
+over the condor after both were drawn and compared at real icon sizes: the
+condor loses its silhouette below about 48px and reads as an insect, while the
+copihue keeps a distinct shape and its crimson makes the icon findable in a
+grid where white-on-teal is generic.
+
+The condor survives at larger sizes and is used as the empty-chart
+illustration. The copihue crimson is decorative only and never encodes a value,
+so it cannot be confused with the negative-change colour.
 
 ## Disclaimer
 

@@ -9,6 +9,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import cl.ufchile.app.di.AppContainer
 import cl.ufchile.app.work.SyncWorker
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -29,6 +30,11 @@ class UfChileApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // Material's date picker takes its month and weekday names, and its own
+        // strings, from the JVM default locale. The app is Chile-only, so it is
+        // pinned rather than inherited from a phone that might be set to
+        // English.
+        Locale.setDefault(Locale.forLanguageTag("es-CL"))
         container = AppContainer(this)
         scheduleDailySync()
     }

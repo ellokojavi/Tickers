@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Andean condor in flight. The solid body and short fan tail are what stop the
+  silhouette reading as an insect; the notched wingtips are the slotted primary
+  feathers.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108"
+    android:tint="#FFFFFF">
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,44c3.4,0 5.6,3 5.6,7.4v11c0,3.6 -2.4,5.8 -5.6,5.8s-5.6,-2.2 -5.6,-5.8v-11c0,-4.4 2.2,-7.4 5.6,-7.4z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,36.8m-4.2,0a4.2,4.2 0,1 1,8.4 0a4.2,4.2 0,1 1,-8.4 0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M50.4,34l-7.4,-2.6 8,-2.4z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M47.4,65h13.2l-3.2,11h-6.8z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M49,49c-8,-3.4 -16,-5 -24.6,-5l6.4,5.6 -8.4,0.6 8.4,4.6 -7,2 8.6,3 -5,3.8 8.6,-1.6c4.4,-0.8 8.8,-1 13,-0.6z" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M59,49c8,-3.4 16,-5 24.6,-5l-6.4,5.6 8.4,0.6 -8.4,4.6 7,2 -8.6,3 5,3.8 -8.6,-1.6c-4.4,-0.8 -8.8,-1 -13,-0.6z" />
+</vector>
