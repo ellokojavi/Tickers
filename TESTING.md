@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 83 JVM tests   — seconds, no device
+./gradlew test                  # 105 JVM tests  — seconds, no device
 ./gradlew connectedAndroidTest  # 9 UI tests     — needs a device or emulator
 ```
 
@@ -15,10 +15,10 @@ without a device, and anything a user can tap must be verified on one.**
 
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
-| Pure calculation | JUnit | 56 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
+| Pure calculation | JUnit | 71 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
 | Formatting & parsing | JUnit | 8 | `es-CL` output and input round trips |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
-| Persistence & assets | Robolectric | 14 | Room schema, type converters, bundled dataset |
+| Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
 | UI flows | Instrumented | 9 | Navigation, offline rendering, live computation, screen ordering |
 
 The engines live in `domain/` with **no Android imports**, which is what makes
@@ -88,7 +88,7 @@ The seed test reads `app/src/main/assets/uf_monthly_seed.json` directly — the
 same file that ships in the APK — so regenerating it badly fails the build
 rather than the phone.
 
-### `UfEngineTest` — 13 tests
+### `UfEngineTest` — 17 tests
 
 Centred on the app's defining subtlety: **the series legitimately contains
 future dates.**
@@ -101,6 +101,34 @@ future dates.**
 - Annualisation: a full year returns its own change, six months compound
   correctly, declines stay negative, short windows magnify as the arithmetic
   requires, and impossible inputs return zero instead of NaN.
+- Downsampling keeps the endpoints and the requested size, preserves the
+  overall movement, leaves short series untouched and survives absurd budgets.
+
+### `UfSanityTest` — 9 tests
+
+The public feed serves corrupt values, so nothing is stored without a check.
+
+- **The real 2014 corruption is rejected**: 608,15 and 607,38 between two days
+  worth about 24.627 are dropped, and the surrounding days survive.
+- The largest genuine daily move in 49 years (0,2633%) is kept.
+- The allowance scales with the gap, so a multi-day jump is judged per day.
+- An anchor from the database lets the first value of a batch be checked too;
+  without one it is trusted, which is the documented limit of the guard.
+- Non-positive values never pass; input order does not matter.
+
+### `UfDailySeedParseTest` — 7 tests
+
+The bundled-series format, parsed without Android.
+
+- Centavos become exact two-decimal pesos with no float step.
+- A blank line is a gap and must still advance the calendar, so later dates do
+  not shift.
+- A missing or unparseable header yields nothing rather than wrong dates.
+- Junk lines are ignored, never guessed at.
+- **The shipped asset is checked directly**: it covers the full span with a
+  handful of gaps, every value is positive, no day-over-day jump exceeds the
+  plausibility bound, and it survives the runtime filter untouched — so a bad
+  regeneration fails the build, not the phone.
 
 ### `UfLookupTest` — 11 tests
 
@@ -191,7 +219,7 @@ machine with poor connectivity.
 
 ---
 
-## Four bugs this suite already caught
+## Five bugs this suite already caught
 
 Worth recording, because both would have shipped otherwise:
 
@@ -211,7 +239,13 @@ Fixed with an explicit `contentDescription`.
 See `UfLookupTest` above. The fix is a closed set of outcomes plus a bounded
 calendar, and the regression is pinned by its own test.
 
-**4. Expanding the history put its own controls off screen.** The range chips
+**4. The public data source was serving corrupt values.** Preloading the whole
+series surfaced a 97% single-day collapse in December 2014: the feed returns
+608,15 where the UF was about 24.627. It had been invisible while the app only
+fetched recent years. Both the generator and the running app now reject
+implausible movements, and two tests pin the specific values.
+
+**5. Expanding the history put its own controls off screen.** The range chips
 sat below a chart that grows to 200dp, which pushed them past the fold on a
 1080×2400 device: tapping "Ver histórico" revealed a taller chart and no way to
 change its range without scrolling. The test failed on `assertIsDisplayed`,
@@ -238,7 +272,8 @@ before a release.
       behaviour across a February
 
 ### Offline behaviour
-- [ ] Airplane mode on first launch: Inflation still works from the bundled seed
+- [ ] Airplane mode on first launch: every chart and date lookup works from the
+      bundled series, not just the inflation calculator
 - [ ] Airplane mode after a sync: every screen renders from cache
 - [ ] The staleness warning appears, and no fabricated value is ever shown
 - [ ] Reconnecting and pulling to refresh recovers cleanly
@@ -254,7 +289,9 @@ before a release.
 - [ ] Landscape orientation
 - [ ] Expanding the history keeps its range selector and its change figures on screen
 - [ ] Sharing today's card produces readable text in WhatsApp and in mail
-- [ ] The launcher icon reads correctly under circular, squircle and themed masks
+- [ ] The launcher icon fills a circular mask edge to edge, stays a circle under
+      a squircle mask, and its themed variant still reads in one tone
+- [ ] The "Máx" range scrubs smoothly across all 49 years
 - [ ] A 25-year payment table scrolls smoothly in both axes
 - [ ] CSV export opens correctly in a spreadsheet under a Chilean locale
 - [ ] TalkBack reaches and announces every interactive control
@@ -268,9 +305,11 @@ before a release.
 ## Regenerating the bundled dataset
 
 ```bash
-python3 tools/build_uf_seed.py
+python3 tools/build_uf_daily_seed.py
 ./gradlew test    # the seed tests must pass before the change is committed
 ```
 
-`InflationEngineTest` reads the generated file directly, so a truncated or
-partially-fetched regeneration fails immediately.
+The generator refuses to write a truncated series and prints every value it
+rejects. `UfDailySeedParseTest` and `InflationEngineTest` then read the
+generated file directly, so a truncated, corrupted or partially-fetched
+regeneration fails immediately.

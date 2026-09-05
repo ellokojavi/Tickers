@@ -127,4 +127,44 @@ class UfEngineTest {
         assertThat(annual.toDouble()).isGreaterThan(2.0)
         assertThat(annual.toDouble()).isLessThan(6.0)
     }
+
+    // -------------------------------------------------------- downsampling
+
+    @Test
+    fun `a short series is returned untouched`() {
+        val short = series.take(3)
+
+        assertThat(UfEngine.downsample(short, 400)).isSameInstanceAs(short)
+    }
+
+    @Test
+    fun `downsampling keeps the endpoints and the requested size`() {
+        val long = (0 until 18_000).map {
+            UfValue(LocalDate.of(1977, 8, 1).plusDays(it.toLong()), BigDecimal(1000 + it))
+        }
+
+        val thinned = UfEngine.downsample(long, 400)
+
+        assertThat(thinned).hasSize(400)
+        assertThat(thinned.first()).isEqualTo(long.first())
+        assertThat(thinned.last()).isEqualTo(long.last())
+        assertThat(thinned.map { it.date }).isInOrder()
+    }
+
+    @Test
+    fun `downsampling preserves the overall movement`() {
+        val long = (0 until 18_000).map {
+            UfValue(LocalDate.of(1977, 8, 1).plusDays(it.toLong()), BigDecimal(1000 + it))
+        }
+        val thinned = UfEngine.downsample(long, 400)
+
+        assertThat(UfEngine.deltaPct(thinned.first().value, thinned.last().value))
+            .isEqualTo(UfEngine.deltaPct(long.first().value, long.last().value))
+    }
+
+    @Test
+    fun `an absurd point budget does not crash`() {
+        assertThat(UfEngine.downsample(series, 1)).isSameInstanceAs(series)
+        assertThat(UfEngine.downsample(emptyList(), 400)).isEmpty()
+    }
 }

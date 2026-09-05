@@ -48,6 +48,17 @@ data class UfUiState(
     val historyOpen: Boolean = false,
     val range: Range = Range.M3,
     val all: List<UfValue> = emptyList(),
+
+    /**
+     * Every day in the selected window. Carried as state rather than computed
+     * in a getter: the full series is ~18.000 days, and a getter would re-filter
+     * it on every pointer event while scrubbing.
+     */
+    val rangeValues: List<UfValue> = emptyList(),
+
+    /** [rangeValues] thinned to what a chart can actually draw. */
+    val chartValues: List<UfValue> = emptyList(),
+
     val scrubIndex: Int? = null,
     val lookupDate: LocalDate = LocalDate.now(),
     val lookup: LookupResult = LookupResult.Loading,
@@ -62,16 +73,6 @@ data class UfUiState(
         get() = if (current != null && monthAgo != null)
             UfEngine.deltaPct(monthAgo.value, current.value) else null
 
-    /** Collapsed shows a fixed recent window; expanded honours [range]. */
-    val chartValues: List<UfValue>
-        get() = if (!historyOpen) {
-            all.filter { !it.date.isAfter(LocalDate.now()) }.takeLast(60)
-        } else {
-            val months = range.months ?: return all
-            val from = LocalDate.now().minusMonths(months)
-            all.filter { !it.date.isBefore(from) }
-        }
-
     /** Last day with a published value; the newest date a lookup may ask about. */
     val lastPublished: LocalDate?
         get() = UfLookup.maxSelectable(all)
@@ -82,18 +83,16 @@ data class UfUiState(
 
     val rangeChangePct: BigDecimal?
         get() {
-            val v = chartValues
-            val first = v.firstOrNull() ?: return null
-            val last = v.lastOrNull() ?: return null
+            val first = rangeValues.firstOrNull() ?: return null
+            val last = rangeValues.lastOrNull() ?: return null
             return UfEngine.deltaPct(first.value, last.value)
         }
 
     /** The same movement expressed as a constant annual rate. */
     val rangeAnnualisedPct: BigDecimal?
         get() {
-            val v = chartValues
-            val first = v.firstOrNull() ?: return null
-            val last = v.lastOrNull() ?: return null
+            val first = rangeValues.firstOrNull() ?: return null
+            val last = rangeValues.lastOrNull() ?: return null
             val days = java.time.temporal.ChronoUnit.DAYS.between(first.date, last.date)
             if (days <= 0L) return null
             return UfEngine.annualisedPct(first.value, last.value, days)
@@ -117,7 +116,17 @@ class UfViewModel(
             ) { series, indicators, sync -> Triple(series, indicators, sync) }
                 .collect { (series, indicators, sync) -> project(series, indicators, sync) }
         }
-        refresh()
+        viewModelScope.launch {
+            // The bundled series lands first so the charts are complete before
+            // the network is even reachable.
+            repo.ensureSeeded()
+            refresh(force = false)
+        }
+    }
+
+    private companion object {
+        /** More points than this cannot be resolved on a phone-width chart. */
+        const val MAX_CHART_POINTS = 400
     }
 
     private fun project(series: List<UfValue>, indicators: List<Indicator>, sync: SyncInfo) {
@@ -128,6 +137,7 @@ class UfViewModel(
             val target = c.date.minusMonths(1)
             series.filter { !it.date.isAfter(target) }.maxByOrNull { it.date }
         }
+        val windowed = window(series, _ui.value.historyOpen, _ui.value.range)
         _ui.value = _ui.value.copy(
             loading = false,
             current = current,
@@ -135,6 +145,8 @@ class UfViewModel(
             monthAgo = monthAgo,
             future = UfEngine.futureOf(series, today),
             all = series,
+            rangeValues = windowed,
+            chartValues = UfEngine.downsample(windowed, MAX_CHART_POINTS),
             indicators = indicators,
             sync = sync,
             // The converter deals in whole pesos: Chile has not used centavos
@@ -146,11 +158,12 @@ class UfViewModel(
         )
     }
 
-    fun refresh() {
+    /** [force] is set by the refresh button; the launch sync lets it coalesce. */
+    fun refresh(force: Boolean = true) {
         if (_ui.value.refreshing) return
         viewModelScope.launch {
             _ui.value = _ui.value.copy(refreshing = true, error = null)
-            val result = repo.sync()
+            val result = repo.sync(force = force)
             _ui.value = _ui.value.copy(
                 refreshing = false,
                 loading = false,
@@ -187,7 +200,13 @@ class UfViewModel(
 
     fun toggleHistory() {
         val opening = !_ui.value.historyOpen
-        _ui.value = _ui.value.copy(historyOpen = opening, scrubIndex = null)
+        val windowed = window(_ui.value.all, opening, _ui.value.range)
+        _ui.value = _ui.value.copy(
+            historyOpen = opening,
+            scrubIndex = null,
+            rangeValues = windowed,
+            chartValues = UfEngine.downsample(windowed, MAX_CHART_POINTS),
+        )
         if (opening) {
             ensureFrom(LocalDate.now().minusMonths(_ui.value.range.months ?: 12).year)
             if (_ui.value.lookup == LookupResult.Loading) lookup(_ui.value.lookupDate)
@@ -195,7 +214,13 @@ class UfViewModel(
     }
 
     fun setRange(range: Range) {
-        _ui.value = _ui.value.copy(range = range, scrubIndex = null)
+        val windowed = window(_ui.value.all, _ui.value.historyOpen, range)
+        _ui.value = _ui.value.copy(
+            range = range,
+            scrubIndex = null,
+            rangeValues = windowed,
+            chartValues = UfEngine.downsample(windowed, MAX_CHART_POINTS),
+        )
         val needed = range.months?.let { LocalDate.now().minusMonths(it).year }
             ?: _ui.value.all.minOfOrNull { it.date.year }
         if (needed != null) ensureFrom(needed)
@@ -238,6 +263,16 @@ class UfViewModel(
                 )
             )
         }
+    }
+
+    /** Collapsed shows a fixed recent window; expanded honours [range]. */
+    private fun window(series: List<UfValue>, historyOpen: Boolean, range: Range): List<UfValue> {
+        if (!historyOpen) {
+            return series.filter { !it.date.isAfter(LocalDate.now()) }.takeLast(60)
+        }
+        val months = range.months ?: return series
+        val from = LocalDate.now().minusMonths(months)
+        return series.filter { !it.date.isBefore(from) }
     }
 
     private fun ensureFrom(year: Int) {

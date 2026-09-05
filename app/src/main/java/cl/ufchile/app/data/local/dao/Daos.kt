@@ -17,6 +17,10 @@ interface UfDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(values: List<UfValueEntity>)
 
+    /** Used for the bundled seed: anything already fetched from an API wins. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissing(values: List<UfValueEntity>)
+
     @Query("SELECT * FROM uf_values ORDER BY date ASC")
     fun observeAll(): Flow<List<UfValueEntity>>
 

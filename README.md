@@ -72,8 +72,8 @@ are the same question at different points in time.
 
 **Tap "Ver histórico"** and the chart card expands in place:
 
-- Full daily series back to **August 1977**, with on-demand backfill of older
-  years.
+- Full daily series back to **August 1977**, bundled in the app rather than
+  fetched — no waiting and no requests when changing range.
 - Range selector: 1M / 3M / 6M / 1Y / 5Y / Max.
 - Touch scrubbing. **The headline value never changes while scrubbing** — the
   explored day is reported separately, so the screen cannot misstate what the
@@ -165,6 +165,8 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-20b | Share today's UF card as preformatted text via the system share sheet |
 | RF-21 | Refresh data daily in the background and on manual pull |
 | RF-22 | Operate fully offline from cached and bundled data |
+| RF-22b | Ship the complete daily series and refresh only what is genuinely new |
+| RF-22c | Reject implausible values from any source rather than storing them |
 | RF-23 | Label the origin of every value and whether the source is official |
 
 ### Non-functional
@@ -181,7 +183,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-8 | WCAG AA contrast, font-scaling support, TalkBack labels |
 | RNF-9 | Light and dark themes, following the system or set manually |
 | RNF-10 | Calculation engines are pure Kotlin, testable without a device |
-| RNF-11 | Chilean iconography — the copihue as the app mark, the condor as an empty-state illustration — without breaking the minimalist palette |
+| RNF-11 | Chilean iconography — the flag as the app mark, the copihue and condor as illustrations — without breaking the minimalist palette |
 
 ---
 
@@ -191,11 +193,28 @@ in Room; deletions offer an undo. Nothing leaves the device.
 |--------|------|-----|-------|
 | [CMF Chile](https://api.cmfchile.cl) | **Primary — official** | Required, free | The financial regulator's own API. Quota: 10,000 requests/month |
 | [mindicador.cl](https://mindicador.cl) | Fallback | None | Third-party mirror of Banco Central data |
-| Bundled asset | Offline seed | — | Monthly UF anchors, Aug 1977 → present |
+| Bundled asset | Offline seed | — | **The complete daily series**, Aug 1977 → build date |
 
-The app tries the official source first and falls back automatically. Because
-one refresh per day is enough — the UF for the entire current period is already
-published — the CMF quota comfortably covers normal use.
+The app tries the official source first and falls back automatically.
+
+**The entire daily series ships inside the APK** — about 18.000 days from
+August 1977, roughly 50 kB compressed. It is loaded into the database on first
+launch (0,6 s, off the main thread), so every chart and every date lookup works
+offline from the very first run, and a refresh only ever asks for the years the
+cache does not already cover — normally just the current one. Concurrent
+refreshes are coalesced, so the background worker and the screen opening at the
+same moment issue one request, not two. The CMF quota is therefore never under
+pressure.
+
+### The data is validated, not trusted
+
+The public feed is not clean. It serves `608,15` for 2014-12-29 and `607,38`
+for 2014-12-30, where the real UF was about 24.627. Both the generator and the
+running app therefore reject any value that moves more than 1% per elapsed day
+— roughly four times the largest genuine daily change in the whole 49-year
+series (0,2633%). Rejected days become gaps, which the app reports honestly as
+"nearest earlier day"; nothing is interpolated into an invented official
+figure.
 
 ### Configuring the CMF API key
 
@@ -243,8 +262,10 @@ phone.
 The bundled dataset is regenerated with:
 
 ```bash
-python3 tools/build_uf_seed.py
+python3 tools/build_uf_daily_seed.py
 ```
+
+It refuses to write a truncated series and prints every value it rejects.
 
 ---
 
@@ -299,7 +320,7 @@ Kotlin · Jetpack Compose (Material 3) · MVVM · unidirectional state
 │   ├── remote/  Retrofit + OkHttp + kotlinx.serialization
 │   │            CmfDataSource (primary) → MindicadorDataSource (fallback)
 │   ├── local/   Room: uf_values · indicators · simulations
-│   ├── seed/    Bundled UF anchor dataset
+│   ├── seed/    Bundled full daily UF series
 │   ├── prefs/   DataStore settings
 │   └── repo/    Cache-first repositories
 ├── work/        WorkManager daily sync
@@ -311,6 +332,13 @@ Kotlin · Jetpack Compose (Material 3) · MVVM · unidirectional state
 *Manual DI instead of Hilt.* The object graph is single-level and shallow. A
 hand-written container removes an annotation processor, a plugin, and an entire
 class of build failures, at the cost of about forty lines.
+
+*The whole series bundled instead of paged from the network.* Eighteen thousand
+days cost about 50 kB compressed — less than one screenshot — and buy offline
+charts, instant range switching and a fraction of the API traffic. Charts thin
+the window to 400 points before drawing, because a phone cannot resolve more
+and rebuilding an 18.000-segment path on every pointer event would make
+scrubbing crawl.
 
 *A hand-drawn chart instead of a charting library.* The app needs one line, one
 gradient fill and a scrub cursor. A dependency for that would cost more in size
@@ -379,12 +407,12 @@ strategy, coverage matrix and manual QA checklist.
 UFChile/
 ├── app/
 │   ├── src/main/
-│   │   ├── assets/uf_monthly_seed.json    Bundled UF anchors (1977→)
+│   │   ├── assets/uf_daily.txt            Full daily UF series (1977→)
 │   │   ├── java/cl/ufchile/app/           Source
 │   │   └── res/                           Resources
 │   ├── src/test/                          JVM unit tests
 │   └── src/androidTest/                   Instrumented tests
-├── tools/build_uf_seed.py                 Regenerates the bundled dataset
+├── tools/build_uf_daily_seed.py           Regenerates the bundled dataset
 ├── README.md
 └── TESTING.md
 ```
@@ -395,7 +423,7 @@ UFChile/
 
 **v0.1 — current**
 UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 92 tests passing; debug and
+mortgage simulator with CRUD and CSV export. 114 tests passing; debug and
 minified release builds verified on an emulator.
 
 **Toward v1.0**
@@ -412,16 +440,24 @@ UF change notifications; UTM and tax calculators; iOS.
 
 ## Iconography
 
-The app mark is the **copihue** (*Lapageria rosea*), Chile's national flower,
-hanging from a stem that doubles as the ascending series line. It was chosen
-over the condor after both were drawn and compared at real icon sizes: the
-condor loses its silhouette below about 48px and reads as an insect, while the
-copihue keeps a distinct shape and its crimson makes the icon findable in a
-grid where white-on-teal is generic.
+The app mark is the **Chilean flag in a circle** with the UF's own series
+climbing across it.
 
-The condor survives at larger sizes and is used as the empty-chart
-illustration. The copihue crimson is decorative only and never encodes a value,
-so it cannot be confused with the negative-change colour.
+A launcher crops the central 72×72 of a 108×108 adaptive icon and scales it up,
+so the circle is drawn at exactly that radius: on a circular mask it fills the
+icon edge to edge, and on a squircle it stays a clean circle rather than being
+cut into a rounded square. The source artwork separated the green line from the
+red field with a glow; a vector drawable cannot blur, so a white underlay stroke
+does the same job — without it the bright green vibrates against the red. The
+themed (monochrome) variant drops the flag, which cannot survive a single tint,
+and keeps the ascending series.
+
+Inside the app the **copihue** (*Lapageria rosea*), Chile's national flower,
+illustrates the empty simulations state, and the **condor** stands in for an
+empty chart. Both were drawn and compared at real sizes first: the condor loses
+its silhouette below about 48px and reads as an insect, which is why it only
+appears large. The copihue crimson is decorative and never encodes a value, so
+it cannot be read as the negative-change colour.
 
 ## Disclaimer
 

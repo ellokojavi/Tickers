@@ -25,6 +25,25 @@ object UfEngine {
             .setScale(2, RoundingMode.HALF_UP)
 
     /**
+     * Evenly thins [values] to at most [maxPoints], always keeping the first
+     * and last.
+     *
+     * The full series is nearly 18.000 days and a chart cannot usefully draw
+     * more points than it has pixels; without this, dragging across the "Máx"
+     * range would rebuild an 18.000-segment path on every pointer event. The UF
+     * moves smoothly, so even sampling is visually indistinguishable.
+     */
+    fun downsample(values: List<UfValue>, maxPoints: Int): List<UfValue> {
+        if (maxPoints < 2 || values.size <= maxPoints) return values
+        val step = (values.size - 1).toDouble() / (maxPoints - 1)
+        val out = ArrayList<UfValue>(maxPoints)
+        for (i in 0 until maxPoints) {
+            out += values[Math.round(i * step).toInt().coerceIn(0, values.lastIndex)]
+        }
+        return out
+    }
+
+    /**
      * Constant annual rate that reproduces the change from [from] to [to] over
      * [days]. Short windows produce large figures; that is arithmetic, not a
      * bug, and is why the UI labels it "anualizado".
