@@ -5,8 +5,8 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 105 JVM tests  — seconds, no device
-./gradlew connectedAndroidTest  # 9 UI tests     — needs a device or emulator
+./gradlew test                  # 107 JVM tests  — seconds, no device
+./gradlew connectedAndroidTest  # 10 UI tests    — needs a device or emulator
 ```
 
 ---
@@ -19,7 +19,7 @@ without a device, and anything a user can tap must be verified on one.**
 | Formatting & parsing | JUnit | 8 | `es-CL` output and input round trips |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
-| UI flows | Instrumented | 9 | Navigation, offline rendering, live computation, screen ordering |
+| UI flows | Instrumented | 10 | Navigation, offline rendering, live computation, screen ordering |
 
 The engines live in `domain/` with **no Android imports**, which is what makes
 the first three layers possible at all. This is an architectural choice made
@@ -116,7 +116,7 @@ The public feed serves corrupt values, so nothing is stored without a check.
   without one it is trusted, which is the documented limit of the guard.
 - Non-positive values never pass; input order does not matter.
 
-### `UfDailySeedParseTest` — 7 tests
+### `UfDailySeedParseTest` — 9 tests
 
 The bundled-series format, parsed without Android.
 
@@ -125,10 +125,12 @@ The bundled-series format, parsed without Android.
   not shift.
 - A missing or unparseable header yields nothing rather than wrong dates.
 - Junk lines are ignored, never guessed at.
-- **The shipped asset is checked directly**: it covers the full span with a
-  handful of gaps, every value is positive, no day-over-day jump exceeds the
-  plausibility bound, and it survives the runtime filter untouched — so a bad
+- **The shipped asset is checked directly**: every value is positive, no
+  day-over-day jump exceeds the plausibility bound, it survives the runtime
+  filter untouched, and it has **no missing day at all** — so a bad
   regeneration fails the build, not the phone.
+- The two days the source corrupts in December 2014 carry their real value of
+  24.627,10, recovered from the re-adjustment period they sit in.
 
 ### `UfLookupTest` — 11 tests
 
@@ -193,16 +195,16 @@ Loads the seed through the **real asset pipeline**, catching a renamed file, an
 asset excluded from packaging, or malformed JSON. Also verifies the in-memory
 cache returns the same instance.
 
-### `NavigationSmokeTest` — 9 tests (instrumented)
+### `NavigationSmokeTest` — 10 tests (instrumented)
 
 Runs on a device or emulator against the real activity.
 
 - The app launches showing today's value and the converter.
 - All three tabs are present.
-- **History stays hidden until asked for**: none of its controls are visible on
-  launch, which is what protects the at-a-glance path.
-- Expanding history reveals the ranges and the date lookup, and collapsing puts
-  the screen back.
+- The history and its range selector are visible with no interaction at all.
+- The date lookup is present on arrival.
+- **The day-by-day list starts collapsed** and expands on demand, which is what
+  keeps a screen carrying hundreds of rows usable.
 - **Inflation computes from bundled data with no network** — the direct test of
   the offline-first requirement.
 - Credits opens the editor and produces a result from defaults alone,
@@ -292,6 +294,7 @@ before a release.
 - [ ] The launcher icon fills a circular mask edge to edge, stays a circle under
       a squircle mask, and its themed variant still reads in one tone
 - [ ] The "Máx" range scrubs smoothly across all 49 years
+- [ ] Both chart endpoints show a date and a value that match the series
 - [ ] A 25-year payment table scrolls smoothly in both axes
 - [ ] CSV export opens correctly in a spreadsheet under a Chilean locale
 - [ ] TalkBack reaches and announces every interactive control

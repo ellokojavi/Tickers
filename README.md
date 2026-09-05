@@ -54,8 +54,6 @@ This app treats all three as the same problem: making an indexed unit legible.
 One screen, because "what is the UF worth today" and "what was it worth then"
 are the same question at different points in time.
 
-**By default** — the at-a-glance state, which is what every launch opens on:
-
 - Current UF value in Chilean pesos, with the exact publication date.
 - Change versus the previous day (absolute) and versus 30 days ago (percentage).
 - Two-way UF ⇄ CLP converter. The peso side is whole pesos: Chile has not used
@@ -63,31 +61,27 @@ are the same question at different points in time.
   itself is published that way.
 - **Share the card** as preformatted text through the system share sheet —
   WhatsApp, Telegram, mail, notes, anywhere.
-- 60-day sparkline.
+- **The history is always on screen**, not a mode to switch into: range
+  selector (1M / 3M / 6M / 1Y / 5Y / Max), the change over that range both
+  cumulative and annualised, and a chart whose **two ends are labelled with
+  their date and value**, so it can be read without touching it.
+- Touch scrubbing. **The headline value never changes while scrubbing** — the
+  explored day is reported separately, so the screen cannot misstate what the
+  UF is worth today.
+- Date lookup for any single day, with the calendar **bounded by the published
+  horizon**: a day whose UF does not exist yet cannot be selected at all, and
+  the lookup never answers with a neighbouring day's value.
 - Already-published future values, explained and marked as official.
+- A day-by-day list of the selected range, **collapsed by default** — it runs
+  to hundreds of rows and is a reference, not the main event.
 - Companion indicators: IVP, US dollar, euro, UTM, monthly CPI.
 - An explicit **data source badge** — the app never hides where a number came
   from, and marks whether that source is official.
 - Freshness indicator, and a visible warning when showing cached data.
 
-**Tap "Ver histórico"** and the chart card expands in place:
-
-- Full daily series back to **August 1977**, bundled in the app rather than
-  fetched — no waiting and no requests when changing range.
-- Range selector: 1M / 3M / 6M / 1Y / 5Y / Max.
-- Touch scrubbing. **The headline value never changes while scrubbing** — the
-  explored day is reported separately, so the screen cannot misstate what the
-  UF is worth today.
-- Change over the selected range, both cumulative and annualised.
-- Date lookup for any single day, with the calendar **bounded by the published
-  horizon**: a day whose UF does not exist yet cannot be selected at all, and
-  the lookup never answers with a neighbouring day's value.
-- Daily detail list.
-
 Published future values are drawn as a dashed segment and labelled as official,
 never as a projection. When a requested date lies beyond the published horizon,
-the app says so rather than extrapolating. The expanded state is not persisted:
-every launch returns to the at-a-glance view.
+the app says so rather than extrapolating.
 
 ### Inflation
 
@@ -142,12 +136,14 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-3 | Convert UF ⇄ CLP in both directions |
 | RF-4 | Display companion indicators (IVP, USD, EUR, UTM, CPI) |
 | RF-5 | Query the UF value for any date within coverage |
-| RF-5b | Present today's value and the historical series as one destination, with history opt-in and not persisted |
+| RF-5b | Present today's value and the historical series as one destination, with the history always visible |
 | RF-5c | Refuse to answer for a date with no published value, and make such dates unselectable |
 | RF-6 | Display already-published future UF values, explicitly marked as official |
 | RF-7 | Never extrapolate or project a UF value that has not been published |
 | RF-8 | Chart the series over selectable ranges with touch scrubbing, without ever altering the headline value |
 | RF-8b | Report the range's change both cumulatively and annualised |
+| RF-8c | Label both ends of the chart with their date and value |
+| RF-8d | Keep the day-by-day list collapsed until requested |
 | RF-9 | Restate an amount between any two months using the CPI index |
 | RF-10 | Show the same restatement expressed in UF units |
 | RF-11 | Report adjustment factor, cumulative inflation and annualised rate |
@@ -212,9 +208,16 @@ The public feed is not clean. It serves `608,15` for 2014-12-29 and `607,38`
 for 2014-12-30, where the real UF was about 24.627. Both the generator and the
 running app therefore reject any value that moves more than 1% per elapsed day
 — roughly four times the largest genuine daily change in the whole 49-year
-series (0,2633%). Rejected days become gaps, which the app reports honestly as
-"nearest earlier day"; nothing is interpolated into an invented official
-figure.
+series (0,2633%). Rejected days, and any the source simply omits, are then **reconstructed from
+their own re-adjustment period**. Inside a period — the 10th of one month to
+the 9th of the next — the UF grows at a constant daily factor by construction,
+so a missing day is a term of a known geometric progression rather than a
+guess. December 2014 is the clearest case: the UF was frozen at 24.627,10 for
+that entire period because November's CPI was 0,0%, so the two corrupted days
+recover their exact published value. Reconstruction is refused when a gap
+straddles a period boundary, where the factor changes.
+
+The result is a complete series: 17.937 days with no holes.
 
 ### Configuring the CMF API key
 
@@ -423,7 +426,7 @@ UFChile/
 
 **v0.1 — current**
 UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 114 tests passing; debug and
+mortgage simulator with CRUD and CSV export. 117 tests passing; debug and
 minified release builds verified on an emulator.
 
 **Toward v1.0**
