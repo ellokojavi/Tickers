@@ -26,12 +26,11 @@ import androidx.navigation.navArgument
 import cl.ufchile.app.data.prefs.ThemeMode
 import cl.ufchile.app.ui.credit.CreditEditorScreen
 import cl.ufchile.app.ui.credit.CreditListScreen
-import cl.ufchile.app.ui.history.HistoryScreen
 import cl.ufchile.app.ui.inflation.InflationScreen
 import cl.ufchile.app.ui.nav.Routes
 import cl.ufchile.app.ui.nav.Tab
 import cl.ufchile.app.ui.theme.UfChileTheme
-import cl.ufchile.app.ui.today.TodayScreen
+import cl.ufchile.app.ui.value.UfValueScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -68,7 +67,7 @@ private fun UfChileRoot() {
                                 onClick = {
                                     if (route != tab.route) {
                                         navController.navigate(tab.route) {
-                                            popUpTo(Tab.TODAY.route) { saveState = true }
+                                            popUpTo(Tab.VALUE.route) { saveState = true }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
@@ -84,11 +83,11 @@ private fun UfChileRoot() {
         ) { padding ->
             NavHost(
                 navController = navController,
-                startDestination = Tab.TODAY.route,
+                startDestination = Tab.VALUE.route,
                 modifier = Modifier.fillMaxSize().padding(padding),
             ) {
-                composable(Tab.TODAY.route) {
-                    TodayScreen(
+                composable(Tab.VALUE.route) {
+                    UfValueScreen(
                         onCycleTheme = {
                             scope.launch {
                                 app.container.settings.setTheme(
@@ -103,7 +102,6 @@ private fun UfChileRoot() {
                         themeMode = themeMode,
                     )
                 }
-                composable(Tab.HISTORY.route) { HistoryScreen() }
                 composable(Tab.INFLATION.route) { InflationScreen() }
                 composable(Tab.CREDITS.route) {
                     CreditListScreen(onOpen = { id ->

@@ -102,7 +102,12 @@ data class MortgageInput(
     val stampTaxPct: BigDecimal = BigDecimal.ZERO,
     /** Notaría, conservador, tasación, etc. */
     val otherUpfrontCostsUf: BigDecimal = BigDecimal.ZERO,
-    val startDate: LocalDate = LocalDate.now(),
+    /**
+     * Due date of instalment 1. Every later instalment falls on the same day of
+     * the month; a day of 29-31 is clamped to the last day of shorter months,
+     * which is what lenders do too.
+     */
+    val firstPaymentDate: LocalDate = LocalDate.now().plusMonths(1),
     val prepayments: List<Prepayment> = emptyList(),
 ) {
     val loanAmountUf: BigDecimal get() = (propertyValueUf - downPaymentUf).max(BigDecimal.ZERO)

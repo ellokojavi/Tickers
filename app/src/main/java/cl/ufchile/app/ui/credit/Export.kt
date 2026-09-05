@@ -23,6 +23,7 @@ object ScheduleExport {
         sb.appendLine("Tasa anual;${dec(result.input.annualRatePct)};%")
         sb.appendLine("Convencion;${result.input.rateConvention.label}")
         sb.appendLine("Plazo;${result.input.termYears};anios")
+        sb.appendLine("Primer vencimiento;${Fmt.shortDate(result.input.firstPaymentDate)}")
         sb.appendLine("Dividendo (capital+interes);${dec(result.basePaymentUf)};UF")
         result.caePct?.let { sb.appendLine("CAE;${dec(it)};%") }
         ufValue?.let { sb.appendLine("Valor UF usado;${dec(it)};CLP") }

@@ -41,7 +41,7 @@ class DatabaseCrudTest {
         originationFeeUf = BigDecimal("5"),
         stampTaxPct = BigDecimal("0.8"),
         otherUpfrontCostsUf = BigDecimal("30"),
-        startDate = LocalDate.of(2026, 3, 15),
+        firstPaymentDate = LocalDate.of(2026, 3, 15),
         prepayments = listOf(
             Prepayment(12, BigDecimal("500"), PrepaymentMode.REDUCE_TERM),
             Prepayment(24, BigDecimal("250.75"), PrepaymentMode.REDUCE_PAYMENT),
@@ -72,7 +72,7 @@ class DatabaseCrudTest {
         assertThat(loaded.input.propertyValueUf).isEqualTo(BigDecimal("5000.5"))
         assertThat(loaded.input.annualRatePct).isEqualTo(BigDecimal("4.55"))
         assertThat(loaded.input.rateConvention).isEqualTo(RateConvention.EFFECTIVE_EQUIVALENT)
-        assertThat(loaded.input.startDate).isEqualTo(LocalDate.of(2026, 3, 15))
+        assertThat(loaded.input.firstPaymentDate).isEqualTo(LocalDate.of(2026, 3, 15))
     }
 
     @Test

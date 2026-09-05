@@ -1,5 +1,6 @@
 package cl.ufchile.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.math.BigDecimal
@@ -38,7 +39,8 @@ data class SimulationEntity(
     val originationFeeUf: BigDecimal,
     val stampTaxPct: BigDecimal,
     val otherUpfrontCostsUf: BigDecimal,
-    val startDate: LocalDate,
+    // The column keeps its original name so the rename needs no migration.
+    @ColumnInfo(name = "startDate") val firstPaymentDate: LocalDate,
     /** Prepayments serialised as JSON; a rarely-used list is not worth a table. */
     val prepaymentsJson: String,
     val createdAt: Long,
