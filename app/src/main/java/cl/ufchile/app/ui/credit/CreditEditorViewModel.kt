@@ -35,6 +35,7 @@ data class CreditForm(
     val originationFeeUf: String = "0",
     val stampTaxPct: String = "0,8",
     val otherUpfrontCostsUf: String = "30",
+    val firstPaymentDate: LocalDate = LocalDate.now().plusMonths(1),
     val prepayments: List<Prepayment> = emptyList(),
 )
 
@@ -156,7 +157,7 @@ class CreditEditorViewModel(
             originationFeeUf = Fmt.parseNumber(f.originationFeeUf) ?: BigDecimal.ZERO,
             stampTaxPct = Fmt.parseNumber(f.stampTaxPct) ?: BigDecimal.ZERO,
             otherUpfrontCostsUf = Fmt.parseNumber(f.otherUpfrontCostsUf) ?: BigDecimal.ZERO,
-            startDate = LocalDate.now(),
+            firstPaymentDate = f.firstPaymentDate,
             prepayments = f.prepayments,
         )
     }
@@ -174,6 +175,7 @@ class CreditEditorViewModel(
         originationFeeUf = input.originationFeeUf.toPlainString().replace('.', ','),
         stampTaxPct = input.stampTaxPct.toPlainString().replace('.', ','),
         otherUpfrontCostsUf = input.otherUpfrontCostsUf.toPlainString().replace('.', ','),
+        firstPaymentDate = input.firstPaymentDate,
         prepayments = input.prepayments,
     )
 }

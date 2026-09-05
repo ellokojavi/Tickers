@@ -112,7 +112,7 @@ object MortgageEngine {
             rows.add(
                 AmortizationRow(
                     number = month,
-                    date = input.startDate.plusMonths(month.toLong()),
+                    date = input.firstPaymentDate.plusMonths((month - 1).toLong()),
                     openingBalanceUf = opening,
                     interestUf = interest,
                     principalUf = principalPart,

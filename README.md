@@ -49,27 +49,38 @@ This app treats all three as the same problem: making an indexed unit legible.
 
 ## Features
 
-### Today
+### UF value
+
+One screen, because "what is the UF worth today" and "what was it worth then"
+are the same question at different points in time.
+
+**By default** — the at-a-glance state, which is what every launch opens on:
 
 - Current UF value in Chilean pesos, with the exact publication date.
 - Change versus the previous day (absolute) and versus 30 days ago (percentage).
 - Two-way UF ⇄ CLP converter.
 - 60-day sparkline.
+- Already-published future values, explained and marked as official.
 - Companion indicators: IVP, US dollar, euro, UTM, monthly CPI.
 - An explicit **data source badge** — the app never hides where a number came
   from, and marks whether that source is official.
 - Freshness indicator, and a visible warning when showing cached data.
 
-### History
+**Tap "Ver histórico"** and the chart card expands in place:
 
-- Full daily series back to **August 1977**.
-- Range selector: 1M / 3M / 6M / 1Y / 5Y / Max, with on-demand backfill of older
+- Full daily series back to **August 1977**, with on-demand backfill of older
   years.
-- Interactive chart with touch scrubbing.
+- Range selector: 1M / 3M / 6M / 1Y / 5Y / Max.
+- Touch scrubbing. **The headline value never changes while scrubbing** — the
+  explored day is reported separately, so the screen cannot misstate what the
+  UF is worth today.
 - Date lookup for any single day.
-- **Published future values are drawn as a dashed segment and labelled as
-  official, never as a projection.** When a requested date lies beyond the
-  published horizon, the app says so rather than extrapolating.
+- Daily detail list.
+
+Published future values are drawn as a dashed segment and labelled as official,
+never as a projection. When a requested date lies beyond the published horizon,
+the app says so rather than extrapolating. The expanded state is not persisted:
+every launch returns to the at-a-glance view.
 
 ### Inflation
 
@@ -87,9 +98,16 @@ This app treats all three as the same problem: making an indexed unit legible.
 
 - `UF + x%` loans on the French amortisation system (constant capital + interest
   payment).
+- **A user-chosen due date for the first instalment**, so the schedule carries
+  real dates rather than an assumed "one month from today". Later instalments
+  fall on the same day each month, clamped to the last day of shorter months
+  exactly as a lender would.
 - Complete payment table: opening balance, interest, principal, dividend, life
   insurance, fire insurance, prepayment, monthly total and closing balance —
   every row in UF, with peso equivalents at the current UF value.
+- Opening a **saved** simulation leads with the result and the payment table;
+  the editable form and its update action sit below. A **new** simulation leads
+  with the form. Consulting and creating are different jobs.
 - Cost inputs: *desgravamen* (percentage of the outstanding balance),
   *incendio y sismo* (fixed monthly UF), origination fee, stamp tax
   (*impuesto de timbres*), and notary/appraisal/registry costs.
@@ -117,19 +135,22 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-3 | Convert UF ⇄ CLP in both directions |
 | RF-4 | Display companion indicators (IVP, USD, EUR, UTM, CPI) |
 | RF-5 | Query the UF value for any date within coverage |
+| RF-5b | Present today's value and the historical series as one destination, with history opt-in and not persisted |
 | RF-6 | Display already-published future UF values, explicitly marked as official |
 | RF-7 | Never extrapolate or project a UF value that has not been published |
-| RF-8 | Chart the series over selectable ranges with touch scrubbing |
+| RF-8 | Chart the series over selectable ranges with touch scrubbing, without ever altering the headline value |
 | RF-9 | Restate an amount between any two months using the CPI index |
 | RF-10 | Show the same restatement expressed in UF units |
 | RF-11 | Report adjustment factor, cumulative inflation and annualised rate |
 | RF-12 | Reject out-of-coverage dates with an explanation |
 | RF-13 | Simulate a `UF + x%` mortgage and produce a full amortisation schedule |
+| RF-13b | Let the user set the first instalment's due date and derive every later date from it |
 | RF-14 | Support both annual→monthly rate conventions used in Chile |
 | RF-15 | Model life and property insurance, fees, stamp tax and upfront costs |
 | RF-16 | Compute the CAE from actual cash flows |
 | RF-17 | Model prepayments, reducing either term or payment |
 | RF-18 | Create, read, update, duplicate and delete saved simulations |
+| RF-18b | Open a saved simulation on its result; open a new one on its form |
 | RF-19 | Persist simulations across app restarts and updates |
 | RF-20 | Export a schedule to CSV and share it |
 | RF-21 | Refresh data daily in the background and on manual pull |
@@ -257,6 +278,9 @@ annual rate, which is asserted in the test suite.
 Kotlin · Jetpack Compose (Material 3) · MVVM · unidirectional state
 │
 ├── ui/          Compose screens + ViewModels, StateFlow-driven
+│   ├── value/   UF today + history (one screen)
+│   ├── inflation/
+│   └── credit/
 ├── domain/      Pure Kotlin. No Android imports.
 │   ├── model/   Data classes
 │   └── engine/  UfEngine · InflationEngine · MortgageEngine
@@ -359,8 +383,9 @@ UFChile/
 ## Roadmap
 
 **v0.1 — current**
-Today, History, Inflation, full mortgage simulator with CRUD and CSV export.
-68 tests passing; debug and minified release builds verified on an emulator.
+UF value (today plus opt-in history), Inflation, and a full mortgage simulator
+with CRUD and CSV export. 75 tests passing; debug and minified release builds
+verified on an emulator.
 
 **Toward v1.0**
 - PDF export of payment schedules

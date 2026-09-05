@@ -76,7 +76,7 @@ class SimulationRepository(private val dao: SimulationDao) {
         originationFeeUf = i.originationFeeUf,
         stampTaxPct = i.stampTaxPct,
         otherUpfrontCostsUf = i.otherUpfrontCostsUf,
-        startDate = i.startDate,
+        firstPaymentDate = i.firstPaymentDate,
         prepaymentsJson = json.encodeToString(
             ListSerializer(PrepaymentDto.serializer()),
             i.prepayments.map { PrepaymentDto(it.monthNumber, it.amountUf.toPlainString(), it.mode.name) },
@@ -116,7 +116,7 @@ class SimulationRepository(private val dao: SimulationDao) {
                 originationFeeUf = originationFeeUf,
                 stampTaxPct = stampTaxPct,
                 otherUpfrontCostsUf = otherUpfrontCostsUf,
-                startDate = startDate,
+                firstPaymentDate = firstPaymentDate,
                 prepayments = prepayments,
             ),
         )

@@ -5,8 +5,8 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 62 JVM tests   — seconds, no device
-./gradlew connectedAndroidTest  # 6 UI tests     — needs a device or emulator
+./gradlew test                  # 66 JVM tests   — seconds, no device
+./gradlew connectedAndroidTest  # 9 UI tests     — needs a device or emulator
 ```
 
 ---
@@ -15,11 +15,11 @@ without a device, and anything a user can tap must be verified on one.**
 
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
-| Pure calculation | JUnit | 35 | Mortgage maths, inflation index, UF conversions |
+| Pure calculation | JUnit | 39 | Mortgage maths, due dates, inflation index, UF conversions |
 | Formatting & parsing | JUnit | 8 | `es-CL` output and input round trips |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 14 | Room schema, type converters, bundled dataset |
-| UI flows | Instrumented | 6 | Navigation, offline rendering, live computation |
+| UI flows | Instrumented | 9 | Navigation, offline rendering, live computation, screen ordering |
 
 The engines live in `domain/` with **no Android imports**, which is what makes
 the first three layers possible at all. This is an architectural choice made
@@ -29,7 +29,7 @@ for testability, not an accident.
 
 ## What each suite asserts
 
-### `MortgageEngineTest` — 17 tests
+### `MortgageEngineTest` — 21 tests
 
 The amortisation engine is the highest-risk code in the app: it is the only
 place where a silent error produces a plausible-looking wrong answer.
@@ -55,6 +55,16 @@ place where a silent error produces a plausible-looking wrong answer.
 - CAE rises once fees and insurance are added.
 - Upfront costs are computed off the loan amount, not the property value.
 - A longer term lowers the payment and raises total interest.
+
+On due dates:
+
+- Instalment 1 falls exactly on the date the user chose.
+- Instalments advance one month at a time, checked at the 2nd, 12th, 13th and
+  final rows.
+- A 31st clamps to the last day of shorter months and recovers afterwards
+  (31 Jan → 28 Feb → 31 Mar → 30 Apr), matching how a lender schedules it.
+- **Changing the due date moves no money**: payment, total cost and CAE are
+  identical across two very different start dates.
 
 ### `InflationEngineTest` — 11 tests
 
@@ -131,18 +141,25 @@ Loads the seed through the **real asset pipeline**, catching a renamed file, an
 asset excluded from packaging, or malformed JSON. Also verifies the in-memory
 cache returns the same instance.
 
-### `NavigationSmokeTest` — 6 tests (instrumented)
+### `NavigationSmokeTest` — 9 tests (instrumented)
 
 Runs on a device or emulator against the real activity.
 
-- The app launches on the Today tab and renders the converter.
-- All four tabs are present.
-- History opens and offers a date lookup.
+- The app launches showing today's value and the converter.
+- All three tabs are present.
+- **History stays hidden until asked for**: none of its controls are visible on
+  launch, which is what protects the at-a-glance path.
+- Expanding history reveals the ranges and the date lookup, and collapsing puts
+  the screen back.
 - **Inflation computes from bundled data with no network** — the direct test of
   the offline-first requirement.
 - Credits opens the editor and produces a result from defaults alone,
   including a CAE.
 - The theme toggle does not break the screen.
+- **A saved simulation opens on its result, a new one on its form** — the
+  ordering rule, asserted in both directions. The test names its simulation
+  uniquely and deletes it afterwards, so the suite is idempotent.
+- The payment table's first row carries the chosen due date.
 
 Assertions deliberately target chrome and bundled-data content, never a value
 that depends on a successful network call, so the suite is not flaky on a
@@ -150,7 +167,7 @@ machine with poor connectivity.
 
 ---
 
-## Two bugs this suite already caught
+## Three bugs this suite already caught
 
 Worth recording, because both would have shipped otherwise:
 
@@ -165,6 +182,14 @@ able to prevent the app from starting.
 sits in a slot that is not merged into the node's semantics, so TalkBack
 announced only "Button". Found because the UI test could not locate it either.
 Fixed with an explicit `contentDescription`.
+
+**3. Expanding the history put its own controls off screen.** The range chips
+sat below a chart that grows to 200dp, which pushed them past the fold on a
+1080×2400 device: tapping "Ver histórico" revealed a taller chart and no way to
+change its range without scrolling. The test failed on `assertIsDisplayed`,
+which is precisely the distinction that matters — the node existed, it just was
+not visible. The chips now sit above the chart, where the control that governs
+a view belongs.
 
 ---
 
@@ -181,6 +206,8 @@ before a release.
 - [ ] A known inflation case is spot-checked against an external calculator
 - [ ] A mortgage simulation is compared against a real bank's published
       simulator, under **both** rate conventions
+- [ ] A due date on the 29th, 30th or 31st produces the expected month-end
+      behaviour across a February
 
 ### Offline behaviour
 - [ ] Airplane mode on first launch: Inflation still works from the bundled seed
@@ -197,6 +224,7 @@ before a release.
 - [ ] Light and dark themes, and following the system setting
 - [ ] Font scale at maximum: no clipped or overlapping text
 - [ ] Landscape orientation
+- [ ] Expanding the history keeps its range selector on screen
 - [ ] A 25-year payment table scrolls smoothly in both axes
 - [ ] CSV export opens correctly in a spreadsheet under a Chilean locale
 - [ ] TalkBack reaches and announces every interactive control

@@ -25,6 +25,7 @@ class MortgageEngineTest {
         other: String = "0",
         prepayments: List<Prepayment> = emptyList(),
         convention: RateConvention = RateConvention.NOMINAL_DIVIDED,
+        firstPayment: LocalDate = LocalDate.of(2026, 10, 5),
     ) = MortgageInput(
         propertyValueUf = BigDecimal(property),
         downPaymentUf = BigDecimal(down),
@@ -36,7 +37,7 @@ class MortgageEngineTest {
         originationFeeUf = BigDecimal(origination),
         stampTaxPct = BigDecimal(stamp),
         otherUpfrontCostsUf = BigDecimal(other),
-        startDate = LocalDate.of(2026, 1, 1),
+        firstPaymentDate = firstPayment,
         prepayments = prepayments,
     )
 
@@ -227,5 +228,48 @@ class MortgageEngineTest {
 
         assertThat(long.basePaymentUf).isLessThan(short.basePaymentUf)
         assertThat(long.totalInterestUf).isGreaterThan(short.totalInterestUf)
+    }
+
+    // ------------------------------------------------------------- due dates
+
+    @Test
+    fun `the first instalment falls on the chosen date`() {
+        val result = MortgageEngine.simulate(input(firstPayment = LocalDate.of(2027, 3, 20)))
+
+        assertThat(result.schedule.first().date).isEqualTo(LocalDate.of(2027, 3, 20))
+    }
+
+    @Test
+    fun `instalments advance one month at a time`() {
+        val result = MortgageEngine.simulate(input(firstPayment = LocalDate.of(2026, 10, 5)))
+
+        assertThat(result.schedule[1].date).isEqualTo(LocalDate.of(2026, 11, 5))
+        assertThat(result.schedule[11].date).isEqualTo(LocalDate.of(2027, 9, 5))
+        assertThat(result.schedule[12].date).isEqualTo(LocalDate.of(2027, 10, 5))
+        assertThat(result.schedule.last().date).isEqualTo(LocalDate.of(2051, 9, 5))
+    }
+
+    /**
+     * A 31st falls back to the last day of shorter months, which is how a
+     * lender schedules it, and the day recovers afterwards.
+     */
+    @Test
+    fun `a month-end due date clamps to shorter months`() {
+        val result = MortgageEngine.simulate(input(firstPayment = LocalDate.of(2026, 1, 31)))
+
+        assertThat(result.schedule[0].date).isEqualTo(LocalDate.of(2026, 1, 31))
+        assertThat(result.schedule[1].date).isEqualTo(LocalDate.of(2026, 2, 28))
+        assertThat(result.schedule[2].date).isEqualTo(LocalDate.of(2026, 3, 31))
+        assertThat(result.schedule[3].date).isEqualTo(LocalDate.of(2026, 4, 30))
+    }
+
+    @Test
+    fun `the due date does not affect any amount`() {
+        val a = MortgageEngine.simulate(input(firstPayment = LocalDate.of(2026, 10, 5)))
+        val b = MortgageEngine.simulate(input(firstPayment = LocalDate.of(2031, 2, 17)))
+
+        assertThat(b.basePaymentUf).isEqualTo(a.basePaymentUf)
+        assertThat(b.totalCostUf).isEqualTo(a.totalCostUf)
+        assertThat(b.caePct).isEqualTo(a.caePct)
     }
 }
