@@ -5,8 +5,8 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 136 JVM tests  — seconds, no device
-./gradlew connectedAndroidTest  # 11 UI tests    — needs a device or emulator
+./gradlew test                  # 138 JVM tests  — seconds, no device
+./gradlew connectedAndroidTest  # 12 UI tests    — needs a device or emulator
 ```
 
 ---
@@ -16,10 +16,10 @@ without a device, and anything a user can tap must be verified on one.**
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
 | Pure calculation | JUnit | 77 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
-| Formatting & parsing | JUnit | 31 | `es-CL` output, input grouping, cursor mapping, default state |
+| Formatting & parsing | JUnit | 33 | `es-CL` output, input grouping, cursor mapping, default state |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
-| UI flows | Instrumented | 11 | Navigation, offline rendering, live computation, screen ordering |
+| UI flows | Instrumented | 12 | Navigation, offline rendering, live computation, screen ordering |
 
 The engines live in `domain/` with **no Android imports**, which is what makes
 the first three layers possible at all. This is an architectural choice made
@@ -160,11 +160,16 @@ The rules now live in a pure resolver with a closed set of outcomes:
 The calendar is bounded by the same horizon, so an unpublished day cannot be
 picked in the first place — the resolver is the second line of defence.
 
-### `FormatTest` — 8 tests
+### `FormatTest` — 10 tests
 
 `$40.880,36`, `22,23 UF`, `+3,25%`, `05-09-2026`, "hace 4 días". Parsing accepts
 `40.880,36`, `$1.000`, `4,5` and `1.234 UF`; rejects `""`, `"abc"` and `","`.
 Formatting and parsing round trip.
+
+Counts get their separators too — `13.396`, `17.937` — which is why day spans
+and row counts now go through the formatter rather than being interpolated
+directly. A figure shown to a user is punctuated whether or not today's data
+happens to reach a thousand.
 
 ### `ThousandsTransformationTest` — 19 tests
 
@@ -238,6 +243,8 @@ Runs on a device or emulator against the real activity.
 - The date lookup is present on arrival.
 - **The day-by-day list starts collapsed** and expands on demand, which is what
   keeps a screen carrying hundreds of rows usable.
+- The inflation screen's **"Hoy" shortcut appears only when the end date is not
+  today**, and clears itself once used.
 - **Inflation computes from bundled data with no network** — the direct test of
   the offline-first requirement.
 - Credits opens the editor and produces a result from defaults alone,

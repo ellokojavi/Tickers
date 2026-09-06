@@ -178,7 +178,7 @@ fun UfValueScreen(
                 SectionTitle("Detalle diario")
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        if (ui.detailExpanded) "Ocultar" else "${ui.rangeValues.size} días",
+                        if (ui.detailExpanded) "Ocultar" else "${Fmt.integer(ui.rangeValues.size)} días",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -194,7 +194,7 @@ fun UfValueScreen(
         }
 
         if (ui.detailExpanded) {
-            items(ui.rangeValues.reversed().take(400), key = { it.date.toString() }) { v ->
+            items(ui.rangeValues.reversed().take(DETAIL_ROWS), key = { it.date.toString() }) { v ->
                 KeyValueRow(
                     label = Fmt.shortDate(v.date) +
                         if (v.date.isAfter(LocalDate.now())) "  ·  futuro publicado" else "",
@@ -203,10 +203,10 @@ fun UfValueScreen(
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
-            if (ui.rangeValues.size > 400) {
+            if (ui.rangeValues.size > DETAIL_ROWS) {
                 item {
                     Text(
-                        "Se muestran los 400 días más recientes del período.",
+                        "Se muestran los ${Fmt.integer(DETAIL_ROWS)} días más recientes del período.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
@@ -552,7 +552,7 @@ private fun FutureCard(ui: UfUiState) {
         }
         if (ui.future.size > 12) {
             Text(
-                "y ${ui.future.size - 12} días más hasta el ${Fmt.shortDate(ui.future.last().date)}",
+                "y ${Fmt.integer(ui.future.size - 12)} días más hasta el ${Fmt.shortDate(ui.future.last().date)}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp),
@@ -575,3 +575,6 @@ private fun IndicatorsCard(ui: UfUiState) {
         }
     }
 }
+
+/** How many day rows the detail list renders before it stops. */
+private const val DETAIL_ROWS = 400

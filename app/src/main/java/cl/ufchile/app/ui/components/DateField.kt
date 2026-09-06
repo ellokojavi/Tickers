@@ -43,6 +43,9 @@ fun DateField(
     modifier: Modifier = Modifier,
     min: LocalDate? = null,
     max: LocalDate? = null,
+    /** An optional shortcut shown beside the picker, e.g. jumping back to today. */
+    quickLabel: String? = null,
+    onQuick: (() -> Unit)? = null,
 ) {
     var open by remember { mutableStateOf(false) }
 
@@ -57,11 +60,23 @@ fun DateField(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(Fmt.longDate(value), style = MaterialTheme.typography.bodyLarge)
-            OutlinedButton(
-                onClick = { open = true },
-                shape = MaterialTheme.shapes.small,
-            ) { Text("Cambiar") }
+            Text(
+                Fmt.longDate(value),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (quickLabel != null && onQuick != null) {
+                    TextButton(onClick = onQuick) { Text(quickLabel) }
+                }
+                OutlinedButton(
+                    onClick = { open = true },
+                    shape = MaterialTheme.shapes.small,
+                ) { Text("Cambiar") }
+            }
         }
     }
 

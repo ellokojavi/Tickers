@@ -49,6 +49,16 @@ object Fmt {
     /** "7,1567x" — a multiplicative adjustment factor. */
     fun factor(v: BigDecimal): String = uf4.format(v) + "x"
 
+    /** "13.396" — a plain count, grouped. Any figure shown to the user gets
+     *  its separators, whether or not today's data happens to reach a
+     *  thousand. */
+    fun integer(v: Long): String = pesos.format(v)
+
+    fun integer(v: Int): String = pesos.format(v)
+
+    /** "36,7" — one decimal, for spans expressed in months or years. */
+    fun decimal1(v: Double): String = pct1.format(v).removeSuffix("%")
+
     /** "+3,25%" */
     fun pctSigned(v: BigDecimal): String {
         val s = pct.format(v.abs())

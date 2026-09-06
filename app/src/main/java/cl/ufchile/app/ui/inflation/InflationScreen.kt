@@ -29,6 +29,7 @@ import cl.ufchile.app.ui.components.KeyValueRow
 import cl.ufchile.app.ui.components.NumberField
 import cl.ufchile.app.ui.components.ScreenHeader
 import cl.ufchile.app.ui.components.SectionTitle
+import java.time.LocalDate
 
 @Composable
 fun InflationScreen() {
@@ -67,12 +68,17 @@ fun InflationScreen() {
                         Icon(Icons.Filled.SwapVert, contentDescription = "Invertir las fechas")
                     }
                 }
+                val today = LocalDate.now()
                 DateField(
                     label = "Hasta",
                     value = ui.to,
                     onSelect = vm::setTo,
                     min = ui.earliest,
                     max = ui.latest,
+                    // Coming back to today is the most common correction, and
+                    // it should not cost a trip through the calendar.
+                    quickLabel = if (ui.to != today) "Hoy" else null,
+                    onQuick = { vm.setTo(today) },
                 )
             }
         }
@@ -151,8 +157,11 @@ fun InflationScreen() {
     }
 }
 
-private fun periodLabel(days: Long): String = when {
-    days < 60 -> "$days días"
-    days < 730 -> "$days días (${"%.1f".format(days / 30.44).replace('.', ',')} meses)"
-    else -> "$days días (${"%.1f".format(days / 365.25).replace('.', ',')} años)"
+private fun periodLabel(days: Long): String {
+    val count = Fmt.integer(days)
+    return when {
+        days < 60 -> "$count días"
+        days < 730 -> "$count días (${Fmt.decimal1(days / 30.44)} meses)"
+        else -> "$count días (${Fmt.decimal1(days / 365.25)} años)"
+    }
 }

@@ -86,7 +86,7 @@ fun AmortizationTableDialog(
                         Column {
                             Text("Tabla de pagos", style = MaterialTheme.typography.titleMedium)
                             Text(
-                                "${result.schedule.size} cuotas · valores en UF",
+                                "${Fmt.integer(result.schedule.size)} cuotas · valores en UF",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -151,7 +151,7 @@ private fun ScheduleRow(
 ) {
     val cells = remember(row) {
         listOf(
-            row.number.toString(),
+            Fmt.integer(row.number),
             Fmt.shortDate(row.date),
             n(row.openingBalanceUf),
             n(row.interestUf),
