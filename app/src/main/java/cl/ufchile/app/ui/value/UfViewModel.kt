@@ -138,7 +138,7 @@ class UfViewModel(
             val target = c.date.minusMonths(1)
             series.filter { !it.date.isAfter(target) }.maxByOrNull { it.date }
         }
-        val windowed = window(series, _ui.value.range)
+        val windowed = UfEngine.historyWindow(series, _ui.value.range.months)
         _ui.value = _ui.value.copy(
             loading = false,
             current = current,
@@ -206,7 +206,7 @@ class UfViewModel(
     }
 
     fun setRange(range: Range) {
-        val windowed = window(_ui.value.all, range)
+        val windowed = UfEngine.historyWindow(_ui.value.all, range.months)
         _ui.value = _ui.value.copy(
             range = range,
             scrubIndex = null,
@@ -255,13 +255,6 @@ class UfViewModel(
                 )
             )
         }
-    }
-
-    /** The slice of the series the selected range covers. */
-    private fun window(series: List<UfValue>, range: Range): List<UfValue> {
-        val months = range.months ?: return series
-        val from = LocalDate.now().minusMonths(months)
-        return series.filter { !it.date.isBefore(from) }
     }
 
     private fun ensureFrom(year: Int) {

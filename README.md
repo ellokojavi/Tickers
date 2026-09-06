@@ -64,7 +64,10 @@ are the same question at different points in time.
 - **The history is always on screen**, not a mode to switch into: range
   selector (1M / 3M / 6M / 1Y / 5Y / Max), the change over that range both
   cumulative and annualised, and a chart whose **two ends are labelled with
-  their date and value**, so it can be read without touching it.
+  their date and value**, so it can be read without touching it. It **ends
+  today**: the series runs past today, but a historical chart is a record of
+  what has happened, and the days already published beyond it have their own
+  card.
 - Touch scrubbing. **The headline value never changes while scrubbing** — the
   explored day is reported separately, so the screen cannot misstate what the
   UF is worth today.
@@ -79,9 +82,9 @@ are the same question at different points in time.
   from, and marks whether that source is official.
 - Freshness indicator, and a visible warning when showing cached data.
 
-Published future values are drawn as a dashed segment and labelled as official,
-never as a projection. When a requested date lies beyond the published horizon,
-the app says so rather than extrapolating.
+Future values are never presented as history or as a projection: they sit in
+their own card, labelled as already official. When a requested date lies beyond
+the published horizon, the app says so rather than extrapolating.
 
 ### Inflation
 
@@ -159,6 +162,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-8 | Chart the series over selectable ranges with touch scrubbing, without ever altering the headline value |
 | RF-8b | Report the range's change both cumulatively and annualised |
 | RF-8c | Label both ends of the chart with their date and value |
+| RF-8e | End the chart on today, never on a published future day |
 | RF-8d | Keep the day-by-day list collapsed until requested |
 | RF-9 | Restate an amount between any two dates, at day precision, through the UF |
 | RF-10 | Show the UF on both dates and the amount in UF units |
@@ -453,7 +457,7 @@ UFChile/
 
 **v0.1 — current**
 UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 141 tests passing; debug and
+mortgage simulator with CRUD and CSV export. 147 tests passing; debug and
 minified release builds verified on an emulator.
 
 **Toward v1.0**

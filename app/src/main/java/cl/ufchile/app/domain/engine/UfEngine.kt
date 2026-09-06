@@ -3,6 +3,7 @@ package cl.ufchile.app.domain.engine
 import cl.ufchile.app.domain.model.UfValue
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.LocalDate
 
 /** Conversions and deltas over the UF series. */
 object UfEngine {
@@ -23,6 +24,26 @@ object UfEngine {
         else (to - from).divide(from, 8, RoundingMode.HALF_UP)
             .multiply(BigDecimal(100))
             .setScale(2, RoundingMode.HALF_UP)
+
+    /**
+     * The slice of [series] a chart should draw: the last [months] up to and
+     * including [today], never beyond it.
+     *
+     * The series legitimately runs past today — the UF is published to the 9th
+     * of next month — but a historical chart is a record of what has happened.
+     * Those days have their own card on the screen. A null [months] means the
+     * whole history.
+     */
+    fun historyWindow(
+        series: List<UfValue>,
+        months: Long?,
+        today: LocalDate = LocalDate.now(),
+    ): List<UfValue> {
+        val history = series.filter { !it.date.isAfter(today) }
+        if (months == null) return history
+        val from = today.minusMonths(months)
+        return history.filter { !it.date.isBefore(from) }
+    }
 
     /**
      * Evenly thins [values] to at most [maxPoints], always keeping the first

@@ -167,4 +167,68 @@ class UfEngineTest {
         assertThat(UfEngine.downsample(series, 1)).isSameInstanceAs(series)
         assertThat(UfEngine.downsample(emptyList(), 400)).isEmpty()
     }
+
+    // ------------------------------------------------------- history window
+
+    private val longSeries = (0L until 400L).map {
+        UfValue(LocalDate.of(2025, 9, 5).plusDays(it), BigDecimal(40000 + it))
+    }
+
+    /**
+     * The regression this pins: the chart ended on the last published day,
+     * which is up to a month in the future, so its final label and its period
+     * variation reached past today.
+     */
+    @Test
+    fun `the window never reaches past today`() {
+        val today = LocalDate.of(2026, 9, 5)
+
+        val window = UfEngine.historyWindow(longSeries, months = 3, today = today)
+
+        assertThat(window.last().date).isEqualTo(today)
+        assertThat(window.none { it.date.isAfter(today) }).isTrue()
+    }
+
+    @Test
+    fun `the whole history also stops at today`() {
+        val today = LocalDate.of(2026, 9, 5)
+
+        val window = UfEngine.historyWindow(longSeries, months = null, today = today)
+
+        assertThat(window.first().date).isEqualTo(LocalDate.of(2025, 9, 5))
+        assertThat(window.last().date).isEqualTo(today)
+    }
+
+    @Test
+    fun `the window starts the requested number of months back`() {
+        val today = LocalDate.of(2026, 9, 5)
+
+        val window = UfEngine.historyWindow(longSeries, months = 3, today = today)
+
+        assertThat(window.first().date).isEqualTo(LocalDate.of(2026, 6, 5))
+    }
+
+    @Test
+    fun `today itself is included`() {
+        val today = LocalDate.of(2026, 9, 5)
+
+        assertThat(UfEngine.historyWindow(longSeries, months = 1, today = today).map { it.date })
+            .contains(today)
+    }
+
+    @Test
+    fun `a series entirely in the future yields nothing to chart`() {
+        val future = listOf(
+            UfValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
+            UfValue(LocalDate.of(2026, 9, 9), BigDecimal("40885.63")),
+        )
+
+        assertThat(UfEngine.historyWindow(future, months = null, today = LocalDate.of(2026, 9, 5)))
+            .isEmpty()
+    }
+
+    @Test
+    fun `an empty series stays empty`() {
+        assertThat(UfEngine.historyWindow(emptyList(), months = 3)).isEmpty()
+    }
 }
