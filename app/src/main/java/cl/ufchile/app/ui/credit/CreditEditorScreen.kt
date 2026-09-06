@@ -240,6 +240,7 @@ private fun PrepaymentDialog(
                     onValueChange = { month = it },
                     label = "En la cuota número",
                     supporting = "Entre 1 y $maxMonth",
+                    allowDecimals = false,
                 )
                 Spacer(Modifier.height(10.dp))
                 NumberField(
@@ -314,7 +315,7 @@ private fun LoanCard(
             label = "Pie",
             suffix = "UF",
             supporting = ui.result?.let {
-                "Financias ${Fmt.pct(it.input.financedPct)} de la propiedad"
+                "El banco financia ${Fmt.pct(it.input.financedPct)} de la propiedad"
             },
         )
         Spacer(Modifier.height(10.dp))
@@ -331,6 +332,7 @@ private fun LoanCard(
             onValueChange = { v -> vm.update { it.copy(termYears = v) } },
             label = "Plazo",
             suffix = "años",
+            allowDecimals = false,
         )
         Spacer(Modifier.height(14.dp))
         Text(

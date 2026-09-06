@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import cl.ufchile.app.core.format.ThousandsTransformation
+import cl.ufchile.app.core.format.sanitizeNumericInput
 
 /** A numeric field that accepts Chilean input ("1.250,5") and reports raw text. */
 @Composable
@@ -24,13 +26,15 @@ fun NumberField(
     suffix: String? = null,
     supporting: String? = null,
     isError: Boolean = false,
+    allowDecimals: Boolean = true,
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { new ->
-            // Only characters that can appear in a Chilean number.
-            if (new.all { it.isDigit() || it == ',' || it == '.' || it == '-' }) onValueChange(new)
-        },
+        // The field holds the raw number; thousands separators belong to the
+        // display, so they are never part of what the user types or of what
+        // gets parsed.
+        onValueChange = { new -> onValueChange(sanitizeNumericInput(new, allowDecimals)) },
+        visualTransformation = ThousandsTransformation(allowDecimals),
         label = { Text(label) },
         suffix = suffix?.let { { Text(it) } },
         supportingText = supporting?.let { { Text(it) } },

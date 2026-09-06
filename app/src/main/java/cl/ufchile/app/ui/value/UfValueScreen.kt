@@ -140,7 +140,13 @@ fun UfValueScreen(
                 SectionTitle("Conversor")
                 NumberField(ui.ufText, vm::onUfInput, label = "UF", suffix = "UF")
                 Spacer(Modifier.height(10.dp))
-                NumberField(ui.clpText, vm::onClpInput, label = "Pesos", suffix = "CLP")
+                NumberField(
+                    ui.clpText,
+                    vm::onClpInput,
+                    label = "Pesos",
+                    suffix = "CLP",
+                    allowDecimals = false,
+                )
             }
         }
 
