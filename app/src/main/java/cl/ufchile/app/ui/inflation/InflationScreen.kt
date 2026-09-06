@@ -60,6 +60,7 @@ fun InflationScreen() {
                     onValueChange = vm::setAmount,
                     label = "Monto en pesos",
                     suffix = "CLP",
+                    allowDecimals = false,
                 )
                 Spacer(Modifier.height(14.dp))
                 // Stacked rather than side by side: two month+year pickers do

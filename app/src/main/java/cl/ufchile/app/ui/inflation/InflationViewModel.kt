@@ -15,7 +15,7 @@ import java.time.YearMonth
 
 data class InflationUiState(
     val ready: Boolean = false,
-    val amountText: String = "4.000",
+    val amountText: String = "4000",
     val from: YearMonth = YearMonth.of(1990, 1),
     val to: YearMonth = YearMonth.now().minusMonths(1),
     val earliest: YearMonth = InflationEngine.EARLIEST,
