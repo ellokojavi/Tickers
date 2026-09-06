@@ -93,6 +93,9 @@ class NavigationSmokeTest {
         rule.onNodeWithText("Reajuste").assertIsDisplayed()
         rule.onNodeWithText("Variación acumulada").assertIsDisplayed()
         rule.onNodeWithText("Equivalente anual").assertIsDisplayed()
+
+        // The equivalence can leave the app as text.
+        rule.onNodeWithContentDescription("Compartir la equivalencia").assertIsDisplayed()
     }
 
     /**

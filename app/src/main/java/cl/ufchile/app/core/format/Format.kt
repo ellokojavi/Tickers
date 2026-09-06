@@ -59,6 +59,16 @@ object Fmt {
     /** "36,7" — one decimal, for spans expressed in months or years. */
     fun decimal1(v: Double): String = pct1.format(v).removeSuffix("%")
 
+    /** "13.397 días (36,7 años)" — a span, in the unit that reads best. */
+    fun period(days: Long): String {
+        val count = integer(days)
+        return when {
+            days < 60 -> "$count días"
+            days < 730 -> "$count días (${decimal1(days / 30.44)} meses)"
+            else -> "$count días (${decimal1(days / 365.25)} años)"
+        }
+    }
+
     /** "+3,25%" */
     fun pctSigned(v: BigDecimal): String {
         val s = pct.format(v.abs())

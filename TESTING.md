@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 138 JVM tests  — seconds, no device
+./gradlew test                  # 146 JVM tests  — seconds, no device
 ./gradlew connectedAndroidTest  # 12 UI tests    — needs a device or emulator
 ```
 
@@ -16,7 +16,7 @@ without a device, and anything a user can tap must be verified on one.**
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
 | Pure calculation | JUnit | 77 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
-| Formatting & parsing | JUnit | 33 | `es-CL` output, input grouping, cursor mapping, default state |
+| Formatting & parsing | JUnit | 41 | `es-CL` output, input grouping, cursor mapping, default state |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
 | UI flows | Instrumented | 12 | Navigation, offline rendering, live computation, screen ordering |
@@ -196,6 +196,20 @@ Numeric fields hold raw text and the display adds the grouping. That was a
 convention rather than something enforced, so this asserts the invariant for
 **every default the app ships**: passing it through the sanitiser must be a
 no-op. Reintroducing the old `"4.000"` fails it.
+
+### `ShareReajusteTest` — 7 tests
+
+The text a restatement turns into is user-visible and pure, so it is asserted
+rather than eyeballed.
+
+- The equivalence leads, line by line: it is what gets quoted in a chat.
+- The arithmetic behind it is present so a reader can check it, and both UF
+  values plus the amount in UF are included.
+- **No figure escapes unpunctuated** — the message is searched for the raw,
+  separator-less forms of every number it contains.
+- The method is stated rather than left implied.
+- Emphasis uses the marks chat apps understand.
+- A same-day restatement still produces a coherent message.
 
 ### `DtoParsingTest` — 5 tests
 
