@@ -88,11 +88,6 @@ data class SignColors(
     val negative: Color,
     val neutral: Color,
     val future: Color,
-    /**
-     * Copihue crimson. Decorative only — never used to encode a value, so it
-     * cannot be mistaken for the negative sign colour.
-     */
-    val copihue: Color,
 )
 
 val LightSignColors = SignColors(
@@ -100,7 +95,6 @@ val LightSignColors = SignColors(
     negative = Color(0xFFB3261E),
     neutral = Color(0xFF6F7977),
     future = Color(0xFF5B4B8A),
-    copihue = Color(0xFFC8384F),
 )
 
 val DarkSignColors = SignColors(
@@ -108,7 +102,6 @@ val DarkSignColors = SignColors(
     negative = Color(0xFFFF9A90),
     neutral = Color(0xFF8B9694),
     future = Color(0xFFC0B0F0),
-    copihue = Color(0xFFE7607A),
 )
 
 val LocalSignColors = staticCompositionLocalOf { LightSignColors }

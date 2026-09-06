@@ -455,12 +455,16 @@ does the same job — without it the bright green vibrates against the red. The
 themed (monochrome) variant drops the flag, which cannot survive a single tint,
 and keeps the ascending series.
 
-Inside the app the **copihue** (*Lapageria rosea*), Chile's national flower,
-illustrates the empty simulations state, and the **condor** stands in for an
-empty chart. Both were drawn and compared at real sizes first: the condor loses
-its silhouette below about 48px and reads as an insect, which is why it only
-appears large. The copihue crimson is decorative and never encodes a value, so
-it cannot be read as the negative-change colour.
+Empty states reuse the symbol of the thing that is missing: the mortgage list
+shows the same bank mark its tab carries, and an empty chart shows a **condor**
+— drawn and compared at real sizes first, which is why it only ever appears
+large: below about 48px it loses its silhouette and reads as an insect.
+
+A copihue was drawn for both the app mark and the empty simulations state
+before the flag and the bank replaced them. The iterations are worth keeping in
+mind if the mark is ever revisited: an outline copihue reads as a scribble at
+list sizes, a narrow bell with steeply recurved tepals stops reading as a
+flower, and only a wide filled bell with tepals flaring at about 35° survives.
 
 ## Disclaimer
 

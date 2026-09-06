@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.annotation.DrawableRes
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -128,17 +126,17 @@ fun EmptyState(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
-    @DrawableRes illustration: Int? = null,
-    illustrationTint: Color = LocalSignColors.current.copihue,
+    illustration: ImageVector? = null,
+    illustrationTint: Color = MaterialTheme.colorScheme.outline,
 ) {
     Box(modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             if (illustration != null) {
                 Icon(
-                    painter = painterResource(illustration),
+                    imageVector = illustration,
                     contentDescription = null,
                     tint = illustrationTint,
-                    modifier = Modifier.size(96.dp),
+                    modifier = Modifier.size(88.dp),
                 )
                 Spacer(Modifier.height(18.dp))
             }
