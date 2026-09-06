@@ -142,4 +142,45 @@ class ThousandsTransformationTest {
         assertThat(cl.ufchile.app.core.format.Fmt.parseNumber(raw))
             .isEqualTo(java.math.BigDecimal("1234567.89"))
     }
+
+    // --------------------------------------------- state that is not canonical
+
+    /**
+     * The regression this exists for. The inflation screen's amount defaulted
+     * to "4.000" — already grouped — and the transformation counted the dot as
+     * a digit position, inserting a second one and rendering "4..000".
+     *
+     * Every test here fed it clean input, so nothing caught it, and the screen
+     * still computed the right answer because the parser discards dots. The
+     * transformation must therefore cope with a state it did not produce.
+     */
+    @Test
+    fun `an already-grouped state never doubles its separators`() {
+        assertThat(render("4.000", decimals = false)).isEqualTo("4.000")
+        assertThat(render("1.234.567", decimals = false)).isEqualTo("1.234.567")
+        assertThat(render("40.880", decimals = false)).isEqualTo("40.880")
+    }
+
+    @Test
+    fun `garbage in the state still renders something sane`() {
+        assertThat(render("abc")).isEmpty()
+        assertThat(render("1a2b3")).isEqualTo("123")
+        assertThat(render("$5000")).isEqualTo("5.000")
+    }
+
+    @Test
+    fun `mappings stay in bounds even for a state that is not canonical`() {
+        listOf("4.000", "1.234.567", "1a2b3", "$5000", ",,,").forEach { raw ->
+            listOf(true, false).forEach { decimals ->
+                val result = ThousandsTransformation(decimals).filter(AnnotatedString(raw))
+                val m = result.offsetMapping
+                for (o in 0..raw.length) {
+                    assertThat(m.originalToTransformed(o)).isIn(0..result.text.length)
+                }
+                for (x in 0..result.text.length) {
+                    assertThat(m.transformedToOriginal(x)).isIn(0..raw.length)
+                }
+            }
+        }
+    }
 }

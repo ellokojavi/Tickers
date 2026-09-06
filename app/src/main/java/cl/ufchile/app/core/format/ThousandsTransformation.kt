@@ -22,32 +22,46 @@ class ThousandsTransformation(
 
     override fun filter(text: AnnotatedString): TransformedText {
         val raw = text.text
-        val negative = raw.startsWith("-")
-        val body = if (negative) raw.substring(1) else raw
 
-        val commaAt = if (allowDecimals) body.indexOf(DECIMAL) else -1
-        val integerPart = if (commaAt >= 0) body.substring(0, commaAt) else body
-        val decimalPart = if (commaAt >= 0) body.substring(commaAt) else ""
+        // The field's state is meant to be raw, but this must not depend on
+        // every caller getting that right: a state that already carried a
+        // grouping character used to have a second one inserted into it,
+        // rendering "4.000" as "4..000". The input is normalised here first,
+        // and the offset mapping is built against the original string so the
+        // cursor still lands where the user expects.
+        val clean = sanitizeNumericInput(raw, allowDecimals)
+        val body = clean.removePrefix("-")
+        val commaAt = body.indexOf(DECIMAL)
+        val integerDigits = if (commaAt >= 0) commaAt else body.length
 
         val out = StringBuilder()
-        // One entry per cursor position in the raw text, including the end.
         val map = IntArray(raw.length + 1)
+        var emitted = 0
+        var pastDecimal = false
 
-        var rawIndex = 0
-        if (negative) {
-            out.append('-')
-            rawIndex = 1
-            map[1] = out.length
-        }
-        for (i in integerPart.indices) {
-            if (i > 0 && (integerPart.length - i) % GROUP == 0) out.append(GROUPING)
-            out.append(integerPart[i])
-            map[rawIndex + i + 1] = out.length
-        }
-        val afterInteger = rawIndex + integerPart.length
-        for (i in decimalPart.indices) {
-            out.append(decimalPart[i])
-            map[afterInteger + i + 1] = out.length
+        raw.forEachIndexed { i, c ->
+            when {
+                c == '-' && i == 0 -> out.append('-')
+
+                c.isDigit() -> {
+                    if (!pastDecimal) {
+                        if (emitted > 0 && (integerDigits - emitted) % GROUP == 0) {
+                            out.append(GROUPING)
+                        }
+                        emitted++
+                    }
+                    out.append(c)
+                }
+
+                allowDecimals && (c == DECIMAL || c == GROUPING) &&
+                    !pastDecimal && emitted > 0 -> {
+                    out.append(DECIMAL)
+                    pastDecimal = true
+                }
+
+                else -> Unit // anything else contributes nothing
+            }
+            map[i + 1] = out.length
         }
 
         return TransformedText(

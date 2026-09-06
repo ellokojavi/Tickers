@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 123 JVM tests  — seconds, no device
+./gradlew test                  # 130 JVM tests  — seconds, no device
 ./gradlew connectedAndroidTest  # 10 UI tests    — needs a device or emulator
 ```
 
@@ -16,7 +16,7 @@ without a device, and anything a user can tap must be verified on one.**
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
 | Pure calculation | JUnit | 71 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
-| Formatting & parsing | JUnit | 24 | `es-CL` output, input grouping, cursor mapping |
+| Formatting & parsing | JUnit | 31 | `es-CL` output, input grouping, cursor mapping, default state |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
 | UI flows | Instrumented | 10 | Navigation, offline rendering, live computation, screen ordering |
@@ -159,7 +159,7 @@ picked in the first place — the resolver is the second line of defence.
 `40.880,36`, `$1.000`, `4,5` and `1.234 UF`; rejects `""`, `"abc"` and `","`.
 Formatting and parsing round trip.
 
-### `ThousandsTransformationTest` — 16 tests
+### `ThousandsTransformationTest` — 19 tests
 
 Numeric input is grouped for display while the field's state stays raw.
 
@@ -174,6 +174,16 @@ Numeric input is grouped for display while the field's state stays raw.
 - Only the first separator counts, a leading one is dropped, integer-only
   fields refuse separators entirely, and letters never make it in.
 - Sanitised text parses back to the number the user meant.
+- **A state that is already grouped is not grouped again**, and garbage in the
+  state still renders something sane, with the offset mappings in bounds. See
+  the postmortem below for why this matters.
+
+### `NumericDefaultsTest` — 4 tests
+
+Numeric fields hold raw text and the display adds the grouping. That was a
+convention rather than something enforced, so this asserts the invariant for
+**every default the app ships**: passing it through the sanitiser must be a
+no-op. Reintroducing the old `"4.000"` fails it.
 
 ### `DtoParsingTest` — 5 tests
 
@@ -237,7 +247,7 @@ machine with poor connectivity.
 
 ---
 
-## Five bugs this suite already caught
+## Bugs found, and one this suite missed
 
 Worth recording, because both would have shipped otherwise:
 
@@ -270,6 +280,43 @@ change its range without scrolling. The test failed on `assertIsDisplayed`,
 which is precisely the distinction that matters — the node existed, it just was
 not visible. The chips now sit above the chart, where the control that governs
 a view belongs.
+
+---
+
+## The one that escaped: a postmortem
+
+The inflation screen rendered its amount as **`4..000`**. It shipped, and a user
+found it.
+
+**What happened.** Numeric fields hold raw text and the display adds the
+grouping. That screen's default was still the pre-formatted `"4.000"`, so the
+transformation counted the dot as a digit position and inserted a second one.
+
+**Why nothing caught it.** Three separate gaps, worth naming because each is a
+general lesson:
+
+1. *The transformation's tests only ever fed it valid input.* Every case passed
+   an already-canonical string. The one state that could break it — one
+   containing a grouping character — was never tried, and the function produced
+   garbage silently instead of coping or failing.
+2. *The invariant was a convention, not a check.* Three defaults were changed by
+   hand when the grouping was introduced and a fourth, in a different
+   ViewModel, was missed. Nothing asserted that defaults are raw.
+3. *The UI test asserted the results, not the field.* It checks that "SEGÚN EL
+   IPC" and "Factor de ajuste" appear. The computation stayed correct the whole
+   time, because the parser discards dots — so the app produced right answers
+   behind a corrupted display and no assertion could fail.
+
+There was also a process failure: the change was verified by screenshotting the
+mortgage form, which is where the defaults *had* been fixed, rather than the
+screen that had not been touched.
+
+**What changed.** The default is corrected; the transformation now normalises
+whatever state it is handed, so no caller can make it render nonsense;
+`NumericDefaultsTest` pins the invariant for every shipped default; and the
+transformation is tested against dirty state. The defaults test was verified to
+fail when the old value is put back — a regression test that does not fail on
+the original bug is decoration.
 
 ---
 
@@ -312,6 +359,8 @@ before a release.
 - [ ] The "Máx" range scrubs smoothly across all 49 years
 - [ ] Both chart endpoints show a date and a value that match the series
 - [ ] Typing a long amount groups it live, and the cursor stays where expected
+- [ ] Every numeric field's *initial* value renders correctly before it is
+      touched — not just after editing
 - [ ] On a phone whose numeric keypad offers "." rather than ",", decimals still
       work in the rate fields
 - [ ] A 25-year payment table scrolls smoothly in both axes
