@@ -60,6 +60,8 @@ import cl.ufchile.app.ui.appViewModel
 import cl.ufchile.app.ui.components.AppCard
 import cl.ufchile.app.ui.components.ChipRow
 import cl.ufchile.app.ui.components.KeyValueRow
+import cl.ufchile.app.ui.components.toUtcDate
+import cl.ufchile.app.ui.components.toUtcMillis
 import cl.ufchile.app.ui.components.NumberField
 import cl.ufchile.app.ui.components.Pill
 import cl.ufchile.app.ui.components.ScreenHeader
@@ -250,12 +252,6 @@ fun UfValueScreen(
     }
 }
 
-/** The Material date picker speaks UTC milliseconds; the app speaks dates. */
-private fun LocalDate.toUtcMillis(): Long =
-    atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-
-private fun Long.toUtcDate(): LocalDate =
-    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
 
 @Composable
 private fun HeroCard(ui: UfUiState, onShare: () -> Unit) {

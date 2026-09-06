@@ -30,28 +30,34 @@ data class Indicator(
     val value: BigDecimal,
 )
 
-// ---------------------------------------------------------------- inflation
+// ---------------------------------------------------------------- reajuste
 
-data class InflationResult(
+/**
+ * An amount restated from one date to another through the UF.
+ *
+ * Day-exact by construction: the UF is published daily, so the amount is
+ * converted into UF at the origin date and back into pesos at the target one.
+ * The CPI cannot do this — it is a monthly statistic, and there is no such
+ * thing as the price level on a given day — which is why this screen used to
+ * ask for months and show a second, parallel monthly reading beside the daily
+ * one.
+ */
+data class ReajusteResult(
     val amount: BigDecimal,
-    val from: YearMonth,
-    val to: YearMonth,
-    val adjustedAmount: BigDecimal,
-    /** Multiplicative factor, e.g. 7.1567 */
-    val factor: BigDecimal,
-    /** Cumulative inflation over the period, in percent. */
-    val cumulativePct: BigDecimal,
-    /** Equivalent constant annual rate, in percent. */
-    val annualizedPct: BigDecimal,
-    val months: Int,
-)
-
-/** The same amount expressed through the UF instead of the CPI index. */
-data class UfEquivalence(
+    val from: LocalDate,
+    val to: LocalDate,
+    val ufAtFrom: BigDecimal,
+    val ufAtTo: BigDecimal,
+    /** What the amount was worth in UF on [from]. */
     val ufUnits: BigDecimal,
-    val ufValueAtOrigin: BigDecimal,
-    val ufValueAtTarget: BigDecimal,
     val adjustedAmount: BigDecimal,
+    /** Multiplicative factor, e.g. 7.4818 */
+    val factor: BigDecimal,
+    /** Change over the period, in percent. */
+    val variationPct: BigDecimal,
+    /** Equivalent constant annual rate, in percent. */
+    val annualisedPct: BigDecimal,
+    val days: Long,
 )
 
 // ---------------------------------------------------------------- mortgage

@@ -59,6 +59,9 @@ class UfRepository(
 
     suspend fun isEmpty(): Boolean = ufDao.count() == 0
 
+    /** Newest day with a published value, future days included. */
+    suspend fun lastPublishedDate(): LocalDate? = ufDao.maxDate()
+
     /**
      * Loads the bundled daily series into the database the first time it is
      * needed. Inserted with IGNORE, so any day already fetched from an API

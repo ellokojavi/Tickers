@@ -4,45 +4,51 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cl.ufchile.app.core.format.Fmt
 import cl.ufchile.app.data.repo.UfRepository
-import cl.ufchile.app.domain.engine.InflationEngine
-import cl.ufchile.app.domain.model.InflationResult
-import cl.ufchile.app.domain.model.UfEquivalence
+import cl.ufchile.app.domain.engine.LookupResult
+import cl.ufchile.app.domain.engine.UfLookup
+import cl.ufchile.app.domain.engine.UfReajuste
+import cl.ufchile.app.domain.model.ReajusteResult
+import cl.ufchile.app.domain.model.UfValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
-import java.time.YearMonth
+import java.time.LocalDate
 
 data class InflationUiState(
     val ready: Boolean = false,
     val amountText: String = "4000",
-    val from: YearMonth = YearMonth.of(1990, 1),
-    val to: YearMonth = YearMonth.now().minusMonths(1),
-    val earliest: YearMonth = InflationEngine.EARLIEST,
-    val latest: YearMonth = YearMonth.now(),
-    val result: InflationResult? = null,
-    val ufEquivalence: UfEquivalence? = null,
+    val from: LocalDate = LocalDate.of(1990, 1, 1),
+    val to: LocalDate = LocalDate.now(),
+    val earliest: LocalDate = UfLookup.SERIES_START,
+    val latest: LocalDate = LocalDate.now(),
+    val result: ReajusteResult? = null,
+    /** Set when a date resolved to a neighbouring day rather than itself. */
+    val substituted: LocalDate? = null,
     val error: String? = null,
 )
 
+/**
+ * Restates an amount between two dates.
+ *
+ * Dates, not months: the UF is published every day, so the conversion is exact
+ * at day precision. The screen used to ask for months and show a second,
+ * parallel monthly reading beside the daily one, because the CPI only exists
+ * as a monthly statistic and the two answered subtly different questions.
+ * Choosing days makes the question well posed and leaves a single answer.
+ */
 class InflationViewModel(private val repo: UfRepository) : ViewModel() {
 
     private val _ui = MutableStateFlow(InflationUiState())
     val ui = _ui.asStateFlow()
 
-    private var engine: InflationEngine? = null
-    private var anchors: Map<YearMonth, BigDecimal> = emptyMap()
-
     init {
         viewModelScope.launch {
-            anchors = repo.anchors()
-            val e = InflationEngine(anchors)
-            engine = e
+            repo.ensureSeeded()
+            val latest = repo.lastPublishedDate() ?: LocalDate.now()
             _ui.value = _ui.value.copy(
                 ready = true,
-                earliest = e.earliestMonth,
-                latest = e.latestMonth,
-                to = e.latestMonth,
+                latest = latest,
+                to = _ui.value.to.coerceAtMost(latest),
             )
             compute()
         }
@@ -53,13 +59,13 @@ class InflationViewModel(private val repo: UfRepository) : ViewModel() {
         compute()
     }
 
-    fun setFrom(month: YearMonth) {
-        _ui.value = _ui.value.copy(from = month)
+    fun setFrom(date: LocalDate) {
+        _ui.value = _ui.value.copy(from = date)
         compute()
     }
 
-    fun setTo(month: YearMonth) {
-        _ui.value = _ui.value.copy(to = month)
+    fun setTo(date: LocalDate) {
+        _ui.value = _ui.value.copy(to = date)
         compute()
     }
 
@@ -70,27 +76,49 @@ class InflationViewModel(private val repo: UfRepository) : ViewModel() {
     }
 
     private fun compute() {
-        val e = engine ?: return
-        val s = _ui.value
-        val amount = Fmt.parseNumber(s.amountText)
-        if (amount == null || amount.signum() <= 0) {
-            _ui.value = s.copy(result = null, ufEquivalence = null, error = null)
-            return
-        }
-        try {
-            val result = e.convert(amount, s.from, s.to)
-            // The UF reading uses the UF value inside each month itself, which
-            // is a different (and independent) way of restating the amount.
-            val ufFrom = anchors[s.from]
-            val ufTo = anchors[s.to]
+        viewModelScope.launch {
+            val s = _ui.value
+            val amount = Fmt.parseNumber(s.amountText)
+            if (amount == null || amount.signum() <= 0) {
+                _ui.value = s.copy(result = null, substituted = null, error = null)
+                return@launch
+            }
+
+            val fromUf = resolve(s.from)
+            val toUf = resolve(s.to)
+            if (fromUf == null || toUf == null) {
+                _ui.value = s.copy(
+                    result = null,
+                    substituted = null,
+                    error = "Sin valor de la UF para esa fecha. La serie va del " +
+                        "${Fmt.shortDate(s.earliest)} al ${Fmt.shortDate(s.latest)}.",
+                )
+                return@launch
+            }
+
             _ui.value = s.copy(
-                result = result,
-                ufEquivalence = if (ufFrom != null && ufTo != null)
-                    e.asUfEquivalence(amount, ufFrom, ufTo) else null,
+                result = UfReajuste.convert(amount, fromUf, toUf),
+                // A date that resolved to a neighbour is surfaced rather than
+                // passed off as exact.
+                substituted = listOf(fromUf to s.from, toUf to s.to)
+                    .firstOrNull { (value, asked) -> value.date != asked }?.second,
                 error = null,
             )
-        } catch (t: IllegalArgumentException) {
-            _ui.value = s.copy(result = null, ufEquivalence = null, error = t.message)
+        }
+    }
+
+    private suspend fun resolve(date: LocalDate): UfValue? {
+        val outcome = UfLookup.resolve(
+            requested = date,
+            exact = repo.exactUfOn(date),
+            nearestEarlier = repo.nearestUfOn(date),
+            lastPublished = _ui.value.latest,
+            today = LocalDate.now(),
+        )
+        return when (outcome) {
+            is LookupResult.Exact -> outcome.value
+            is LookupResult.Nearest -> outcome.value
+            else -> null
         }
     }
 }
