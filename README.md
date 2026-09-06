@@ -95,6 +95,9 @@ Restates an amount between **two dates**, not two months.
   debts are actually re-adjusted with.
 - Reports the UF on both dates, the amount in UF units, the adjustment factor,
   the accumulated variation and the equivalent annual rate.
+- **Share the equivalence** as preformatted text through the system share sheet.
+  The equivalence leads, because that is what gets quoted in a chat; the
+  arithmetic behind it follows for anyone who wants to check it.
 - Both calendars are bounded by the series, so a date with no published UF
   cannot be picked. When the end date is not today, a **"Hoy"** shortcut sits
   beside it: coming back is the most common correction and should not cost a
@@ -181,6 +184,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-19 | Persist simulations across app restarts and updates |
 | RF-20 | Export a schedule to CSV and share it |
 | RF-20b | Share today's UF card as preformatted text via the system share sheet |
+| RF-20c | Share a restatement the same way |
 | RF-21 | Refresh data daily in the background and on manual pull |
 | RF-22 | Operate fully offline from cached and bundled data |
 | RF-22b | Ship the complete daily series and refresh only what is genuinely new |
@@ -459,7 +463,7 @@ UFChile/
 
 **v0.1 — current**
 UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 150 tests passing; debug and
+mortgage simulator with CRUD and CSV export. 158 tests passing; debug and
 minified release builds verified on an emulator.
 
 **Toward v1.0**

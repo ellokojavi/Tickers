@@ -1,16 +1,10 @@
 package cl.ufchile.app.ui.value
 
 import android.content.Context
-import android.content.Intent
 import cl.ufchile.app.core.format.Fmt
+import cl.ufchile.app.core.share.shareText
 
-/**
- * Turns the "today" card into a plain-text message for the system share sheet.
- *
- * Plain text rather than an image: it stays selectable, quotable and
- * searchable wherever it lands. The *asterisk* emphasis renders as bold in
- * WhatsApp and Telegram and is harmless everywhere else.
- */
+/** Turns the "today" card into a plain-text message for the share sheet. */
 object ShareToday {
 
     fun buildMessage(ui: UfUiState): String {
@@ -43,16 +37,10 @@ object ShareToday {
         return sb.toString()
     }
 
-    /**
-     * Hands the message to the system share sheet. The user picks the app and
-     * presses send there; nothing leaves the device on its own.
-     */
-    fun share(context: Context, message: String) {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "Valor de la UF")
-            putExtra(Intent.EXTRA_TEXT, message)
-        }
-        context.startActivity(Intent.createChooser(intent, "Compartir el valor de la UF"))
-    }
+    fun share(context: Context, message: String) = shareText(
+        context = context,
+        subject = "Valor de la UF",
+        message = message,
+        chooserTitle = "Compartir el valor de la UF",
+    )
 }

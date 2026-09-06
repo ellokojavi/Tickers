@@ -90,4 +90,12 @@ class FormatTest {
         assertThat(Fmt.decimal1(1.0)).isEqualTo("1,0")
         assertThat(Fmt.decimal1(1234.56)).isEqualTo("1.234,6")
     }
+
+    @Test
+    fun `a span reads in the unit that suits its length`() {
+        assertThat(Fmt.period(0)).isEqualTo("0 días")
+        assertThat(Fmt.period(45)).isEqualTo("45 días")
+        assertThat(Fmt.period(365)).isEqualTo("365 días (12,0 meses)")
+        assertThat(Fmt.period(13_397)).isEqualTo("13.397 días (36,7 años)")
+    }
 }
