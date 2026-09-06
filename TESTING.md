@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 130 JVM tests  — seconds, no device
+./gradlew test                  # 136 JVM tests  — seconds, no device
 ./gradlew connectedAndroidTest  # 11 UI tests    — needs a device or emulator
 ```
 
@@ -15,7 +15,7 @@ without a device, and anything a user can tap must be verified on one.**
 
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
-| Pure calculation | JUnit | 71 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
+| Pure calculation | JUnit | 77 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
 | Formatting & parsing | JUnit | 31 | `es-CL` output, input grouping, cursor mapping, default state |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
@@ -87,7 +87,7 @@ The CPI-fidelity checks that used to live beside these moved to
 `UfDailySeedParseTest`, where they belong: they are statements about the
 dataset, not about the calculator.
 
-### `UfEngineTest` — 17 tests
+### `UfEngineTest` — 23 tests
 
 Centred on the app's defining subtlety: **the series legitimately contains
 future dates.**
@@ -102,6 +102,10 @@ future dates.**
   requires, and impossible inputs return zero instead of NaN.
 - Downsampling keeps the endpoints and the requested size, preserves the
   overall movement, leaves short series untouched and survives absurd budgets.
+- **The chart window never reaches past today**, for every range including
+  "Máx", while still including today itself. It previously ended on the last
+  published day — up to a month into the future — so the chart's final label
+  and its period variation both overshot.
 
 ### `UfSanityTest` — 9 tests
 

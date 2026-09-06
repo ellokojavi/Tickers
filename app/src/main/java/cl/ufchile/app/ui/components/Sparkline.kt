@@ -17,14 +17,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cl.ufchile.app.R
 import cl.ufchile.app.domain.model.UfValue
-import java.time.LocalDate
 
 /**
  * A minimal line chart drawn on a Canvas.
@@ -40,7 +38,6 @@ fun Sparkline(
     modifier: Modifier = Modifier,
     height: Dp = 180.dp,
     lineColor: Color = MaterialTheme.colorScheme.primary,
-    today: LocalDate = LocalDate.now(),
     selectedIndex: Int? = null,
     onScrub: (Int?) -> Unit = {},
 ) {
@@ -65,7 +62,6 @@ fun Sparkline(
     val max = values.maxOf { it.value }.toDouble()
     val span = (max - min).takeIf { it > 0.0 } ?: 1.0
     val gridColor = MaterialTheme.colorScheme.outlineVariant
-    val futureColor = cl.ufchile.app.ui.theme.LocalSignColors.current.future
 
     Canvas(
         modifier = modifier
@@ -119,26 +115,6 @@ fun Sparkline(
             ),
         )
         drawPath(line, lineColor, style = Stroke(width = 2.5f))
-
-        // Published-but-future days get a dashed overlay so they read as
-        // "already official, not yet reached" rather than as a projection.
-        val firstFuture = values.indexOfFirst { it.date.isAfter(today) }
-        if (firstFuture > 0) {
-            val futurePath = Path().apply {
-                moveTo(xAt(firstFuture - 1), yAt(values[firstFuture - 1].value.toDouble()))
-                for (i in firstFuture until values.size) {
-                    lineTo(xAt(i), yAt(values[i].value.toDouble()))
-                }
-            }
-            drawPath(
-                futurePath,
-                futureColor,
-                style = Stroke(
-                    width = 2.5f,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)),
-                ),
-            )
-        }
 
         selectedIndex?.let { i ->
             if (i in values.indices) {
