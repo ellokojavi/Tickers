@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -37,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import cl.ufchile.app.R
 import cl.ufchile.app.core.format.Fmt
 import cl.ufchile.app.domain.engine.UfEngine
 import cl.ufchile.app.ui.appViewModel
@@ -93,7 +93,7 @@ fun CreditListScreen(onOpen: (Long) -> Unit) {
                     EmptyState(
                         title = "Sin simulaciones",
                         subtitle = "Crea una para modelar un crédito UF + tasa y guardar la tabla de pagos.",
-                        illustration = R.drawable.ic_copihue,
+                        illustration = Icons.Outlined.AccountBalance,
                     )
                 }
             }
