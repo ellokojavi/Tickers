@@ -85,15 +85,31 @@ the app says so rather than extrapolating.
 
 ### Inflation
 
-- Restates an amount between any two months, in either direction.
-- Two independent readings shown side by side:
-  - via the **CPI index** (the canonical answer),
-  - via **UF units** (how many UF the amount bought then, priced today).
-- Reports the adjustment factor, cumulative inflation and the equivalent annual
-  rate.
-- Coverage: **October 1977 to the present**. Months outside that window are
-  rejected with an explanation instead of being guessed. Dates before the
-  current Chilean peso (1975) are out of scope by design.
+Restates an amount between **two dates**, not two months.
+
+- Day-exact: the amount is converted into UF on the origin date and back into
+  pesos on the target one. This is the mechanism Chilean contracts, rents and
+  debts are actually re-adjusted with.
+- Reports the UF on both dates, the amount in UF units, the adjustment factor,
+  the accumulated variation and the equivalent annual rate.
+- Both calendars are bounded by the series, so a date with no published UF
+  cannot be picked.
+- Coverage: **1 August 1977 to the last published day**.
+
+**Why dates rather than months.** The screen used to ask for months and show
+two readings side by side: one through a monthly CPI index and one through UF
+units. They answered subtly different questions and differed by a few percent,
+because the UF carries the CPI with a two-month lag by construction.
+
+The reason for the monthly granularity was the CPI itself: the INE publishes
+one index per month, so there is no such thing as the price level on a given
+day. The UF, by contrast, is published every calendar day. Asking for dates
+therefore makes the question well posed and leaves exactly one answer, which is
+why the parallel reading is gone.
+
+The consequence is that the reported figure is the UF re-adjustment, which
+tracks inflation with the UF's own lag rather than reproducing the INE's
+month-on-month series. The screen says so.
 
 ### Mortgage simulator
 
@@ -144,10 +160,10 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RF-8b | Report the range's change both cumulatively and annualised |
 | RF-8c | Label both ends of the chart with their date and value |
 | RF-8d | Keep the day-by-day list collapsed until requested |
-| RF-9 | Restate an amount between any two months using the CPI index |
-| RF-10 | Show the same restatement expressed in UF units |
-| RF-11 | Report adjustment factor, cumulative inflation and annualised rate |
-| RF-12 | Reject out-of-coverage dates with an explanation |
+| RF-9 | Restate an amount between any two dates, at day precision, through the UF |
+| RF-10 | Show the UF on both dates and the amount in UF units |
+| RF-11 | Report the adjustment factor, accumulated variation and annualised rate |
+| RF-12 | Make out-of-coverage dates unselectable, and explain the coverage |
 | RF-13 | Simulate a `UF + x%` mortgage and produce a full amortisation schedule |
 | RF-13b | Let the user set the first instalment's due date and derive every later date from it |
 | RF-14 | Support both annual→monthly rate conventions used in Chile |
@@ -256,11 +272,15 @@ one-decimal percentage. So the index is simply:
 index(month m) = UF value on the 9th of month m+2
 ```
 
-**This is verified, not assumed.** `InflationEngineTest` reproduces every
+**This is verified, not assumed.** `UfDailySeedParseTest` reproduces every
 published monthly CPI figure for 2024 from the UF series; the deviation is
-0.000 pp in all eleven months. The test runs on the exact asset file shipped
-inside the APK, so a corrupted regeneration fails the build rather than the
-phone.
+within the published figure's own single decimal in all eleven months. The test
+runs on the exact asset file shipped inside the APK, so a corrupted
+regeneration fails the build rather than the phone.
+
+The calculator itself no longer needs this mapping — it converts between dates
+through the UF directly — but the relationship is what makes the series
+trustworthy as an inflation measure, so it stays under test.
 
 The bundled dataset is regenerated with:
 
@@ -433,7 +453,7 @@ UFChile/
 
 **v0.1 — current**
 UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 117 tests passing; debug and
+mortgage simulator with CRUD and CSV export. 141 tests passing; debug and
 minified release builds verified on an emulator.
 
 **Toward v1.0**

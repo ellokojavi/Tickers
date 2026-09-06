@@ -83,12 +83,27 @@ class NavigationSmokeTest {
     fun inflation_tab_computes_from_bundled_data_without_network() {
         rule.onNodeWithText("Inflación").performClick()
 
-        // The seed ships in the APK, so a result must appear regardless of
-        // connectivity.
-        waitForText("SEGÚN EL IPC")
-        rule.onNodeWithText("SEGÚN EL IPC").assertIsDisplayed()
-        rule.onNodeWithText("Factor de ajuste").assertIsDisplayed()
-        rule.onNodeWithText("Inflación acumulada").assertIsDisplayed()
+        // The whole series ships in the APK, so a result must appear
+        // regardless of connectivity.
+        waitForText("Calculadora de inflación")
+        rule.onNodeWithText("Desde").assertIsDisplayed()
+        rule.onNodeWithText("Hasta").assertIsDisplayed()
+
+        rule.onNode(hasScrollAction()).performScrollToNode(hasText("Reajuste"))
+        rule.onNodeWithText("Reajuste").assertIsDisplayed()
+        rule.onNodeWithText("Variación acumulada").assertIsDisplayed()
+        rule.onNodeWithText("Equivalente anual").assertIsDisplayed()
+    }
+
+    /** Dates, not months: the point of the rewrite. */
+    @Test
+    fun the_inflation_dates_are_chosen_by_day() {
+        rule.onNodeWithText("Inflación").performClick()
+        waitForText("Calculadora de inflación")
+
+        // A full date, not a month and a year.
+        rule.onAllNodesWithText("1 de enero de 1990").assertCountEquals(1)
+        rule.onAllNodesWithText("Cambiar").assertCountEquals(2)
     }
 
     @Test

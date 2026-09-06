@@ -113,4 +113,47 @@ class UfDailySeedParseTest {
 
         assertThat(parsed.size.toLong()).isEqualTo(span)
     }
+
+    // ------------------------------------------------- fidelidad frente al IPC
+
+    private fun anchors() = UfDailySeed.parse(File("src/main/assets/uf_daily.txt").readLines())
+        .filter { it.date.dayOfMonth == 9 }
+        .associate { java.time.YearMonth.from(it.date) to it.value }
+
+    /**
+     * The UF is re-adjusted daily so that its value on the 9th of month M+1
+     * divided by its value on the 9th of month M equals the CPI variation of
+     * month M-1. That relationship is what makes the series usable as a price
+     * index, so it is checked against the CPI the INE actually published.
+     */
+    @Test
+    fun `the series reproduces the published CPI for every month of 2024`() {
+        val a = anchors()
+        val published = mapOf(
+            2 to 0.6, 3 to 0.4, 4 to 0.5, 5 to 0.3, 6 to -0.1, 7 to 0.7,
+            8 to 0.3, 9 to 0.1, 10 to 1.0, 11 to 0.2, 12 to -0.2,
+        )
+
+        published.forEach { (month, expected) ->
+            val target = java.time.YearMonth.of(2024, month)
+            val before = a[target.plusMonths(1)]
+            val after = a[target.plusMonths(2)]
+            assertThat(before).isNotNull()
+            assertThat(after).isNotNull()
+
+            val derived = (after!!.toDouble() / before!!.toDouble() - 1) * 100
+            // The published figure carries a single decimal.
+            assertThat(derived).isWithin(0.05).of(expected)
+        }
+    }
+
+    /** December 2008 was Chile's sharpest monthly deflation. */
+    @Test
+    fun `the 2009 deflation episode survives in the series`() {
+        val a = anchors()
+        val before = a[java.time.YearMonth.of(2009, 1)]!!
+        val after = a[java.time.YearMonth.of(2009, 2)]!!
+
+        assertThat((after.toDouble() / before.toDouble() - 1) * 100).isWithin(0.05).of(-1.2)
+    }
 }

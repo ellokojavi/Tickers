@@ -6,7 +6,7 @@ without a device, and anything a user can tap must be verified on one.**
 
 ```bash
 ./gradlew test                  # 130 JVM tests  — seconds, no device
-./gradlew connectedAndroidTest  # 10 UI tests    — needs a device or emulator
+./gradlew connectedAndroidTest  # 11 UI tests    — needs a device or emulator
 ```
 
 ---
@@ -19,7 +19,7 @@ without a device, and anything a user can tap must be verified on one.**
 | Formatting & parsing | JUnit | 31 | `es-CL` output, input grouping, cursor mapping, default state |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
-| UI flows | Instrumented | 10 | Navigation, offline rendering, live computation, screen ordering |
+| UI flows | Instrumented | 11 | Navigation, offline rendering, live computation, screen ordering |
 
 The engines live in `domain/` with **no Android imports**, which is what makes
 the first three layers possible at all. This is an architectural choice made
@@ -66,27 +66,26 @@ On due dates:
 - **Changing the due date moves no money**: payment, total cost and CAE are
   identical across two very different start dates.
 
-### `InflationEngineTest` — 11 tests
+### `UfReajusteTest` — 9 tests
 
-- **The CPI derivation is validated against reality**: the monthly variation
-  implied by the UF is compared with the CPI the INE actually published for
-  every month of 2024. Maximum deviation: 0.000 pp.
-- The December 2008 deflation (−1.2%, Chile's sharpest) is present and correct.
-- The bundled seed covers August 1977 to the present with **no missing month**
-  inside the span — a gap would silently corrupt every conversion across it.
-- No month-over-month step is implausible (the bound allows real deflation but
-  catches a truncated or misparsed dataset).
-- Converting forward and then back returns the original amount.
-- A same-month conversion is a no-op with factor 1.
-- 1990 → 2024 lands in the expected 6×–8× range with a sane annualised rate.
-- The annualised rate, compounded over the period, reproduces the cumulative
-  factor.
-- **Out-of-coverage months throw instead of returning a guess.**
-- `supports()` reports the true coverage window at both edges.
+Restating an amount between two dates through the UF.
 
-The seed test reads `app/src/main/assets/uf_monthly_seed.json` directly — the
-same file that ships in the APK — so regenerating it badly fails the build
-rather than the phone.
+- The amount moves by the ratio of the two UF values, and the UF-unit reading
+  agrees with it.
+- The case the screen opens on — $4.000 of 1 January 1990 — lands on $30.085,
+  a factor of 7,5213 over 13.396 days at 5,66% a year.
+- The same day is a no-op; forward and back returns the original amount; going
+  backwards in time shrinks it and reports a negative variation.
+- The annual rate compounds back to the factor.
+- **Two dates one day apart give different results** — day precision is the
+  whole point of the rewrite.
+- A billion-peso amount does not drift, because the result comes from the
+  factor once rather than from rounding UF units and back.
+- A non-positive UF value is refused instead of dividing by zero.
+
+The CPI-fidelity checks that used to live beside these moved to
+`UfDailySeedParseTest`, where they belong: they are statements about the
+dataset, not about the calculator.
 
 ### `UfEngineTest` — 17 tests
 
@@ -116,7 +115,7 @@ The public feed serves corrupt values, so nothing is stored without a check.
   without one it is trusted, which is the documented limit of the guard.
 - Non-positive values never pass; input order does not matter.
 
-### `UfDailySeedParseTest` — 9 tests
+### `UfDailySeedParseTest` — 11 tests
 
 The bundled-series format, parsed without Android.
 
@@ -131,6 +130,10 @@ The bundled-series format, parsed without Android.
   regeneration fails the build, not the phone.
 - The two days the source corrupts in December 2014 carry their real value of
   24.627,10, recovered from the re-adjustment period they sit in.
+- **The series reproduces the CPI the INE published** for every month of 2024,
+  and the December 2008 deflation of −1,2% survives in it. This is what makes
+  the series trustworthy as an inflation measure, independently of which
+  calculation the app happens to show.
 
 ### `UfLookupTest` — 11 tests
 
