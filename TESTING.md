@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 107 JVM tests  — seconds, no device
+./gradlew test                  # 123 JVM tests  — seconds, no device
 ./gradlew connectedAndroidTest  # 10 UI tests    — needs a device or emulator
 ```
 
@@ -16,7 +16,7 @@ without a device, and anything a user can tap must be verified on one.**
 | Layer | Runner | Count | What it protects |
 |-------|--------|-------|------------------|
 | Pure calculation | JUnit | 71 | Mortgage maths, due dates, inflation index, UF conversions, date-lookup rules |
-| Formatting & parsing | JUnit | 8 | `es-CL` output and input round trips |
+| Formatting & parsing | JUnit | 24 | `es-CL` output, input grouping, cursor mapping |
 | API contracts | JUnit | 5 | Both providers' payload shapes |
 | Persistence & assets | Robolectric | 16 | Room schema, type converters, bundled dataset |
 | UI flows | Instrumented | 10 | Navigation, offline rendering, live computation, screen ordering |
@@ -159,6 +159,22 @@ picked in the first place — the resolver is the second line of defence.
 `40.880,36`, `$1.000`, `4,5` and `1.234 UF`; rejects `""`, `"abc"` and `","`.
 Formatting and parsing round trip.
 
+### `ThousandsTransformationTest` — 16 tests
+
+Numeric input is grouped for display while the field's state stays raw.
+
+- Thousands group with dots; short numbers and the decimal part are untouched;
+  a trailing separator survives so typing can continue.
+- The cursor maps across inserted separators and round trips, and both
+  mappings stay inside bounds for every input — Compose rejects a mapping that
+  does not.
+- **A typed dot becomes the decimal separator**, which is the regression this
+  covers: fields used to accept "." and then discard it when parsing, so "4.5"
+  in a rate field silently became 45.
+- Only the first separator counts, a leading one is dropped, integer-only
+  fields refuse separators entirely, and letters never make it in.
+- Sanitised text parses back to the number the user meant.
+
 ### `DtoParsingTest` — 5 tests
 
 Contract tests against **captured real payloads** from both providers.
@@ -295,6 +311,9 @@ before a release.
       a squircle mask, and its themed variant still reads in one tone
 - [ ] The "Máx" range scrubs smoothly across all 49 years
 - [ ] Both chart endpoints show a date and a value that match the series
+- [ ] Typing a long amount groups it live, and the cursor stays where expected
+- [ ] On a phone whose numeric keypad offers "." rather than ",", decimals still
+      work in the rate fields
 - [ ] A 25-year payment table scrolls smoothly in both axes
 - [ ] CSV export opens correctly in a spreadsheet under a Chilean locale
 - [ ] TalkBack reaches and announces every interactive control

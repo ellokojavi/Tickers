@@ -25,8 +25,8 @@ import java.time.LocalDate
 data class CreditForm(
     val name: String = "Mi simulación",
     val notes: String = "",
-    val propertyValueUf: String = "5.000",
-    val downPaymentUf: String = "1.000",
+    val propertyValueUf: String = "5000",
+    val downPaymentUf: String = "1000",
     val annualRatePct: String = "4,5",
     val termYears: String = "25",
     val rateConvention: RateConvention = RateConvention.NOMINAL_DIVIDED,

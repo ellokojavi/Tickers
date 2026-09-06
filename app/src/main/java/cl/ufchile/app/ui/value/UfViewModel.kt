@@ -154,7 +154,9 @@ class UfViewModel(
             // for decades. The headline UF value keeps its two decimals because
             // the UF itself is published that way.
             clpText = _ui.value.clpText.ifBlank {
-                current?.let { Fmt.clp(it.value).removePrefix("$") }.orEmpty()
+                current?.let {
+                    it.value.setScale(0, java.math.RoundingMode.HALF_UP).toPlainString()
+                }.orEmpty()
             },
         )
     }
@@ -183,7 +185,7 @@ class UfViewModel(
         _ui.value = _ui.value.copy(
             ufText = text,
             clpText = if (uf != null && rate != null)
-                Fmt.clp(UfEngine.ufToClp(uf, rate)).removePrefix("$") else "",
+                UfEngine.ufToClp(uf, rate).toPlainString() else "",
         )
     }
 

@@ -170,7 +170,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | ID | Requirement |
 |----|-------------|
 | RNF-1 | Android 8.0+ (minSdk 26), targetSdk 35 |
-| RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`) |
+| RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`), on input as well as output |
 | RNF-3 | Functional with no network connection; never a blank screen |
 | RNF-4 | APK under 15 MB — the minified release build is **1.6 MB** |
 | RNF-5 | Cold start under 1.5 s |
@@ -342,6 +342,13 @@ charts, instant range switching and a fraction of the API traffic. Charts thin
 the window to 400 points before drawing, because a phone cannot resolve more
 and rebuilding an 18.000-segment path on every pointer event would make
 scrubbing crawl.
+
+*Numeric fields group thousands as you type.* The field's state stays raw and
+only the display is grouped, which means the separator is never something the
+user has to type. Fields previously accepted a typed "." and then discarded it
+when parsing, so "4.5" in a rate field silently became 45. A typed "." or ","
+is now always the decimal separator — Android's numeric keypad offers both, and
+which one appears depends on the phone's locale, not the app's.
 
 *A hand-drawn chart instead of a charting library.* The app needs one line, one
 gradient fill and a scrub cursor. A dependency for that would cost more in size
