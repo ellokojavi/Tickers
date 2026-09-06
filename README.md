@@ -96,7 +96,9 @@ Restates an amount between **two dates**, not two months.
 - Reports the UF on both dates, the amount in UF units, the adjustment factor,
   the accumulated variation and the equivalent annual rate.
 - Both calendars are bounded by the series, so a date with no published UF
-  cannot be picked.
+  cannot be picked. When the end date is not today, a **"Hoy"** shortcut sits
+  beside it: coming back is the most common correction and should not cost a
+  trip through the calendar.
 - Coverage: **1 August 1977 to the last published day**.
 
 **Why dates rather than months.** The screen used to ask for months and show
@@ -190,7 +192,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | ID | Requirement |
 |----|-------------|
 | RNF-1 | Android 8.0+ (minSdk 26), targetSdk 35 |
-| RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`), on input as well as output |
+| RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`) on input as well as output, and on **every** figure, counts included |
 | RNF-3 | Functional with no network connection; never a blank screen |
 | RNF-4 | APK under 15 MB — the minified release build is **1.6 MB** |
 | RNF-5 | Cold start under 1.5 s |
@@ -457,7 +459,7 @@ UFChile/
 
 **v0.1 — current**
 UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 147 tests passing; debug and
+mortgage simulator with CRUD and CSV export. 150 tests passing; debug and
 minified release builds verified on an emulator.
 
 **Toward v1.0**

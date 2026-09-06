@@ -95,6 +95,28 @@ class NavigationSmokeTest {
         rule.onNodeWithText("Equivalente anual").assertIsDisplayed()
     }
 
+    /**
+     * Getting back to today is the most common correction, so it is one tap.
+     * Swapping the dates is used to move the end date off today without having
+     * to drive the calendar, which would make the test flaky.
+     */
+    @Test
+    fun the_today_shortcut_appears_only_when_the_end_date_is_not_today() {
+        rule.onNodeWithText("Inflación").performClick()
+        waitForText("Calculadora de inflación")
+
+        // The screen opens on today, so there is nothing to go back to.
+        rule.onAllNodesWithText("Hoy").assertCountEquals(0)
+
+        rule.onNodeWithContentDescription("Invertir las fechas").performClick()
+        rule.waitForIdle()
+        rule.onNodeWithText("Hoy").assertIsDisplayed()
+
+        rule.onNodeWithText("Hoy").performClick()
+        rule.waitForIdle()
+        rule.onAllNodesWithText("Hoy").assertCountEquals(0)
+    }
+
     /** Dates, not months: the point of the rewrite. */
     @Test
     fun the_inflation_dates_are_chosen_by_day() {

@@ -74,4 +74,20 @@ class FormatTest {
         assertThat(Fmt.relativeDay(today.plusDays(1), today)).isEqualTo("mañana")
         assertThat(Fmt.relativeDay(today.plusDays(3), today)).isEqualTo("en 3 días")
     }
+
+    @Test
+    fun `counts are grouped like any other figure`() {
+        assertThat(Fmt.integer(0)).isEqualTo("0")
+        assertThat(Fmt.integer(480)).isEqualTo("480")
+        assertThat(Fmt.integer(13_396L)).isEqualTo("13.396")
+        assertThat(Fmt.integer(17_937)).isEqualTo("17.937")
+        assertThat(Fmt.integer(-1_500)).isEqualTo("-1.500")
+    }
+
+    @Test
+    fun `one-decimal spans use a comma and no percent sign`() {
+        assertThat(Fmt.decimal1(36.7)).isEqualTo("36,7")
+        assertThat(Fmt.decimal1(1.0)).isEqualTo("1,0")
+        assertThat(Fmt.decimal1(1234.56)).isEqualTo("1.234,6")
+    }
 }

@@ -239,7 +239,7 @@ private fun PrepaymentDialog(
                     value = month,
                     onValueChange = { month = it },
                     label = "En la cuota número",
-                    supporting = "Entre 1 y $maxMonth",
+                    supporting = "Entre 1 y ${Fmt.integer(maxMonth)}",
                     allowDecimals = false,
                 )
                 Spacer(Modifier.height(10.dp))
@@ -453,7 +453,7 @@ private fun PrepaymentsCard(
                 ) {
                     Column(Modifier.weight(1f)) {
                         Text(
-                            "Cuota ${p.monthNumber} · ${Fmt.uf(p.amountUf)}",
+                            "Cuota ${Fmt.integer(p.monthNumber)} · ${Fmt.uf(p.amountUf)}",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         Text(
@@ -490,9 +490,9 @@ private fun ResultCard(r: MortgageResult, ufValue: BigDecimal?) {
         KeyValueRow("Gastos iniciales", Fmt.uf(r.upfrontCostsUf))
         if (r.totalPrepaymentsUf.signum() > 0) {
             KeyValueRow("Prepagos", Fmt.uf(r.totalPrepaymentsUf))
-            KeyValueRow("Cuotas ahorradas", "${r.monthsSaved}")
+            KeyValueRow("Cuotas ahorradas", Fmt.integer(r.monthsSaved))
         }
-        KeyValueRow("Cuotas", "${r.effectiveTermMonths}")
+        KeyValueRow("Cuotas", Fmt.integer(r.effectiveTermMonths))
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         KeyValueRow("Costo total", Fmt.uf(r.totalCostUf), emphasise = true)
         r.caePct?.let { KeyValueRow("CAE", Fmt.pct(it), emphasise = true) }
