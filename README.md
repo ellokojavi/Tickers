@@ -78,6 +78,11 @@ segundo plano, y ninguno toca tus datos.
 distribuye por Google Play, así que Android te pedirá autorizar la instalación
 desde tu gestor de archivos o navegador la primera vez.
 
+**Para recibir actualizaciones automáticas**, agrega este repositorio a
+[Obtainium](https://github.com/ImranR98/Obtainium), una app libre y gratuita que
+sigue las releases de GitHub. Pega `https://github.com/ellokojavi/UFChile` una
+vez y las nuevas versiones te llegan solas, sin pasar por ninguna tienda.
+
 ---
 
 # Product and engineering
@@ -561,6 +566,22 @@ Held at 0.9 rather than 1.0 for one honest reason: the default annual-to-monthly
 rate convention has not yet been checked against a published bank quote. Both
 conventions are selectable and the app says so, but until that check is done,
 calling it 1.0 would overstate it.
+
+### Distribution
+
+The app is free of proprietary dependencies: no Play Services, no Firebase, no
+analytics, and it builds from source with no secrets, since the CMF key falls
+back to an empty string. That makes it eligible for the free channels that
+require exactly those things, which is worth stating because most apps are not:
+
+- **[IzzyOnDroid](https://apt.izzysoft.de/fdroid/)**, an F-Droid-compatible
+  repository that serves the prebuilt APK straight from these GitHub releases.
+- **F-Droid** proper, which builds from source itself. Slower to get in.
+- **Obtainium**, covered above, which needs nothing from this side at all.
+
+Google Play charges a one-time US$25 registration fee and is the only channel
+most people in Chile actually search. The free routes are worth adding to it,
+not substituting for it.
 
 **Toward v1.0**
 - Validate the default rate convention against published bank quotes
