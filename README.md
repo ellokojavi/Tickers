@@ -551,7 +551,7 @@ UFChile/
 
 ## Roadmap
 
-**v0.9 (current)**
+**v0.9.1 (current)**
 Everything above: the UF value with its full history, a day-exact inflation
 calculator, and a complete mortgage simulator with saved simulations and CSV
 export. 159 tests passing; debug and minified release builds verified on an
