@@ -1,5 +1,6 @@
 package cl.ufchile.app
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import cl.ufchile.app.core.locale.withChileanLocale
 import cl.ufchile.app.data.prefs.ThemeMode
 import cl.ufchile.app.ui.credit.CreditEditorScreen
 import cl.ufchile.app.ui.credit.CreditListScreen
@@ -34,6 +36,13 @@ import cl.ufchile.app.ui.value.UfValueScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    // The Activity's configuration is the one Compose reads, so the locale has
+    // to be pinned here too, not only on the Application.
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withChileanLocale())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
