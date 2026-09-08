@@ -40,8 +40,10 @@
 chart and every date works from the first launch with no connection. When there
 is one, it refreshes the day's value in the background.
 
-**Nothing is collected.** No account, no ads, no tracking, no analytics. The
-only permission it asks for is internet access, used to refresh the value.
+**Nothing is collected.** No account, no ads, no tracking, no analytics. It
+asks for no sensitive permission and never prompts you for one: beyond internet
+access it declares only what the background-refresh library needs, none of
+which touches your data.
 
 **Requirements:** Android 8.0 or newer. The app is signed but is not
 distributed through Google Play, so Android will ask you to allow the install
@@ -68,7 +70,9 @@ que todos los gráficos y todas las fechas funcionan desde el primer arranque si
 internet. Cuando lo hay, actualiza el valor del día en segundo plano.
 
 **No recoge nada.** Sin cuenta, sin publicidad, sin seguimiento, sin analítica.
-El único permiso que pide es acceso a internet, para actualizar el valor.
+No pide ningún permiso sensible ni te muestra un diálogo de permisos: además del
+acceso a internet solo declara los que necesita la librería de actualización en
+segundo plano, y ninguno toca tus datos.
 
 **Requisitos:** Android 8.0 o superior. La app está firmada pero no se
 distribuye por Google Play, así que Android te pedirá autorizar la instalación
@@ -265,7 +269,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-3 | Functional with no network connection; never a blank screen |
 | RNF-4 | APK under 15 MB; the minified release build is **1,7 MB** |
 | RNF-5 | Cold start under 1.5 s |
-| RNF-6 | No analytics, no account, no personal data; `INTERNET` is the only sensitive permission |
+| RNF-6 | No analytics, no account, no personal data. No runtime permission prompts; `INTERNET` plus the normal-level permissions WorkManager adds (`WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED`, `FOREGROUND_SERVICE`) |
 | RNF-7 | All monetary arithmetic in `BigDecimal`; `Double` is never used for money |
 | RNF-8 | WCAG AA contrast, font-scaling support, TalkBack labels |
 | RNF-9 | Light and dark themes, following the system or set manually |
