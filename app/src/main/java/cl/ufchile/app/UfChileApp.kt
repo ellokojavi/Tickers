@@ -1,15 +1,16 @@
 package cl.ufchile.app
 
 import android.app.Application
+import android.content.Context
 import androidx.work.Configuration
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import cl.ufchile.app.core.locale.withChileanLocale
 import cl.ufchile.app.di.AppContainer
 import cl.ufchile.app.work.SyncWorker
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -28,13 +29,12 @@ class UfChileApp : Application(), Configuration.Provider {
             .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.INFO else android.util.Log.ERROR)
             .build()
 
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base.withChileanLocale())
+    }
+
     override fun onCreate() {
         super.onCreate()
-        // Material's date picker takes its month and weekday names, and its own
-        // strings, from the JVM default locale. The app is Chile-only, so it is
-        // pinned rather than inherited from a phone that might be set to
-        // English.
-        Locale.setDefault(Locale.forLanguageTag("es-CL"))
         container = AppContainer(this)
         scheduleDailySync()
     }
