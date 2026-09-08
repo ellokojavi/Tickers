@@ -226,4 +226,26 @@ class NavigationSmokeTest {
 
         rule.onNodeWithText(expected).assertIsDisplayed()
     }
+
+    /**
+     * The independence notice has to be findable without ever interrupting.
+     * Nothing gates the app on launch; the notice sits at the foot of the main
+     * screen and the full attribution is one tap away.
+     */
+    @Test
+    fun the_independence_notice_is_reachable_but_never_pushed() {
+        rule.onAllNodesWithText("Acerca de").assertCountEquals(0)
+
+        rule.onNode(hasScrollAction()).performScrollToNode(hasText("Acerca de y fuentes"))
+        rule.onNodeWithText(
+            "App independiente, sin relación con la CMF, el Banco Central ni el INE."
+        ).assertIsDisplayed()
+
+        rule.onNodeWithText("Acerca de y fuentes").performClick()
+        rule.waitForIdle()
+
+        rule.onNodeWithText("APLICACIÓN INDEPENDIENTE").assertIsDisplayed()
+        // The CMF's terms require its site to be linked wherever its data is republished.
+        rule.onNodeWithText("https://www.cmfchile.cl").assertIsDisplayed()
+    }
 }
