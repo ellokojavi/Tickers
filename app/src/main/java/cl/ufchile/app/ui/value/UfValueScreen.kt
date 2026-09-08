@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -56,6 +57,7 @@ import cl.ufchile.app.data.prefs.ThemeMode
 import cl.ufchile.app.domain.engine.LookupResult
 import cl.ufchile.app.domain.engine.UfLookup
 import cl.ufchile.app.domain.model.DataSource
+import cl.ufchile.app.ui.about.AboutDialog
 import cl.ufchile.app.ui.appViewModel
 import cl.ufchile.app.ui.components.AppCard
 import cl.ufchile.app.ui.components.ChipRow
@@ -90,6 +92,7 @@ fun UfValueScreen(
     val ui by vm.ui.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showPicker by remember { mutableStateOf(false) }
+    var showAbout by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -118,7 +121,13 @@ fun UfValueScreen(
             }
         }
 
-        item { HeroCard(ui, onShare = { ShareToday.share(context, ShareToday.buildMessage(ui)) }) }
+        item {
+            HeroCard(
+                ui = ui,
+                onShare = { ShareToday.share(context, ShareToday.buildMessage(ui)) },
+                onSourceClick = { showAbout = true },
+            )
+        }
 
         ui.error?.let { message ->
             item {
@@ -214,6 +223,14 @@ fun UfValueScreen(
                 }
             }
         }
+
+        // A quiet footer rather than a banner or a dialog on launch: the notice
+        // has to be findable without ever getting in the way.
+        item { Footer(onAbout = { showAbout = true }) }
+    }
+
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
     }
 
     if (showPicker) {
@@ -254,7 +271,7 @@ fun UfValueScreen(
 
 
 @Composable
-private fun HeroCard(ui: UfUiState, onShare: () -> Unit) {
+private fun HeroCard(ui: UfUiState, onShare: () -> Unit, onSourceClick: () -> Unit) {
     AppCard {
         Row(
             Modifier.fillMaxWidth(),
@@ -312,6 +329,9 @@ private fun HeroCard(ui: UfUiState, onShare: () -> Unit) {
                 container = if (ui.sync.source?.official == true)
                     MaterialTheme.colorScheme.primaryContainer
                 else MaterialTheme.colorScheme.surfaceVariant,
+                // Where the number came from is also where the attribution and
+                // the independence notice live.
+                onClick = onSourceClick,
             )
             ui.current?.let {
                 Pill("Actualizado ${Fmt.relativeDay(it.date)}", icon = Icons.Outlined.Schedule)
@@ -578,3 +598,21 @@ private fun IndicatorsCard(ui: UfUiState) {
 
 /** How many day rows the detail list renders before it stops. */
 private const val DETAIL_ROWS = 400
+
+@Composable
+private fun Footer(onAbout: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            "App independiente, sin relación con la CMF, el Banco Central ni el INE.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline,
+            textAlign = TextAlign.Center,
+        )
+        TextButton(onClick = onAbout) {
+            Text("Acerca de y fuentes", style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}

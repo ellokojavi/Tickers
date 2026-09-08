@@ -150,6 +150,11 @@ are the same question at different points in time.
 - An explicit **data source badge**. The app never hides where a number came
   from, and marks whether that source is official.
 - Freshness indicator, and a visible warning when showing cached data.
+- An **"Acerca de" screen** carrying the independence notice, the source
+  attribution the CMF's terms require, the method, and the financial
+  disclaimer. It is reached from a quiet line at the foot of the screen or by
+  tapping the source badge, and never interrupts: there is no launch dialog and
+  nothing to acknowledge.
 
 Future values are never presented as history or as a projection: they sit in
 their own card, labelled as already official. When a requested date lies beyond
@@ -274,6 +279,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-8 | WCAG AA contrast, font-scaling support, TalkBack labels |
 | RNF-9 | Light and dark themes, following the system or set manually |
 | RNF-10 | Calculation engines are pure Kotlin, testable without a device |
+| RNF-12 | State independence from the CMF, Banco Central and INE, and attribute sources as their terms require, without interrupting the user |
 | RNF-11 | Chilean iconography (the flag as the app mark, the copihue and condor as illustrations) without breaking the minimalist palette |
 
 ---
@@ -287,6 +293,21 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | Bundled asset | Offline seed | None | **The complete daily series**, Aug 1977 → build date |
 
 The app tries the official source first and falls back automatically.
+
+### Terms, and what they require
+
+The CMF's [terms of use](https://api.cmfchile.cl/terminos-de-uso.html) authorise
+publishing its data in a third-party application, on one condition: the source
+must be named **with a link to its site** wherever the data is republished. The
+app satisfies this in its "Acerca de" screen, which names the CMF and links to
+cmfchile.cl. That is a requirement, not a courtesy.
+
+mindicador.cl publishes **no terms of use at all**: no licence, no stated
+permission to redistribute, no rate limits. It mirrors Banco Central data and
+is credited in the same screen, but the position is legally undefined, which is
+the reason it is the fallback and not the primary. Anyone shipping this app
+should configure a CMF key so it runs on the source that explicitly authorises
+what the app does, and regenerate the bundled dataset from that source too.
 
 **The entire daily series ships inside the APK**: about 18.000 days from
 August 1977, roughly 50 kB compressed. It is loaded into the database on first
@@ -533,7 +554,7 @@ UFChile/
 **v0.9 (current)**
 Everything above: the UF value with its full history, a day-exact inflation
 calculator, and a complete mortgage simulator with saved simulations and CSV
-export. 158 tests passing; debug and minified release builds verified on an
+export. 159 tests passing; debug and minified release builds verified on an
 emulator.
 
 Held at 0.9 rather than 1.0 for one honest reason: the default annual-to-monthly
