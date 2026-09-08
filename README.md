@@ -16,8 +16,37 @@ Offline-first, no account, no tracking, no ads.
 
 ---
 
+## Download
+
+**[⬇ Download the latest APK](https://github.com/ellokojavi/UFChile/releases/latest/download/UFChile.apk)**
+
+That link always resolves to the newest release. Every release also carries a
+version-stamped copy — `UFChile-v0.9.apk` — for archiving.
+
+Android 8.0 (API 26) or newer. The APK is signed but not distributed through
+Play, so Android will ask you to allow installs from your file manager or
+browser the first time.
+
+---
+
+## Screenshots
+
+| Today's value | History, 1977 → today | Inflation calculator |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/01-valor-uf.png" width="230"> | <img src="docs/screenshots/02-historico.png" width="230"> | <img src="docs/screenshots/03-inflacion.png" width="230"> |
+| The UF in pesos, the change since yesterday and over 30 days, a two-way converter, and the source it came from. | Any range up to the whole 49-year series, with both ends labelled. Here: $389,10 in August 1977 against $40.884,32 today. | Restates an amount between two **dates**, day-exact, through the UF. |
+
+| Mortgage simulation | Payment schedule | Dark theme |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/04-credito.png" width="230"> | <img src="docs/screenshots/05-tabla.png" width="230"> | <img src="docs/screenshots/06-oscuro.png" width="230"> |
+| A `UF + x%` loan with insurance, stamp tax and fees, resolved to a monthly payment and a CAE. | All 300 instalments in UF: opening balance, interest, principal, dividend and insurance, scrollable in both axes. | Every screen follows the system theme, or the one you pick. |
+
+---
+
 ## Table of contents
 
+- [Download](#download)
+- [Screenshots](#screenshots)
 - [Why this exists](#why-this-exists)
 - [Features](#features)
 - [Requirements](#requirements)
@@ -29,6 +58,7 @@ Offline-first, no account, no tracking, no ads.
 - [Testing](#testing)
 - [Project layout](#project-layout)
 - [Roadmap](#roadmap)
+- [Iconography](#iconography)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
@@ -461,17 +491,22 @@ UFChile/
 
 ## Roadmap
 
-**v0.1 — current**
-UF value (today plus opt-in history), an inflation calculator, and a full
-mortgage simulator with CRUD and CSV export. 158 tests passing; debug and
-minified release builds verified on an emulator.
+**v0.9 — current**
+Everything above: the UF value with its full history, a day-exact inflation
+calculator, and a complete mortgage simulator with saved simulations and CSV
+export. 158 tests passing; debug and minified release builds verified on an
+emulator.
+
+Held at 0.9 rather than 1.0 for one honest reason: the default annual-to-monthly
+rate convention has not yet been checked against a published bank quote. Both
+conventions are selectable and the app says so, but until that check is done,
+calling it 1.0 would overstate it.
 
 **Toward v1.0**
+- Validate the default rate convention against published bank quotes
 - PDF export of payment schedules
 - Side-by-side comparison of up to three simulations
-- Validation of the default rate convention against published bank quotes
 - Home-screen widget
-- Instrumented UI test coverage on the four main flows
 
 **Considered, not committed**
 UF change notifications; UTM and tax calculators; iOS.
