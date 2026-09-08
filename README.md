@@ -1,52 +1,89 @@
 # UF Chile
 
-An Android app for working with Chile's **Unidad de Fomento (UF)** — the
-inflation-indexed accounting unit that prices most of the country's mortgages,
-rents, insurance policies and long-term contracts.
+> Chile's **Unidad de Fomento** in your pocket: today's value, its whole history
+> since 1977, an inflation calculator and a mortgage simulator.
+>
+> La **Unidad de Fomento** a mano: el valor de hoy, toda su historia desde 1977,
+> una calculadora de inflación y un simulador de créditos hipotecarios.
 
-It answers four questions:
+**[⬇ Download the latest APK &nbsp;·&nbsp; Descargar la última versión](https://github.com/ellokojavi/UFChile/releases/latest/download/UFChile.apk)**
 
-1. What is the UF worth today?
-2. What was it worth on any past date — and what will it be worth on the days
-   already officially published into the future?
-3. What is an amount from another era worth in today's money?
-4. What does a `UF + x%` mortgage actually cost, month by month?
-
-Offline-first, no account, no tracking, no ads.
-
----
-
-## Download
-
-**[⬇ Download the latest APK](https://github.com/ellokojavi/UFChile/releases/latest/download/UFChile.apk)**
-
-That link always resolves to the newest release. Every release also carries a
-version-stamped copy — `UFChile-v0.9.apk` — for archiving.
-
-Android 8.0 (API 26) or newer. The APK is signed but not distributed through
-Play, so Android will ask you to allow installs from your file manager or
-browser the first time.
-
----
-
-## Screenshots
-
-| Today's value | History, 1977 → today | Inflation calculator |
+| Today's value<br><sub>El valor de hoy</sub> | History since 1977<br><sub>Historia desde 1977</sub> | Inflation calculator<br><sub>Calculadora de inflación</sub> |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/01-valor-uf.png" width="230"> | <img src="docs/screenshots/02-historico.png" width="230"> | <img src="docs/screenshots/03-inflacion.png" width="230"> |
-| The UF in pesos, the change since yesterday and over 30 days, a two-way converter, and the source it came from. | Any range up to the whole 49-year series, with both ends labelled. Here: $389,10 in August 1977 against $40.884,32 today. | Restates an amount between two **dates**, day-exact, through the UF. |
 
-| Mortgage simulation | Payment schedule | Dark theme |
+| Mortgage simulation<br><sub>Simulación de crédito</sub> | Payment schedule<br><sub>Tabla de pagos</sub> | Dark theme<br><sub>Tema oscuro</sub> |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/04-credito.png" width="230"> | <img src="docs/screenshots/05-tabla.png" width="230"> | <img src="docs/screenshots/06-oscuro.png" width="230"> |
-| A `UF + x%` loan with insurance, stamp tax and fees, resolved to a monthly payment and a CAE. | All 300 instalments in UF: opening balance, interest, principal, dividend and insurance, scrollable in both axes. | Every screen follows the system theme, or the one you pick. |
 
 ---
 
-## Table of contents
+# For users · Para usuarios
 
-- [Download](#download)
-- [Screenshots](#screenshots)
+## English
+
+**UF Chile** shows Chile's Unidad de Fomento and helps you work with it.
+
+- **Today's value**, how much it moved since yesterday and over the last 30
+  days, and a two-way UF ⇄ peso converter.
+- **The whole daily history since August 1977** in one chart you can drag a
+  finger across, plus a lookup for any single date. Days already published into
+  the future are kept separate and labelled as official, never presented as a
+  guess.
+- **An inflation calculator** that restates an amount between two exact dates:
+  *$4.000 from 1 January 1990 is worth $30.086 today.*
+- **A mortgage simulator** for `UF + x%` loans, covering insurance, stamp tax,
+  fees, prepayments and the CAE, with the full payment schedule and a CSV
+  export. Simulations are saved so you can come back and edit them.
+
+**It works offline.** The complete daily series ships inside the app, so every
+chart and every date works from the first launch with no connection. When there
+is one, it refreshes the day's value in the background.
+
+**Nothing is collected.** No account, no ads, no tracking, no analytics. The
+only permission it asks for is internet access, used to refresh the value.
+
+**Requirements:** Android 8.0 or newer. The app is signed but is not
+distributed through Google Play, so Android will ask you to allow the install
+from your file manager or browser the first time.
+
+## Español
+
+**UF Chile** muestra la Unidad de Fomento y te ayuda a trabajar con ella.
+
+- **El valor de hoy**, cuánto se movió respecto de ayer y en los últimos 30
+  días, y un conversor UF ⇄ pesos en ambos sentidos.
+- **Toda la historia diaria desde agosto de 1977** en un gráfico que puedes
+  recorrer con el dedo, más la consulta de cualquier fecha. Los días ya
+  publicados hacia adelante van aparte y marcados como oficiales, nunca
+  presentados como una estimación.
+- **Una calculadora de inflación** que reajusta un monto entre dos fechas
+  exactas: *$4.000 del 1 de enero de 1990 equivalen a $30.086 de hoy.*
+- **Un simulador de créditos hipotecarios** UF + tasa, con seguros, impuesto de
+  timbres, comisiones, prepagos y CAE, con la tabla de pagos completa y
+  exportación a CSV. Las simulaciones quedan guardadas para volver a editarlas.
+
+**Funciona sin conexión.** La serie diaria completa viene dentro de la app, así
+que todos los gráficos y todas las fechas funcionan desde el primer arranque sin
+internet. Cuando lo hay, actualiza el valor del día en segundo plano.
+
+**No recoge nada.** Sin cuenta, sin publicidad, sin seguimiento, sin analítica.
+El único permiso que pide es acceso a internet, para actualizar el valor.
+
+**Requisitos:** Android 8.0 o superior. La app está firmada pero no se
+distribuye por Google Play, así que Android te pedirá autorizar la instalación
+desde tu gestor de archivos o navegador la primera vez.
+
+---
+
+# Product and engineering
+
+Everything below documents what was built and why: the requirements it was held
+to, where the data comes from and how it is validated, the calculation models,
+the architecture, and the test strategy. None of it is needed to use the app.
+
+## Contents
+
 - [Why this exists](#why-this-exists)
 - [Features](#features)
 - [Requirements](#requirements)
@@ -62,12 +99,10 @@ browser the first time.
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
----
-
 ## Why this exists
 
 The UF changes **every single day**, and its value for the coming weeks is
-already published — a fact most conversion tools ignore, either by showing only
+already published. Most conversion tools ignore that, either by showing only
 today's value or by extrapolating one. Meanwhile, comparing prices across
 decades in Chile requires splicing CPI series, and mortgage quotes arrive as a
 single monthly figure with the insurance, taxes and fees folded invisibly into
@@ -89,7 +124,7 @@ are the same question at different points in time.
 - Two-way UF ⇄ CLP converter. The peso side is whole pesos: Chile has not used
   centavos for decades. The headline keeps its two decimals because the UF
   itself is published that way.
-- **Share the card** as preformatted text through the system share sheet —
+- **Share the card** as preformatted text through the system share sheet:
   WhatsApp, Telegram, mail, notes, anywhere.
 - **The history is always on screen**, not a mode to switch into: range
   selector (1M / 3M / 6M / 1Y / 5Y / Max), the change over that range both
@@ -98,17 +133,17 @@ are the same question at different points in time.
   today**: the series runs past today, but a historical chart is a record of
   what has happened, and the days already published beyond it have their own
   card.
-- Touch scrubbing. **The headline value never changes while scrubbing** — the
+- Touch scrubbing. **The headline value never changes while scrubbing**. The
   explored day is reported separately, so the screen cannot misstate what the
   UF is worth today.
 - Date lookup for any single day, with the calendar **bounded by the published
   horizon**: a day whose UF does not exist yet cannot be selected at all, and
   the lookup never answers with a neighbouring day's value.
 - Already-published future values, explained and marked as official.
-- A day-by-day list of the selected range, **collapsed by default** — it runs
+- A day-by-day list of the selected range, **collapsed by default**, because it runs
   to hundreds of rows and is a reference, not the main event.
 - Companion indicators: IVP, US dollar, euro, UTM, monthly CPI.
-- An explicit **data source badge** — the app never hides where a number came
+- An explicit **data source badge**. The app never hides where a number came
   from, and marks whether that source is official.
 - Freshness indicator, and a visible warning when showing cached data.
 
@@ -158,8 +193,8 @@ month-on-month series. The screen says so.
   fall on the same day each month, clamped to the last day of shorter months
   exactly as a lender would.
 - Complete payment table: opening balance, interest, principal, dividend, life
-  insurance, fire insurance, prepayment, monthly total and closing balance —
-  every row in UF, with peso equivalents at the current UF value.
+  insurance, fire insurance, prepayment, monthly total and closing balance.
+  Every row is in UF, with peso equivalents at the current UF value.
 - Opening a **saved** simulation leads with the result and the payment table;
   the editable form and its update action sit below. A **new** simulation leads
   with the form. Consulting and creating are different jobs.
@@ -169,7 +204,7 @@ month-on-month series. The screen says so.
 - **CAE** (*Carga Anual Equivalente*) solved from the real cash flows.
 - Prepayments (*abonos a capital*), either shortening the term or lowering the
   payment.
-- **Both rate conventions** are supported — see [Mortgage model](#mortgage-model).
+- **Both rate conventions** are supported. See [Mortgage model](#mortgage-model).
 - CSV export of the full schedule, shared through the Android share sheet.
 
 ### Saved simulations
@@ -228,14 +263,14 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-1 | Android 8.0+ (minSdk 26), targetSdk 35 |
 | RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`) on input as well as output, and on **every** figure, counts included |
 | RNF-3 | Functional with no network connection; never a blank screen |
-| RNF-4 | APK under 15 MB — the minified release build is **1.6 MB** |
+| RNF-4 | APK under 15 MB; the minified release build is **1,7 MB** |
 | RNF-5 | Cold start under 1.5 s |
 | RNF-6 | No analytics, no account, no personal data; `INTERNET` is the only sensitive permission |
 | RNF-7 | All monetary arithmetic in `BigDecimal`; `Double` is never used for money |
 | RNF-8 | WCAG AA contrast, font-scaling support, TalkBack labels |
 | RNF-9 | Light and dark themes, following the system or set manually |
 | RNF-10 | Calculation engines are pure Kotlin, testable without a device |
-| RNF-11 | Chilean iconography — the flag as the app mark, the copihue and condor as illustrations — without breaking the minimalist palette |
+| RNF-11 | Chilean iconography (the flag as the app mark, the copihue and condor as illustrations) without breaking the minimalist palette |
 
 ---
 
@@ -243,17 +278,17 @@ in Room; deletions offer an undo. Nothing leaves the device.
 
 | Source | Role | Key | Notes |
 |--------|------|-----|-------|
-| [CMF Chile](https://api.cmfchile.cl) | **Primary — official** | Required, free | The financial regulator's own API. Quota: 10,000 requests/month |
+| [CMF Chile](https://api.cmfchile.cl) | **Primary, official** | Required, free | The financial regulator's own API. Quota: 10,000 requests/month |
 | [mindicador.cl](https://mindicador.cl) | Fallback | None | Third-party mirror of Banco Central data |
-| Bundled asset | Offline seed | — | **The complete daily series**, Aug 1977 → build date |
+| Bundled asset | Offline seed | None | **The complete daily series**, Aug 1977 → build date |
 
 The app tries the official source first and falls back automatically.
 
-**The entire daily series ships inside the APK** — about 18.000 days from
+**The entire daily series ships inside the APK**: about 18.000 days from
 August 1977, roughly 50 kB compressed. It is loaded into the database on first
 launch (0,6 s, off the main thread), so every chart and every date lookup works
 offline from the very first run, and a refresh only ever asks for the years the
-cache does not already cover — normally just the current one. Concurrent
+cache does not already cover, normally just the current one. Concurrent
 refreshes are coalesced, so the background worker and the screen opening at the
 same moment issue one request, not two. The CMF quota is therefore never under
 pressure.
@@ -262,11 +297,11 @@ pressure.
 
 The public feed is not clean. It serves `608,15` for 2014-12-29 and `607,38`
 for 2014-12-30, where the real UF was about 24.627. Both the generator and the
-running app therefore reject any value that moves more than 1% per elapsed day
-— roughly four times the largest genuine daily change in the whole 49-year
+running app therefore reject any value that moves more than 1% per elapsed day,
+roughly four times the largest genuine daily change in the whole 49-year
 series (0,2633%). Rejected days, and any the source simply omits, are then **reconstructed from
-their own re-adjustment period**. Inside a period — the 10th of one month to
-the 9th of the next — the UF grows at a constant daily factor by construction,
+their own re-adjustment period**. Inside a period, which runs from the 10th of one month to
+the 9th of the next, the UF grows at a constant daily factor by construction,
 so a missing day is a term of a known geometric progression rather than a
 guess. December 2014 is the clearest case: the UF was frozen at 24.627,10 for
 that entire period because November's CPI was 0,0%, so the two corrupted days
@@ -305,7 +340,7 @@ UF(9th of month M+1) / UF(9th of month M) = 1 + CPI variation of month M-1
 ```
 
 The UF is published to two decimals on a value in the tens of thousands, giving
-roughly `1e-7` relative precision — several orders of magnitude better than a
+roughly `1e-7` relative precision, several orders of magnitude better than a
 one-decimal percentage. So the index is simply:
 
 ```
@@ -318,8 +353,8 @@ within the published figure's own single decimal in all eleven months. The test
 runs on the exact asset file shipped inside the APK, so a corrupted
 regeneration fails the build rather than the phone.
 
-The calculator itself no longer needs this mapping — it converts between dates
-through the UF directly — but the relationship is what makes the series
+The calculator itself no longer needs this mapping, since it converts between
+dates through the UF directly, but the relationship is what makes the series
 trustworthy as an inflation measure, so it stays under test.
 
 The bundled dataset is regenerated with:
@@ -334,7 +369,7 @@ It refuses to write a truncated series and prints every value it rejects.
 
 ## Mortgage model
 
-Payments follow the French system — a constant capital-plus-interest amount:
+Payments follow the French system, a constant capital-plus-interest amount:
 
 ```
 payment = P · i / (1 − (1 + i)^(−n))
@@ -349,8 +384,8 @@ outflow falls over the life of the loan. The app shows both figures.
 Chilean lenders quote an annual rate but do not all convert it to a monthly rate
 the same way:
 
-- `monthly = annual / 12` — the common convention, and the app's default
-- `monthly = (1 + annual)^(1/12) − 1` — the effective equivalent, always slightly
+- `monthly = annual / 12`, the common convention, and the app's default
+- `monthly = (1 + annual)^(1/12) − 1`, the effective equivalent, always slightly
   cheaper
 
 Rather than pick one and silently mismatch a real bank quote, **both are
@@ -360,8 +395,8 @@ switching the convention is the first thing to try.
 ### CAE
 
 The *Carga Anual Equivalente* is solved by bisection: the app finds the monthly
-rate at which the present value of every payment the borrower makes — dividend,
-insurance, prepayments — equals the loan amount net of upfront costs, then
+rate at which the present value of every payment the borrower makes (dividend,
+insurance, prepayments) equals the loan amount net of upfront costs, then
 annualises it. With no fees and no insurance it converges on the effective
 annual rate, which is asserted in the test suite.
 
@@ -397,7 +432,7 @@ hand-written container removes an annotation processor, a plugin, and an entire
 class of build failures, at the cost of about forty lines.
 
 *The whole series bundled instead of paged from the network.* Eighteen thousand
-days cost about 50 kB compressed — less than one screenshot — and buy offline
+days cost about 50 kB compressed, less than one screenshot, and buy offline
 charts, instant range switching and a fraction of the API traffic. Charts thin
 the window to 400 points before drawing, because a phone cannot resolve more
 and rebuilding an 18.000-segment path on every pointer event would make
@@ -407,7 +442,7 @@ scrubbing crawl.
 only the display is grouped, which means the separator is never something the
 user has to type. Fields previously accepted a typed "." and then discarded it
 when parsing, so "4.5" in a rate field silently became 45. A typed "." or ","
-is now always the decimal separator — Android's numeric keypad offers both, and
+is now always the decimal separator. Android's numeric keypad offers both, and
 which one appears depends on the phone's locale, not the app's.
 
 *A hand-drawn chart instead of a charting library.* The app needs one line, one
@@ -461,8 +496,8 @@ release APK is about 1.6 MB.
 ## Testing
 
 ```bash
-./gradlew test                  # JVM unit tests — no device needed
-./gradlew connectedAndroidTest  # instrumented tests — needs a device or emulator
+./gradlew test                  # JVM unit tests, no device needed
+./gradlew connectedAndroidTest  # instrumented tests, needs a device or emulator
 ```
 
 The engines are pure Kotlin precisely so the numerical correctness of the app
@@ -491,7 +526,7 @@ UFChile/
 
 ## Roadmap
 
-**v0.9 — current**
+**v0.9 (current)**
 Everything above: the UF value with its full history, a day-exact inflation
 calculator, and a complete mortgage simulator with saved simulations and CSV
 export. 158 tests passing; debug and minified release builds verified on an
@@ -523,13 +558,13 @@ so the circle is drawn at exactly that radius: on a circular mask it fills the
 icon edge to edge, and on a squircle it stays a clean circle rather than being
 cut into a rounded square. The source artwork separated the green line from the
 red field with a glow; a vector drawable cannot blur, so a white underlay stroke
-does the same job — without it the bright green vibrates against the red. The
+does the same job. Without it the bright green vibrates against the red. The
 themed (monochrome) variant drops the flag, which cannot survive a single tint,
 and keeps the ascending series.
 
 Empty states reuse the symbol of the thing that is missing: the mortgage list
-shows the same bank mark its tab carries, and an empty chart shows a **condor**
-— drawn and compared at real sizes first, which is why it only ever appears
+shows the same bank mark its tab carries, and an empty chart shows a **condor**,
+drawn and compared at real sizes first, which is why it only ever appears
 large: below about 48px it loses its silhouette and reads as an insect.
 
 A copihue was drawn for both the app mark and the empty simulations state
