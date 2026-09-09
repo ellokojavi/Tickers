@@ -57,8 +57,9 @@ which touches your data.
 **There is also a web version** at
 [ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/). It does
 everything the Android app does, works offline once opened, and offers to put
-itself on your home screen so the address never has to be typed again. It needs
-no store and no account, which makes it the way to use this on an iPhone.
+itself on your home screen (or, on a computer, among your bookmarks) so the
+address never has to be typed again. It needs no store and no account, which
+makes it the way to use this on an iPhone.
 
 **Requirements:** Android 8.0 or newer for the APK; any current browser for the
 web version. The APK is signed but is not distributed through Google Play, so
@@ -103,9 +104,9 @@ segundo plano, y ninguno toca tus datos.
 **También hay versión web** en
 [ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/). Hace todo
 lo que hace la app de Android, funciona sin conexión una vez abierta, y te
-ofrece dejarla en tu pantalla de inicio para no tener que escribir la dirección
-nunca más. No necesita tienda ni cuenta, que es lo que la vuelve la forma de
-usar esto en un iPhone.
+ofrece dejarla en tu pantalla de inicio (o, en un computador, entre tus
+favoritos) para no tener que escribir la dirección nunca más. No necesita
+tienda ni cuenta, que es lo que la vuelve la forma de usar esto en un iPhone.
 
 **Requisitos:** Android 8.0 o superior para el APK; cualquier navegador actual
 para la versión web. El APK está firmado pero no se distribuye por Google Play,
