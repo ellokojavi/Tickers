@@ -1,4 +1,4 @@
-# UF Chile
+# Tickers
 
 > Chile's **Unidad de Fomento** in your pocket: today's value, its whole history
 > since 1977, an inflation calculator and a mortgage simulator.
@@ -6,7 +6,7 @@
 > La **Unidad de Fomento** a mano: el valor de hoy, toda su historia desde 1977,
 > una calculadora de inflación y un simulador de créditos hipotecarios.
 
-**[⬇ Download the APK &nbsp;·&nbsp; Descargar el APK](https://github.com/ellokojavi/UFChile/releases/latest/download/UFChile.apk)** &nbsp;·&nbsp; **[🌐 Open the web app &nbsp;·&nbsp; Abrir la app web](https://ellokojavi.github.io/UFChile/)**
+**[⬇ Download the APK &nbsp;·&nbsp; Descargar el APK](https://github.com/ellokojavi/Tickers/releases/latest/download/Tickers.apk)** &nbsp;·&nbsp; **[🌐 Open the web app &nbsp;·&nbsp; Abrir la app web](https://ellokojavi.github.io/Tickers/)**
 
 | Today's value<br><sub>El valor de hoy</sub> | History since 1977<br><sub>Historia desde 1977</sub> | Inflation calculator<br><sub>Calculadora de inflación</sub> |
 |:---:|:---:|:---:|
@@ -22,7 +22,7 @@
 
 ## English
 
-**UF Chile** shows Chile's Unidad de Fomento and helps you work with it.
+**Tickers** shows Chile's Unidad de Fomento and helps you work with it.
 
 - **Today's value**, how much it moved since yesterday and over the last 30
   days, and a two-way UF ⇄ peso converter.
@@ -46,7 +46,7 @@ access it declares only what the background-refresh library needs, none of
 which touches your data.
 
 **There is also a web version** at
-[ellokojavi.github.io/UFChile](https://ellokojavi.github.io/UFChile/). It does
+[ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/). It does
 everything the Android app does, works offline once opened, and offers to put
 itself on your home screen so the address never has to be typed again. It needs
 no store and no account, which makes it the way to use this on an iPhone.
@@ -58,7 +58,7 @@ first time.
 
 ## Español
 
-**UF Chile** muestra la Unidad de Fomento y te ayuda a trabajar con ella.
+**Tickers** muestra la Unidad de Fomento y te ayuda a trabajar con ella.
 
 - **El valor de hoy**, cuánto se movió respecto de ayer y en los últimos 30
   días, y un conversor UF ⇄ pesos en ambos sentidos.
@@ -82,7 +82,7 @@ acceso a internet solo declara los que necesita la librería de actualización e
 segundo plano, y ninguno toca tus datos.
 
 **También hay versión web** en
-[ellokojavi.github.io/UFChile](https://ellokojavi.github.io/UFChile/). Hace todo
+[ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/). Hace todo
 lo que hace la app de Android, funciona sin conexión una vez abierta, y te
 ofrece dejarla en tu pantalla de inicio para no tener que escribir la dirección
 nunca más. No necesita tienda ni cuenta, que es lo que la vuelve la forma de
@@ -95,7 +95,7 @@ navegador la primera vez.
 
 **Para recibir actualizaciones automáticas**, agrega este repositorio a
 [Obtainium](https://github.com/ImranR98/Obtainium), una app libre y gratuita que
-sigue las releases de GitHub. Pega `https://github.com/ellokojavi/UFChile` una
+sigue las releases de GitHub. Pega `https://github.com/ellokojavi/Tickers` una
 vez y las nuevas versiones te llegan solas, sin pasar por ninguna tienda.
 
 ---
@@ -506,7 +506,7 @@ staleness warning, never to an empty screen or a fabricated number.
 
 ```bash
 git clone <repo-url>
-cd UFChile
+cd Tickers
 echo "sdk.dir=/path/to/android/sdk" > local.properties
 ./gradlew assembleDebug
 ```
@@ -527,7 +527,7 @@ Create a keystore and a `keystore.properties` at the project root (both are
 gitignored):
 
 ```properties
-storeFile=ufchile-release.jks
+storeFile=tickers-release.jks
 storePassword=...
 keyAlias=...
 keyPassword=...
@@ -554,11 +554,11 @@ strategy, coverage matrix and manual QA checklist.
 ## Project layout
 
 ```
-UFChile/
+Tickers/
 ├── app/
 │   ├── src/main/
 │   │   ├── assets/uf_daily.txt            Full daily UF series (1977→)
-│   │   ├── java/cl/ufchile/app/           Source
+│   │   ├── java/cl/tickers/app/           Source
 │   │   └── res/                           Resources
 │   ├── src/test/                          JVM unit tests
 │   └── src/androidTest/                   Instrumented tests

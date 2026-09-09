@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "UF Chile"
+rootProject.name = "Tickers"
 include(":app")

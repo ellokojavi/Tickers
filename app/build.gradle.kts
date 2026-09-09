@@ -23,11 +23,11 @@ val keystoreProps = Properties().apply {
 }
 
 android {
-    namespace = "cl.ufchile.app"
+    namespace = "cl.tickers.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "cl.ufchile.app"
+        applicationId = "cl.tickers.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 10

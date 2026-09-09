@@ -8,7 +8,7 @@ import * as Fmt from "../../core/format.ts";
 /**
  * The conversion, re-adjustment and formatting half of the parity contract.
  * `shared/golden/uf.json` is read by this test and by
- * app/src/test/java/cl/ufchile/app/parity/UfGoldenVectorTest.kt, and both must
+ * app/src/test/java/cl/tickers/app/parity/UfGoldenVectorTest.kt, and both must
  * agree with it exactly. See shared/PARITY.md.
  *
  * Formatting is in here because a thousands separator or a month name that

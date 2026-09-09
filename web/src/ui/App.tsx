@@ -83,7 +83,7 @@ export const App = () => {
             title={railCollapsed ? "Expandir el menú" : "Colapsar el menú"}
             onClick={toggleRail}
           ><MenuIcon /></button>
-          <span class="rail-brand">UF Chile</span>
+          <span class="rail-brand">Tickers</span>
         </div>
         {TABS.map((t) => (
           <button
