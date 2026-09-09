@@ -99,6 +99,7 @@ export const CreditView = ({ data }: { data: UfData }) => {
 
   return (
     <>
+      <div class="sim-grid">
       {rows.length === 0 ? (
         <div class="empty">
           <div style={{ fontSize: 56, lineHeight: 1 }}>🏛</div>
@@ -145,6 +146,7 @@ export const CreditView = ({ data }: { data: UfData }) => {
           </Card>
         );
       })}
+      </div>
       <button type="button" class="fab" onClick={() => setEditing({ id: null })}>+ Nueva</button>
     </>
   );
@@ -203,7 +205,7 @@ const Editor = (
 
   return (
     <>
-      <div class="row" style={{ minHeight: 56 }}>
+      <div class="row full" style={{ minHeight: 56 }}>
         <button type="button" class="btn text" onClick={onDone}>← Volver</button>
         <strong>{isNew ? "Nueva simulación" : "Editar simulación"}</strong>
         <span />
@@ -331,17 +333,17 @@ const Editor = (
 
       {isNew && resultCard}
       {isNew && result !== null ? (
-        <div class="btn-row">
+        <div class="btn-row full">
           <button type="button" class="btn tonal" onClick={() => setShowTable(true)}>Ver tabla de pagos</button>
           <button type="button" class="btn filled" onClick={save}>Guardar</button>
         </div>
       ) : result !== null && (
-        <div class="btn-row">
+        <div class="btn-row full">
           <button type="button" class="btn filled" onClick={save}>Actualizar</button>
         </div>
       )}
       {!isNew && (
-        <button type="button" class="btn text" style={{ width: "100%", marginTop: 12, color: "var(--error)" }}
+        <button type="button" class="btn text full" style={{ width: "100%", marginTop: 12, color: "var(--error)" }}
           onClick={() => {
             if (existing !== null && confirm(`¿Eliminar "${existing.name}"?`)) {
               deleteSimulation(existing.id); onDone();

@@ -219,22 +219,26 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
         </Card>
       )}
 
-      <div class="row" style={{ padding: "4px 4px 0" }}>
-        <SectionTitle>Detalle diario</SectionTitle>
-        <button type="button" class="btn text" onClick={() => setDetailOpen(!detailOpen)}>
-          {detailOpen ? "Ocultar" : `${Fmt.integer(rangeValues.length)} días`}
-        </button>
-      </div>
-      {detailOpen && (
-        <Card>
-          {[...rangeValues].reverse().slice(0, DETAIL_ROWS).map((v) => (
-            <KeyValue key={v.date} label={Fmt.shortDate(v.date)} value={Fmt.clpExact(v.value)} />
-          ))}
-          {rangeValues.length > DETAIL_ROWS && (
-            <p class="tiny">Se muestran los {Fmt.integer(DETAIL_ROWS)} días más recientes del período.</p>
-          )}
-        </Card>
-      )}
+      {/* Header and list travel together: in the desktop column layout they
+          would otherwise be free to land in different columns. */}
+      <section class="detail">
+        <div class="row" style={{ padding: "4px 4px 0" }}>
+          <SectionTitle>Detalle diario</SectionTitle>
+          <button type="button" class="btn text" onClick={() => setDetailOpen(!detailOpen)}>
+            {detailOpen ? "Ocultar" : `${Fmt.integer(rangeValues.length)} días`}
+          </button>
+        </div>
+        {detailOpen && (
+          <Card>
+            {[...rangeValues].reverse().slice(0, DETAIL_ROWS).map((v) => (
+              <KeyValue key={v.date} label={Fmt.shortDate(v.date)} value={Fmt.clpExact(v.value)} />
+            ))}
+            {rangeValues.length > DETAIL_ROWS && (
+              <p class="tiny">Se muestran los {Fmt.integer(DETAIL_ROWS)} días más recientes del período.</p>
+            )}
+          </Card>
+        )}
+      </section>
 
       <InstallCard />
 

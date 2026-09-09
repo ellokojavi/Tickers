@@ -202,3 +202,86 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
 .glyph svg { width: 18px; height: 18px; }
 
 .banner { background: var(--surface-variant); border-radius: 10px; padding: 12px; font-size: 13px; margin-bottom: 12px; }
+
+.rail-brand { display: none; }
+
+/* ---------------------------------------------------------------- desktop --
+   The phone layout is a single 560px column with a bottom tab bar. Left as-is
+   on a laptop that column sits marooned in the middle of the screen and the
+   tab bar stretches a metre wide with three buttons in it, so from 900px the
+   shell changes shape: navigation moves to a rail down the left, and the cards
+   flow into two columns.
+
+   The columns are CSS multicol rather than a grid because these cards have
+   wildly different heights and no relationship to each other. A grid would
+   align them into rows and leave a ragged gap under every short card; multicol
+   packs them. Cards that must not be split, and the ones that want the full
+   width, say so.
+
+   Nothing above 900px touches the phone layout, which is the point. */
+@media (min-width: 900px) {
+  nav.tabs {
+    top: 0; right: auto; bottom: 0;
+    width: 232px;
+    flex-direction: column; justify-content: flex-start; gap: 4px;
+    border-top: none; border-right: 1px solid var(--outline-variant);
+    padding: 20px 16px;
+  }
+  nav.tabs button {
+    flex-direction: row; justify-content: flex-start; gap: 14px;
+    width: 100%; border-radius: 999px; padding: 12px 18px;
+    font-size: 15px; text-align: left;
+  }
+  nav.tabs button[aria-current="page"] { background: var(--primary-container); }
+  /* The pill is the rail item itself up here, so the icon drops its own. */
+  nav.tabs button[aria-current="page"] .tab-icon { background: transparent; }
+  .tab-icon { padding: 0; }
+
+  .rail-brand {
+    display: block;
+    font-size: 20px; font-weight: 600; letter-spacing: -0.2px;
+    padding: 8px 18px 20px;
+  }
+
+  .app { max-width: none; padding: 0 40px 48px 272px; }
+  .screen-title, .view { max-width: 1120px; margin: 0 auto; }
+  .screen-title { min-height: 72px; font-size: 26px; }
+
+  .view { columns: 2; column-gap: 20px; }
+  .view > * { break-inside: avoid; }
+  .view > .full, .view > .footer { column-span: all; }
+  /* A button is inline-block by default, and column-span only applies to
+     block-level boxes, so a spanning button has to be told twice. */
+  .view > button.full { display: block; }
+  /* Spanning puts them in their own band across the page; it does not mean
+     they should be a metre wide. */
+  .view > .btn-row.full, .view > button.full {
+    max-width: 440px; margin-left: auto; margin-right: auto;
+  }
+
+  /* Four hundred rows would set the column height for the whole page. */
+  .detail .card { max-height: 440px; overflow: auto; }
+
+  /* No bottom bar to clear up here, so it sits in the corner it belongs in. */
+  .fab { bottom: 32px; right: 40px; }
+
+  /* Saved simulations are a list of like things, so they read across and then
+     down. The multicol flow the dashboard uses would read down and then
+     across, which is wrong for a list. */
+  .sim-grid {
+    column-span: all;
+    display: grid; gap: 16px; align-items: start;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  .sim-grid > .card { margin-bottom: 0; }
+
+  .footer { padding-top: 32px; }
+
+  /* Full-bleed on a phone because it is the whole screen; a dialog here. */
+  dialog.sheet {
+    inset: 5vh auto auto 50%; transform: translateX(-50%);
+    width: min(1060px, 92vw); height: auto; max-height: 90vh;
+    border-radius: var(--radius); overflow: auto;
+  }
+  .table-scroll { max-height: 60vh; }
+}
