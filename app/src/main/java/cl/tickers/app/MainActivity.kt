@@ -36,6 +36,7 @@ import cl.tickers.app.ui.inflation.InflationScreen
 import cl.tickers.app.ui.nav.Routes
 import cl.tickers.app.ui.nav.Tab
 import cl.tickers.app.ui.theme.TickersTheme
+import cl.tickers.app.ui.theme.systemThemeMode
 import cl.tickers.app.ui.value.UfValueScreen
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun TickersRoot() {
     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TickersApp
-    val themeMode by app.container.settings.theme.collectAsState(initial = ThemeMode.SYSTEM)
+    val savedTheme by app.container.settings.theme.collectAsState(initial = null)
+    val themeMode = savedTheme ?: systemThemeMode()
     val scope = rememberCoroutineScope()
 
     TickersTheme(themeMode = themeMode) {
@@ -110,14 +112,10 @@ private fun TickersRoot() {
             ) {
                 composable(Tab.VALUE.route) {
                     UfValueScreen(
-                        onCycleTheme = {
+                        onToggleTheme = {
                             scope.launch {
                                 app.container.settings.setTheme(
-                                    when (themeMode) {
-                                        ThemeMode.SYSTEM -> ThemeMode.LIGHT
-                                        ThemeMode.LIGHT -> ThemeMode.DARK
-                                        ThemeMode.DARK -> ThemeMode.SYSTEM
-                                    }
+                                    if (themeMode == ThemeMode.LIGHT) ThemeMode.DARK else ThemeMode.LIGHT
                                 )
                             }
                         },

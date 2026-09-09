@@ -119,14 +119,20 @@ export const deleteSimulation = (id: string): void => {
 // ------------------------------------------------------------------ settings
 
 const THEME_KEY = "ufchile.theme.v1";
-export type ThemeMode = "system" | "light" | "dark";
+export type ThemeMode = "light" | "dark";
 
+// The toggle only ever flips between light and dark. Until the user has
+// touched it, the choice is whatever the system prefers, so the first tap
+// always changes something visible.
 export const readTheme = (): ThemeMode => {
   try {
     const v = localStorage.getItem(THEME_KEY);
-    return v === "light" || v === "dark" ? v : "system";
+    if (v === "light" || v === "dark") return v;
+  } catch { /* fall through */ }
+  try {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   } catch {
-    return "system";
+    return "light";
   }
 };
 

@@ -17,16 +17,17 @@ val AppShapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp),
 )
 
+/** The theme the system would give us, for as long as the user has not chosen one. */
+@Composable
+fun systemThemeMode(): ThemeMode =
+    if (isSystemInDarkTheme()) ThemeMode.DARK else ThemeMode.LIGHT
+
 @Composable
 fun TickersTheme(
-    themeMode: ThemeMode = ThemeMode.SYSTEM,
+    themeMode: ThemeMode = systemThemeMode(),
     content: @Composable () -> Unit,
 ) {
-    val dark = when (themeMode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
+    val dark = themeMode == ThemeMode.DARK
 
     CompositionLocalProvider(
         LocalSignColors provides if (dark) DarkSignColors else LightSignColors
