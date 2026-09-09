@@ -25,7 +25,15 @@ object Fmt {
         decimalSeparator = ','
     }
 
-    private fun df(pattern: String) = DecimalFormat(pattern, symbols)
+    /**
+     * DecimalFormat rounds half to even by default, which contradicts the
+     * HALF_UP this app rounds money with everywhere else and made the two
+     * channels disagree: a dividend of 16,2250 UF displayed as "16,22" here
+     * and as "16,23" on the web. The engines' convention wins.
+     */
+    private fun df(pattern: String) = DecimalFormat(pattern, symbols).apply {
+        roundingMode = RoundingMode.HALF_UP
+    }
 
     private val pesos = df("#,##0")
     private val pesosDec = df("#,##0.00")
@@ -106,8 +114,11 @@ object Fmt {
     fun dayMonth(d: LocalDate): String = dayMonth.format(d)
     fun shortDate(d: LocalDate): String = shortDate.format(d)
     fun monthYear(m: YearMonth): String = monthYear.format(m).replaceFirstChar { it.uppercase() }
+    // ICU abbreviates as "ago." and the period falls in the middle of "ago.
+    // 1977", so removeSuffix never had anything to remove and the abbreviation
+    // kept a full stop the web version does not have.
     fun monthYearShort(m: YearMonth): String =
-        monthYearShort.format(m).replaceFirstChar { it.uppercase() }.removeSuffix(".")
+        monthYearShort.format(m).replaceFirstChar { it.uppercase() }.replace(".", "")
 
     /** "hoy", "ayer", "hace 3 días" — for the freshness indicator. */
     fun relativeDay(d: LocalDate, today: LocalDate = LocalDate.now()): String {

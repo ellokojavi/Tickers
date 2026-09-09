@@ -27,11 +27,24 @@ the commit message.
 
 ### Golden vectors, `shared/golden/`
 
-The load-bearing piece. `mortgage.json` holds inputs and the exact expected
-outputs at the engines' own scale. Both suites read it:
+The load-bearing piece. Two files hold inputs and the exact expected outputs at
+the engines' own scale, and both suites read both files.
+
+`mortgage.json` covers the credit engine: both rate conventions, both
+prepayment modes, insurance and upfront costs, month-end date clamping and the
+zero-rate divisor.
 
 - `app/src/test/java/cl/ufchile/app/parity/GoldenVectorTest.kt`
 - `web/src/domain/__tests__/goldenVectors.test.ts`
+
+`uf.json` covers peso conversions, deltas, the inflation re-adjustment, and
+formatting. Formatting is in there because a thousands separator or a rounding
+mode that differs between the channels is as visible as a wrong figure, and the
+two get there by completely different routes: ICU on Android, hand-rolled
+grouping on the web. It caught two real divergences the first time it ran.
+
+- `app/src/test/java/cl/ufchile/app/parity/UfGoldenVectorTest.kt`
+- `web/src/domain/__tests__/ufGoldenVectors.test.ts`
 
 Neither side generates the file. It is the contract, and both must agree with
 it exactly - string equality of the decimal representation, not a tolerance.
