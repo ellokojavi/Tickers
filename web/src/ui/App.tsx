@@ -1,3 +1,4 @@
+import { Fragment } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useUfData } from "../data/useUfData.ts";
 import {
@@ -14,18 +15,28 @@ import {
   BankIcon, BitcoinIcon, CalculatorIcon, ChartIcon, DollarIcon, MenuIcon, RefreshIcon, ThemeIcon,
 } from "./icons.tsx";
 
-// The three calculators the app started as, then the two market prices. Five
-// is the most a bottom bar can hold and still be tapped accurately, so this is
-// the ceiling: anything further has to go inside one of these rather than
-// beside them.
-const TABS = [
-  { key: "uf", label: "UF", Icon: ChartIcon },
-  { key: "inflacion", label: "Inflación", Icon: CalculatorIcon },
-  { key: "creditos", label: "Créditos", Icon: BankIcon },
-  { key: "dolar", label: "Dólar", Icon: DollarIcon },
-  { key: "btc", label: "Bitcoin", Icon: BitcoinIcon },
+// Two sections: the market figures the app reports, then the calculators it
+// started as. Five is the most a bottom bar can hold and still be tapped
+// accurately, so this is the ceiling: anything further has to go inside one
+// of these rather than beside them.
+const GROUPS = [
+  {
+    title: "Indicadores",
+    tabs: [
+      { key: "uf", label: "UF", Icon: ChartIcon },
+      { key: "dolar", label: "Dólar", Icon: DollarIcon },
+      { key: "btc", label: "Bitcoin", Icon: BitcoinIcon },
+    ],
+  },
+  {
+    title: "Herramientas",
+    tabs: [
+      { key: "inflacion", label: "Inflación", Icon: CalculatorIcon },
+      { key: "creditos", label: "Créditos", Icon: BankIcon },
+    ],
+  },
 ] as const;
-type TabKey = (typeof TABS)[number]["key"];
+type TabKey = (typeof GROUPS)[number]["tabs"][number]["key"];
 
 const TITLES: Record<TabKey, string> = {
   uf: "Unidad de Fomento",
@@ -99,17 +110,27 @@ export const App = () => {
           ><MenuIcon /></button>
           <span class="rail-brand">Tickers</span>
         </div>
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            aria-current={t.key === tab ? "page" : undefined}
-            title={t.label}
-            onClick={() => setTab(t.key)}
-          >
-            <span class="tab-icon"><t.Icon /></span>
-            <span class="tab-label">{t.label}</span>
-          </button>
+        {GROUPS.map((g, i) => (
+          <Fragment key={g.title}>
+            {/* The rule between the sections is a horizontal line down the
+                rail and a vertical hairline along the bottom bar: the same
+                separator, turned with the bar. The heading only fits on the
+                rail, and only while it is wide enough to show labels. */}
+            {i > 0 && <hr class="tab-divider" />}
+            <div class="tab-group" aria-hidden="true">{g.title}</div>
+            {g.tabs.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                aria-current={t.key === tab ? "page" : undefined}
+                title={t.label}
+                onClick={() => setTab(t.key)}
+              >
+                <span class="tab-icon"><t.Icon /></span>
+                <span class="tab-label">{t.label}</span>
+              </button>
+            ))}
+          </Fragment>
         ))}
       </nav>
 
