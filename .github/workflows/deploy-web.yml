@@ -6,6 +6,7 @@ on:
     paths:
       - "web/**"
       - "app/src/main/assets/uf_daily.txt"
+      - "app/src/main/assets/usd_daily.txt"
       - ".github/workflows/deploy-web.yml"
   workflow_dispatch:
 

@@ -22,7 +22,14 @@ import java.time.YearMonth
  */
 object UfDailySeed {
 
-    private const val ASSET = "uf_daily.txt"
+    const val UF_ASSET = "uf_daily.txt"
+
+    /**
+     * The dollar ships in the same format on purpose. It is published on
+     * business days only, and an empty line already means "no value that day",
+     * so weekends need no new format and no second parser.
+     */
+    const val USD_ASSET = "usd_daily.txt"
     private const val START_KEY = "# inicio:"
 
     @Volatile
@@ -60,9 +67,9 @@ object UfDailySeed {
      * The whole series. Deliberately not cached: it is read once to seed the
      * database and holding ~18.000 objects afterwards would be pure waste.
      */
-    fun readAll(context: Context): List<UfValue> =
+    fun readAll(context: Context, asset: String = UF_ASSET): List<UfValue> =
         runCatching {
-            context.assets.open(ASSET).bufferedReader().use { parse(it.readLines()) }
+            context.assets.open(asset).bufferedReader().use { parse(it.readLines()) }
         }.getOrDefault(emptyList())
 
     /**

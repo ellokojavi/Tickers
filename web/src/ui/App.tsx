@@ -6,27 +6,30 @@ import {
 import { ValueView } from "./ValueView.tsx";
 import { InflationView } from "./InflationView.tsx";
 import { BtcView } from "./BtcView.tsx";
+import { UsdView } from "./UsdView.tsx";
+import { useUsdData } from "../data/useUsdData.ts";
 import { CreditView } from "./CreditView.tsx";
 import { AboutSheet } from "./AboutSheet.tsx";
 import {
-  BankIcon, BitcoinIcon, CalculatorIcon, ChartIcon, MenuIcon, RefreshIcon, ThemeIcon,
+  BankIcon, BitcoinIcon, CalculatorIcon, ChartIcon, DollarIcon, MenuIcon, RefreshIcon, ThemeIcon,
 } from "./icons.tsx";
 
-// Bitcoin sits next to the UF because both answer "what is this worth today",
-// and it keeps its own tab rather than joining the UF screen because its
-// content is a different shape: a price that moves by the second, an intraday
-// chart, and a market rather than a published figure. When the dollar arrives
-// it will join the UF tab instead, since those two are the same shape.
+// The three calculators the app started as, then the two market prices. Five
+// is the most a bottom bar can hold and still be tapped accurately, so this is
+// the ceiling: anything further has to go inside one of these rather than
+// beside them.
 const TABS = [
-  { key: "uf", label: "Valor UF", Icon: ChartIcon },
-  { key: "btc", label: "Bitcoin", Icon: BitcoinIcon },
+  { key: "uf", label: "UF", Icon: ChartIcon },
   { key: "inflacion", label: "Inflación", Icon: CalculatorIcon },
   { key: "creditos", label: "Créditos", Icon: BankIcon },
+  { key: "dolar", label: "Dólar", Icon: DollarIcon },
+  { key: "btc", label: "Bitcoin", Icon: BitcoinIcon },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
 const TITLES: Record<TabKey, string> = {
   uf: "Unidad de Fomento",
+  dolar: "Dólar observado",
   btc: "Bitcoin",
   inflacion: "Calculadora de inflación",
   creditos: "Créditos hipotecarios",
@@ -34,6 +37,7 @@ const TITLES: Record<TabKey, string> = {
 
 export const App = () => {
   const data = useUfData();
+  const usd = useUsdData();
   const [tab, setTab] = useState<TabKey>("uf");
   const [theme, setTheme] = useState<ThemeMode>(readTheme);
   const [about, setAbout] = useState(false);
@@ -75,6 +79,7 @@ export const App = () => {
           wants a different arrangement of the same cards. */}
       <main class={`view view-${tab}`}>
         {tab === "uf" && <ValueView data={data} onAbout={() => setAbout(true)} />}
+        {tab === "dolar" && <UsdView data={usd} />}
         {tab === "btc" && <BtcView data={data} />}
         {tab === "inflacion" && <InflationView data={data} />}
         {tab === "creditos" && <CreditView data={data} />}

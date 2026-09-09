@@ -2,3 +2,4 @@ node_modules/
 dist/
 # Copied from the Android assets at build time; the source of truth is there.
 public/uf_daily.txt
+public/usd_daily.txt
