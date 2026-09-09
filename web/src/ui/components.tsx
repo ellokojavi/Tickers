@@ -185,6 +185,22 @@ export const Sparkline = (
 ) => {
   const ref = useRef<HTMLCanvasElement>(null);
 
+  /**
+   * A canvas has to be told its pixel size, and CSS decides that size. On a
+   * phone the width never changed, so drawing once was enough. It changes here
+   * whenever the window is resized or the layout crosses into its two-column
+   * form, and a canvas drawn for another width is a chart of the wrong shape.
+   */
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const canvas = ref.current;
+    if (canvas === null) return;
+    const observer = new ResizeObserver(() => setWidth(canvas.clientWidth));
+    observer.observe(canvas);
+    setWidth(canvas.clientWidth);
+    return () => observer.disconnect();
+  }, [values.length]);
+
   useEffect(() => {
     const canvas = ref.current;
     if (canvas === null || values.length < 2) return;
@@ -194,6 +210,7 @@ export const Sparkline = (
 
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth;
+    if (w === 0) return;
     canvas.width = w * dpr;
     canvas.height = height * dpr;
     const ctx = canvas.getContext("2d");
@@ -244,7 +261,7 @@ export const Sparkline = (
       ctx.beginPath(); ctx.arc(x, yAt(nums[selected]!), 4, 0, Math.PI * 2);
       ctx.fillStyle = line; ctx.fill();
     }
-  }, [values, height, selected]);
+  }, [values, height, selected, width]);
 
   const indexFrom = (clientX: number): number => {
     const canvas = ref.current;

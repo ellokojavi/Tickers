@@ -51,11 +51,18 @@ export const App = () => {
         )}
       </h1>
 
-      {tab === "uf" && <ValueView data={data} onAbout={() => setAbout(true)} />}
-      {tab === "inflacion" && <InflationView data={data} />}
-      {tab === "creditos" && <CreditView data={data} />}
+      {/* The class carries the tab through to CSS: on a wide screen each view
+          wants a different arrangement of the same cards. */}
+      <main class={`view view-${tab}`}>
+        {tab === "uf" && <ValueView data={data} onAbout={() => setAbout(true)} />}
+        {tab === "inflacion" && <InflationView data={data} />}
+        {tab === "creditos" && <CreditView data={data} />}
+      </main>
 
       <nav class="tabs">
+        {/* Only ever seen at the top of the desktop rail. A bottom tab bar on a
+            phone has no room for a wordmark and does not need one. */}
+        <span class="rail-brand">UF Chile</span>
         {TABS.map((t) => (
           <button
             key={t.key}
