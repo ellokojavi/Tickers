@@ -84,6 +84,22 @@ export const chartPlan = (h: Horizon): ChartPlan => {
   }
 };
 
+/**
+ * How precise a chart label has to be for a span to be readable. The domain
+ * picks the granularity; the formatting layer knows how to write one. An hour
+ * of trading labelled by date says nothing, and five years labelled by minute
+ * says too much.
+ */
+export type StampKind = "time" | "day" | "month";
+
+export const stampKind = (h: Horizon): StampKind => {
+  switch (h) {
+    case "H1": case "D1": return "time";
+    case "D7": case "D30": return "day";
+    case "Y1": case "Y5": return "month";
+  }
+};
+
 /** Points a span needs at its granularity, before thinning. Drives the windowing. */
 export const candlesNeeded = (h: Horizon): number =>
   Math.ceil(horizonMillis[h] / (chartPlan(h).granularitySec * 1000));

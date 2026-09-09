@@ -98,6 +98,51 @@ export const shortDate = (d: IsoDate): string =>
 
 export const monthYearShort = (d: IsoDate): string => `${MONTHS_SHORT[month(d) - 1]} ${year(d)}`;
 
+// ------------------------------------------------ instants, in Chilean time
+//
+// A bitcoin chart is labelled with moments, not calendar days, and a moment
+// has to be pinned to a zone or the two channels label the same candle
+// differently depending on where the device thinks it is. This app is for
+// Chile, so Chile is the zone, stated rather than inherited.
+//
+// Only the numeric parts come from Intl; the month names are this file's own,
+// so the output cannot shift when the platform's locale data does.
+const ZONE = "America/Santiago";
+
+const parts = (at: number): Record<string, string> => {
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: ZONE, hour12: false,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+  });
+  const out: Record<string, string> = {};
+  for (const p of formatter.formatToParts(new Date(at))) out[p.type] = p.value;
+  // Midnight comes back as "24" in some ICU versions.
+  if (out.hour === "24") out.hour = "00";
+  return out;
+};
+
+/** "14:35" */
+export const timeHm = (at: number): string => {
+  const p = parts(at);
+  return `${p.hour}:${p.minute}`;
+};
+
+/** "08-09" — day and month, no year, for a span short enough that the year is obvious. */
+export const dayMonthNum = (at: number): string => {
+  const p = parts(at);
+  return `${p.day}-${p.month}`;
+};
+
+/** "Sep 2026" */
+export const monthYearOf = (at: number): string => {
+  const p = parts(at);
+  return `${MONTHS_SHORT[Number(p.month) - 1]} ${p.year}`;
+};
+
+/** "US$78.250,18" */
+export const usd = (v: Money): string => `US$${fixed(v, 2)}`;
+
 /** Day and month with no year, for labelling something already known to be recent. */
 export const dayMonth = (d: IsoDate): string => `${dayOfMonth(d)} de ${MONTHS[month(d) - 1]}`;
 

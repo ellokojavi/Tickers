@@ -5,14 +5,21 @@ import {
 } from "../data/store.ts";
 import { ValueView } from "./ValueView.tsx";
 import { InflationView } from "./InflationView.tsx";
+import { BtcView } from "./BtcView.tsx";
 import { CreditView } from "./CreditView.tsx";
 import { AboutSheet } from "./AboutSheet.tsx";
 import {
-  BankIcon, CalculatorIcon, ChartIcon, MenuIcon, RefreshIcon, ThemeIcon,
+  BankIcon, BitcoinIcon, CalculatorIcon, ChartIcon, MenuIcon, RefreshIcon, ThemeIcon,
 } from "./icons.tsx";
 
+// Bitcoin sits next to the UF because both answer "what is this worth today",
+// and it keeps its own tab rather than joining the UF screen because its
+// content is a different shape: a price that moves by the second, an intraday
+// chart, and a market rather than a published figure. When the dollar arrives
+// it will join the UF tab instead, since those two are the same shape.
 const TABS = [
   { key: "uf", label: "Valor UF", Icon: ChartIcon },
+  { key: "btc", label: "Bitcoin", Icon: BitcoinIcon },
   { key: "inflacion", label: "Inflación", Icon: CalculatorIcon },
   { key: "creditos", label: "Créditos", Icon: BankIcon },
 ] as const;
@@ -20,6 +27,7 @@ type TabKey = (typeof TABS)[number]["key"];
 
 const TITLES: Record<TabKey, string> = {
   uf: "Unidad de Fomento",
+  btc: "Bitcoin",
   inflacion: "Calculadora de inflación",
   creditos: "Créditos hipotecarios",
 };
@@ -67,6 +75,7 @@ export const App = () => {
           wants a different arrangement of the same cards. */}
       <main class={`view view-${tab}`}>
         {tab === "uf" && <ValueView data={data} onAbout={() => setAbout(true)} />}
+        {tab === "btc" && <BtcView data={data} />}
         {tab === "inflacion" && <InflationView data={data} />}
         {tab === "creditos" && <CreditView data={data} />}
       </main>

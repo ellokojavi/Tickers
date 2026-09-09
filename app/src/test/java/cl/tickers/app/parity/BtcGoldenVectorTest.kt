@@ -1,5 +1,6 @@
 package cl.tickers.app.parity
 
+import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.domain.engine.BtcEngine
 import cl.tickers.app.domain.engine.FetchErrorKind
 import cl.tickers.app.domain.engine.Horizon
@@ -8,6 +9,7 @@ import cl.tickers.app.domain.engine.SourceFailure
 import cl.tickers.app.domain.engine.candlesNeeded
 import cl.tickers.app.domain.engine.chartPlan
 import cl.tickers.app.domain.engine.classifyFetchError
+import cl.tickers.app.domain.engine.stampKind
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -102,6 +104,34 @@ class BtcGoldenVectorTest {
         // A horizon added on one channel and not the other would otherwise pass
         // by simply not being in the fixture.
         assertThat(seen).containsExactlyElementsIn(Horizon.entries)
+    }
+
+    @Test
+    fun `chart label granularity and the formatters match the shared fixture`() {
+        for (e in section("stampKind")) {
+            val c = e.jsonObject
+            val h = Horizon.valueOf(c.str("horizon"))
+            check("stampKind($h)", stampKind(h).name.lowercase(), c.str("expected"))
+        }
+
+        val format = golden["format"]!!.jsonObject
+        for (e in format["usd"]!!.jsonArray) {
+            val c = e.jsonObject
+            check("usd(${c.str("v")})", Fmt.usd(c.dec("v")), c.str("expected"))
+        }
+        // These straddle Chile's daylight saving change and local midnight,
+        // which is where two implementations quietly stop agreeing.
+        for ((name, f) in listOf<Pair<String, (Long) -> String>>(
+            "timeHm" to Fmt::timeHm,
+            "dayMonthNum" to Fmt::dayMonthNum,
+            "monthYearOf" to Fmt::monthYearOf,
+        )) {
+            for (e in format[name]!!.jsonArray) {
+                val c = e.jsonObject
+                val millis = c.str("v").toLong()
+                check("$name($millis)", f(millis), c.str("expected"))
+            }
+        }
     }
 
     @Test

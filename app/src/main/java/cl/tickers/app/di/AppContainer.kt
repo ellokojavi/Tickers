@@ -4,6 +4,7 @@ import android.content.Context
 import cl.tickers.app.BuildConfig
 import cl.tickers.app.data.local.AppDatabase
 import cl.tickers.app.data.prefs.SettingsStore
+import cl.tickers.app.data.remote.BtcRemoteDataSource
 import cl.tickers.app.data.remote.CmfDataSource
 import cl.tickers.app.data.remote.MindicadorDataSource
 import cl.tickers.app.data.remote.NetworkModule
@@ -47,6 +48,13 @@ class AppContainer(context: Context) {
             sources = sources,
         )
     }
+
+    /**
+     * No repository behind it: a bitcoin price is worth nothing a minute later,
+     * so there is nothing to cache and nothing to reconcile. The UF has a
+     * repository because its values are permanent once published.
+     */
+    val btcSource: BtcRemoteDataSource by lazy { BtcRemoteDataSource(okHttp) }
 
     val simulationRepository: SimulationRepository by lazy {
         SimulationRepository(database.simulationDao())

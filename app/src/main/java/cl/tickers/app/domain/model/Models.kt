@@ -5,10 +5,15 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 /** A single published UF value for a calendar day. */
+/** Anything a chart can draw: a series of amounts, in order. */
+interface HasValue {
+    val value: BigDecimal
+}
+
 data class UfValue(
     val date: LocalDate,
-    val value: BigDecimal,
-) {
+    override val value: BigDecimal,
+) : HasValue {
     /** True when this value is published for a date that has not arrived yet. */
     fun isFuture(today: LocalDate = LocalDate.now()): Boolean = date.isAfter(today)
 }

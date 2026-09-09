@@ -3,9 +3,10 @@ import { readFileSync } from "node:fs";
 import { money } from "../money.ts";
 import {
   BTC_SCALE, HORIZONS, UF_SCALE, btcToClp, btcUsdToClp, btcUsdToUf, candlesNeeded,
-  chartPlan, classifyFetchError, clpToBtc, fetchErrorCopy, isConnectivity,
-  type FetchErrorKind, type Horizon, type NetworkStatus, type SourceFailure,
+  chartPlan, classifyFetchError, clpToBtc, fetchErrorCopy, isConnectivity, stampKind,
+  type FetchErrorKind, type Horizon, type NetworkStatus, type SourceFailure, type StampKind,
 } from "../btc.ts";
+import * as Fmt from "../../core/format.ts";
 
 /**
  * The bitcoin half of the parity contract. `shared/golden/btc.json` is read by
@@ -33,6 +34,13 @@ interface Golden {
     expected: FetchErrorKind; isConnectivity: boolean;
   }[];
   copy: { kind: FetchErrorKind; headline: string; hint: string }[];
+  stampKind: { horizon: Horizon; expected: StampKind }[];
+  format: {
+    usd: { v: string; expected: string }[];
+    timeHm: { v: number; expected: string }[];
+    dayMonthNum: { v: number; expected: string }[];
+    monthYearOf: { v: number; expected: string }[];
+  };
 }
 
 const golden: Golden = JSON.parse(
@@ -96,5 +104,26 @@ describe("error classification", () => {
       check(`${c.kind} hint`, fetchErrorCopy[c.kind].hint, c.hint);
     }
     expect([...seen].sort()).toEqual(Object.keys(fetchErrorCopy).sort());
+  });
+});
+
+describe("chart labels", () => {
+  it("and the formatters match the shared fixture", () => {
+    for (const c of golden.stampKind) {
+      check(`stampKind(${c.horizon})`, stampKind(c.horizon), c.expected);
+    }
+    for (const c of golden.format.usd) {
+      check(`usd(${c.v})`, Fmt.usd(money(c.v)), c.expected);
+    }
+    // These straddle Chile's daylight saving change and local midnight, which
+    // is where two implementations quietly stop agreeing.
+    const byInstant: [string, (at: number) => string][] = [
+      ["timeHm", Fmt.timeHm], ["dayMonthNum", Fmt.dayMonthNum], ["monthYearOf", Fmt.monthYearOf],
+    ];
+    for (const [name, f] of byInstant) {
+      for (const c of golden.format[name as "timeHm"]) {
+        check(`${name}(${c.v})`, f(c.v), c.expected);
+      }
+    }
   });
 });
