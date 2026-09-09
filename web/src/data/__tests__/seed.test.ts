@@ -11,8 +11,15 @@ const here = dirname(fileURLToPath(import.meta.url));
 const lines = (...data: string[]) =>
   ["# comentario", "# inicio: 2026-09-01", "# unidad: centavos", ...data];
 
+/**
+ * The source of truth, not the copy the web build makes of it. Validating the
+ * file that feeds both platforms is the point, and it means these run without
+ * a build step having happened first.
+ */
 const shipped = () =>
-  parseSeedText(readFileSync(resolvePath(here, "../../../public/uf_daily.txt"), "utf8"));
+  parseSeedText(readFileSync(
+    resolvePath(here, "../../../../app/src/main/assets/uf_daily.txt"), "utf8",
+  ));
 
 describe("bundled series", () => {
   it("values are read as centavos into exact two-decimal pesos", () => {
