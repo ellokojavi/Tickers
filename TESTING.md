@@ -377,7 +377,7 @@ before a release.
 - [ ] Delete offers undo, and undo restores the simulation
 
 ### Presentation
-- [ ] Light and dark themes, and following the system setting
+- [ ] Light and dark themes, and a fresh install following the system setting
 - [ ] Font scale at maximum: no clipped or overlapping text
 - [ ] Landscape orientation
 - [ ] Expanding the history keeps its range selector and its change figures on screen

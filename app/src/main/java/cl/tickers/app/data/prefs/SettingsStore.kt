@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
-enum class ThemeMode { SYSTEM, LIGHT, DARK }
+enum class ThemeMode { LIGHT, DARK }
 
 data class SyncInfo(val source: DataSource?, val at: Long)
 
@@ -24,8 +24,13 @@ class SettingsStore(private val context: Context) {
         val LAST_SYNC_AT = longPreferencesKey("last_sync_at")
     }
 
-    val theme: Flow<ThemeMode> = context.dataStore.data.map { p: Preferences ->
-        runCatching { ThemeMode.valueOf(p[Keys.THEME] ?: "SYSTEM") }.getOrDefault(ThemeMode.SYSTEM)
+    /**
+     * Null until the user has touched the toggle, in which case the theme
+     * follows the system. An older install that had saved the retired
+     * "SYSTEM" value lands there too, which is exactly what it was asking for.
+     */
+    val theme: Flow<ThemeMode?> = context.dataStore.data.map { p: Preferences ->
+        p[Keys.THEME]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
     }
 
     val syncInfo: Flow<SyncInfo> = context.dataStore.data.map { p ->

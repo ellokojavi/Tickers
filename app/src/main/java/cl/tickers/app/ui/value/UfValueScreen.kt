@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.BrightnessAuto
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Schedule
@@ -88,8 +87,8 @@ import androidx.compose.material.icons.filled.Check
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UfValueScreen(
-    themeMode: ThemeMode = ThemeMode.SYSTEM,
-    onCycleTheme: () -> Unit = {},
+    themeMode: ThemeMode = ThemeMode.LIGHT,
+    onToggleTheme: () -> Unit = {},
 ) {
     val vm = appViewModel { UfViewModel(it.ufRepository, it.settings) }
     val ui by vm.ui.collectAsStateWithLifecycle()
@@ -104,10 +103,9 @@ fun UfValueScreen(
     ) {
         item {
             ScreenHeader(title = "Unidad de Fomento") {
-                IconButton(onClick = onCycleTheme) {
+                IconButton(onClick = onToggleTheme) {
                     Icon(
                         when (themeMode) {
-                            ThemeMode.SYSTEM -> Icons.Outlined.BrightnessAuto
                             ThemeMode.LIGHT -> Icons.Outlined.LightMode
                             ThemeMode.DARK -> Icons.Outlined.DarkMode
                         },

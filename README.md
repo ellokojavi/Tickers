@@ -316,7 +316,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-6 | No analytics, no account, no personal data. No runtime permission prompts; `INTERNET` plus the normal-level permissions WorkManager adds (`WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED`, `FOREGROUND_SERVICE`) |
 | RNF-7 | All monetary arithmetic in `BigDecimal`; `Double` is never used for money |
 | RNF-8 | WCAG AA contrast, font-scaling support, TalkBack labels |
-| RNF-9 | Light and dark themes, following the system or set manually |
+| RNF-9 | Light and dark themes, following the system until set manually |
 | RNF-10 | Calculation engines are pure Kotlin, testable without a device |
 | RNF-12 | State independence from the CMF, Banco Central and INE, and attribute sources as their terms require, without interrupting the user |
 | RNF-11 | Chilean iconography (the flag as the app mark, the copihue and condor as illustrations) without breaking the minimalist palette |

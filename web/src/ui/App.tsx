@@ -57,13 +57,11 @@ export const App = () => {
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
 
   useEffect(() => {
-    if (theme === "system") document.documentElement.removeAttribute("data-theme");
-    else document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
     writeTheme(theme);
   }, [theme]);
 
-  const cycleTheme = () =>
-    setTheme(theme === "system" ? "light" : theme === "light" ? "dark" : "system");
+  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
   const toggleRail = () => {
     setRailCollapsed(!railCollapsed);
@@ -76,7 +74,7 @@ export const App = () => {
         {TITLES[tab]}
         {tab === "uf" && (
           <span>
-            <button type="button" class="btn icon" aria-label="Cambiar tema" onClick={cycleTheme}>
+            <button type="button" class="btn icon" aria-label="Cambiar tema" onClick={toggleTheme}>
               <ThemeIcon mode={theme} />
             </button>
             <button type="button" class="btn icon" aria-label="Actualizar" onClick={data.refresh}>
