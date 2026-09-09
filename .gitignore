@@ -13,3 +13,6 @@ captures/
 !debug.keystore
 keystore.properties
 *.jks
+
+# Local tool state
+.claude/
