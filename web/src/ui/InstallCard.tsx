@@ -133,8 +133,8 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
       ) : usesShareMenu() ? (
         <>
           <p class="muted">
-            Agrégala a tu pantalla de inicio y queda con su propio ícono, sin tener que escribir la
-            dirección otra vez.
+            Agrega Tickers a tu pantalla de inicio para que quede con su propio ícono, sin tener
+            que escribir la dirección otra vez.
           </p>
           <ol class="steps">
             <li>
@@ -150,8 +150,8 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
       ) : (
         <>
           <p class="muted">
-            Agrégala a tu pantalla de inicio y queda con su propio ícono, sin tener que escribir la
-            dirección otra vez.
+            Agrega Tickers a tu pantalla de inicio para que quede con su propio ícono, sin tener
+            que escribir la dirección otra vez.
           </p>
           <ol class="steps">
             <li>Abre el menú del navegador</li>

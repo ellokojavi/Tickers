@@ -56,6 +56,16 @@ difference nobody would think to look for.
 - `app/src/test/java/cl/tickers/app/parity/BtcGoldenVectorTest.kt`
 - `web/src/domain/__tests__/btcGoldenVectors.test.ts`
 
+`converter.json` covers the three-field converters, which are the one place in
+the app where the same quantity is shown three ways at once and therefore the
+one place where a rounding mistake shows itself as two different answers on a
+single screen. It was written after exactly that: one bitcoin read 72.476.915
+pesos on load and 72.476.920 after an edit, because the peso figure was being
+derived from the already-rounded dollar figure.
+
+- `app/src/test/java/cl/tickers/app/parity/ConverterGoldenVectorTest.kt`
+- `web/src/domain/__tests__/converterGoldenVectors.test.ts`
+
 Neither side generates the file. It is the contract, and both must agree with
 it exactly - string equality of the decimal representation, not a tolerance.
 Changing the engine on purpose means changing the fixture once, and then both

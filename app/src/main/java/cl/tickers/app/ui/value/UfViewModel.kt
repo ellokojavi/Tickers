@@ -7,6 +7,7 @@ import cl.tickers.app.data.prefs.SettingsStore
 import cl.tickers.app.data.prefs.SyncInfo
 import cl.tickers.app.data.repo.UfRepository
 import cl.tickers.app.domain.engine.LookupResult
+import cl.tickers.app.domain.engine.ConverterEngine
 import cl.tickers.app.domain.engine.UfEngine
 import cl.tickers.app.domain.engine.UfLookup
 import cl.tickers.app.domain.model.Indicator
@@ -42,6 +43,7 @@ data class UfUiState(
     val error: String? = null,
     val ufText: String = "1",
     val clpText: String = "",
+    val usdText: String = "",
 
     // --- history
     val range: Range = Range.M3,
@@ -65,6 +67,13 @@ data class UfUiState(
     /** The full day-by-day list is long, so it starts folded away. */
     val detailExpanded: Boolean = false,
 ) {
+    /**
+     * The observed dollar, already among the indicators the app fetches. It has
+     * its own publication day, which the converter shows, because it is not the
+     * UF's day.
+     */
+    val dollar: Indicator? get() = indicators.firstOrNull { it.code == "dolar" }
+
     val dailyDelta: BigDecimal?
         get() = if (current != null && previous != null)
             UfEngine.delta(previous.value, current.value) else null
@@ -139,6 +148,15 @@ class UfViewModel(
             series.filter { !it.date.isAfter(target) }.maxByOrNull { it.date }
         }
         val windowed = UfEngine.historyWindow(series, _ui.value.range.months)
+        // One UF converted, so the card answers before anyone types in it.
+        val opening = current?.value?.let {
+            ConverterEngine.ufConvert(
+                ConverterEngine.UfField.UF,
+                java.math.BigDecimal.ONE,
+                it,
+                indicators.firstOrNull { i -> i.code == "dolar" }?.value,
+            )
+        }
         _ui.value = _ui.value.copy(
             loading = false,
             current = current,
@@ -153,10 +171,9 @@ class UfViewModel(
             // The converter deals in whole pesos: Chile has not used centavos
             // for decades. The headline UF value keeps its two decimals because
             // the UF itself is published that way.
-            clpText = _ui.value.clpText.ifBlank {
-                current?.let {
-                    it.value.setScale(0, java.math.RoundingMode.HALF_UP).toPlainString()
-                }.orEmpty()
+            clpText = _ui.value.clpText.ifBlank { opening?.clp?.toPlainString().orEmpty() },
+            usdText = _ui.value.usdText.ifBlank {
+                opening?.usd?.toPlainString()?.replace('.', ',').orEmpty()
             },
         )
     }
@@ -179,23 +196,35 @@ class UfViewModel(
 
     // ------------------------------------------------------------ converter
 
-    fun onUfInput(text: String) {
-        val uf = Fmt.parseNumber(text)
-        val rate = _ui.value.current?.value
-        _ui.value = _ui.value.copy(
-            ufText = text,
-            clpText = if (uf != null && rate != null)
-                UfEngine.ufToClp(uf, rate).toPlainString() else "",
-        )
-    }
+    fun onUfInput(text: String) = onConverterInput(ConverterEngine.UfField.UF, text)
 
-    fun onClpInput(text: String) {
-        val clp = Fmt.parseNumber(text)
-        val rate = _ui.value.current?.value
-        _ui.value = _ui.value.copy(
-            clpText = text,
-            ufText = if (clp != null && rate != null)
-                UfEngine.clpToUf(clp, rate).toPlainString().replace('.', ',') else "",
+    fun onClpInput(text: String) = onConverterInput(ConverterEngine.UfField.CLP, text)
+
+    fun onUsdInput(text: String) = onConverterInput(ConverterEngine.UfField.USD, text)
+
+    /**
+     * One value is typed, the other two follow. The arithmetic lives in the
+     * domain because it has to give the same answers here and on the web, and
+     * because deriving one rounded figure from another is how a converter
+     * starts disagreeing with itself.
+     */
+    private fun onConverterInput(field: ConverterEngine.UfField, text: String) {
+        val state = _ui.value
+        val amount = Fmt.parseNumber(text)
+        val rate = state.current?.value
+        val result = if (amount == null || rate == null) {
+            null
+        } else {
+            ConverterEngine.ufConvert(field, amount, rate, state.dollar?.value)
+        }
+
+        _ui.value = state.copy(
+            ufText = if (field == ConverterEngine.UfField.UF) text
+            else result?.uf?.toPlainString()?.replace('.', ',').orEmpty(),
+            clpText = if (field == ConverterEngine.UfField.CLP) text
+            else result?.clp?.toPlainString().orEmpty(),
+            usdText = if (field == ConverterEngine.UfField.USD) text
+            else result?.usd?.toPlainString()?.replace('.', ',').orEmpty(),
         )
     }
 

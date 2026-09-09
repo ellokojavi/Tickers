@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import cl.tickers.app.data.remote.BtcCandle
 import cl.tickers.app.data.remote.BtcRemoteDataSource
 import cl.tickers.app.data.remote.BtcSpotResult
+import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.data.remote.Connectivity
+import cl.tickers.app.domain.engine.ConverterEngine
 import cl.tickers.app.domain.engine.FetchErrorKind
 import cl.tickers.app.domain.engine.Horizon
 import cl.tickers.app.domain.engine.chartPlan
@@ -30,6 +32,7 @@ data class BtcUiState(
     val chartLoading: Boolean = true,
     val scrubIndex: Int? = null,
     val btcText: String = "1",
+    val usdText: String = "",
     val clpText: String = "",
 ) {
     /** The price under the finger while scrubbing, otherwise the live one. */
@@ -109,9 +112,40 @@ class BtcViewModel(
 
     fun onScrub(index: Int?) = _ui.update { it.copy(scrubIndex = index) }
 
-    fun onBtcInput(raw: String, clp: String) = _ui.update { it.copy(btcText = raw, clpText = clp) }
+    fun onBtcInput(raw: String, price: BigDecimal, rate: BigDecimal) =
+        onConverterInput(ConverterEngine.BtcField.BTC, raw, price, rate)
 
-    fun onClpInput(raw: String, btc: String) = _ui.update { it.copy(clpText = raw, btcText = btc) }
+    fun onUsdInput(raw: String, price: BigDecimal, rate: BigDecimal) =
+        onConverterInput(ConverterEngine.BtcField.USD, raw, price, rate)
+
+    fun onClpInput(raw: String, price: BigDecimal, rate: BigDecimal) =
+        onConverterInput(ConverterEngine.BtcField.CLP, raw, price, rate)
+
+    /**
+     * One value is typed, the other two follow. The arithmetic lives in the
+     * domain because it has to give the same answers here and on the web, and
+     * because deriving one rounded figure from another is how a converter
+     * starts disagreeing with itself.
+     */
+    private fun onConverterInput(
+        field: ConverterEngine.BtcField,
+        raw: String,
+        price: BigDecimal,
+        rate: BigDecimal,
+    ) {
+        val amount = Fmt.parseNumber(raw)
+        val result = amount?.let { ConverterEngine.btcConvert(field, it, price, rate) }
+        _ui.update {
+            it.copy(
+                btcText = if (field == ConverterEngine.BtcField.BTC) raw
+                else result?.btc?.toPlainString()?.replace('.', ',').orEmpty(),
+                usdText = if (field == ConverterEngine.BtcField.USD) raw
+                else result?.usd?.toPlainString()?.replace('.', ',').orEmpty(),
+                clpText = if (field == ConverterEngine.BtcField.CLP) raw
+                else result?.clp?.toPlainString().orEmpty(),
+            )
+        }
+    }
 
     private companion object {
         const val SPOT_INTERVAL_MS = 30_000L

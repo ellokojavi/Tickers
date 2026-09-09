@@ -32,7 +32,7 @@ object BtcEngine {
 
     /** One bitcoin in pesos, from its dollar price and the dollar's peso value. */
     fun btcUsdToClp(btcUsd: BigDecimal, usdClp: BigDecimal): BigDecimal =
-        btcUsd.multiply(usdClp).setScale(0, RoundingMode.HALF_UP)
+        FxEngine.usdToClp(btcUsd, usdClp)
 
     /** [btc] bitcoins in pesos. Rounded once, at the end. */
     fun btcToClp(btc: BigDecimal, btcUsd: BigDecimal, usdClp: BigDecimal): BigDecimal =

@@ -73,6 +73,11 @@ import cl.tickers.app.ui.components.signColor
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Check
 
 /**
  * The single "Valor UF" destination.
@@ -149,17 +154,45 @@ fun UfValueScreen(
         item {
             AppCard {
                 SectionTitle("Conversor")
-                NumberField(ui.ufText, vm::onUfInput, label = "UF", suffix = "UF")
+                NumberField(
+                    ui.ufText,
+                    vm::onUfInput,
+                    // The date belongs to the UF, which is the value everything
+                    // else on this card is derived from. It was on the peso
+                    // field, where it read as if the peso had a publication day.
+                    label = ui.current?.let { "UF (al ${Fmt.dayMonth(it.date)})" } ?: "UF",
+                    suffix = "UF",
+                )
                 Spacer(Modifier.height(10.dp))
                 NumberField(
                     ui.clpText,
                     vm::onClpInput,
-                    // A conversion is only true for one day, and this card sits
-                    // far enough from the date at the top to be read on its own.
-                    label = ui.current?.let { "Pesos (al ${Fmt.dayMonth(it.date)})" } ?: "Pesos",
+                    label = "Pesos",
                     suffix = "CLP",
                     allowDecimals = false,
+                    action = {
+                        ShareValueButton(
+                            label = "Copiar el valor en pesos",
+                            text = converterShare(ui.ufText, ui.clpText, null),
+                        )
+                    },
                 )
+                ui.dollar?.let { dollar ->
+                    Spacer(Modifier.height(10.dp))
+                    NumberField(
+                        ui.usdText,
+                        vm::onUsdInput,
+                        label = "Dólares",
+                        suffix = "USD",
+                        supporting = "Dólar observado del ${Fmt.dayMonth(dollar.date)}",
+                        action = {
+                            ShareValueButton(
+                                label = "Copiar el valor en pesos y dólares",
+                                text = converterShare(ui.ufText, ui.clpText, ui.usdText),
+                            )
+                        },
+                    )
+                }
             }
         }
 
@@ -617,4 +650,59 @@ private fun Footer(onAbout: () -> Unit) {
             Text("Acerca de y fuentes", style = MaterialTheme.typography.labelLarge)
         }
     }
+}
+
+/**
+ * Copies one figure straight to the clipboard, for pasting into a message.
+ *
+ * A share sheet is the right gesture for the whole card at the top of the
+ * screen; for a single number inside a field it is three taps to do what one
+ * should. Android has no equivalent of the web's "no share sheet at all", so
+ * this is the same choice made for a different reason: the unit here is one
+ * value, not a report.
+ */
+@Composable
+private fun ShareValueButton(label: String, text: String) {
+    var copied by remember { mutableStateOf(false) }
+    val clipboard = LocalClipboardManager.current
+
+    IconButton(
+        onClick = {
+            clipboard.setText(AnnotatedString(text))
+            copied = true
+        },
+    ) {
+        Icon(
+            if (copied) Icons.Filled.Check else Icons.Filled.ContentCopy,
+            contentDescription = if (copied) "Copiado" else label,
+        )
+    }
+
+    // Android 13 and up shows its own copy confirmation, so a second one would
+    // be two notices for one action; below that the icon is the only feedback.
+    LaunchedEffect(copied) {
+        if (copied) {
+            kotlinx.coroutines.delay(2_000)
+            copied = false
+        }
+    }
+}
+
+/**
+ * What the copy buttons send. Deliberately one line: it is meant to be pasted
+ * into a conversation, not read as a report.
+ */
+private fun converterShare(ufText: String, clpText: String, usdText: String?): String {
+    val amount = Fmt.parseNumber(ufText)
+    val head = if (amount?.compareTo(java.math.BigDecimal.ONE) == 0) {
+        "UF de hoy"
+    } else {
+        Fmt.uf(amount ?: java.math.BigDecimal.ZERO)
+    }
+    val clp = Fmt.parseNumber(clpText) ?: java.math.BigDecimal.ZERO
+    return buildList<String> {
+        add(head)
+        add("CLP" + Fmt.clp(clp))
+        Fmt.parseNumber(usdText.orEmpty())?.let { add(Fmt.usd(it)) }
+    }.joinToString(", ")
 }
