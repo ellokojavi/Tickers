@@ -1,6 +1,6 @@
 import { money } from "../domain/money.ts";
 import { parseIso, type IsoDate } from "../domain/dates.ts";
-import type { Indicator, UfValue } from "../domain/models.ts";
+import type { Indicator, DatedValue } from "../domain/models.ts";
 
 /**
  * mindicador.cl, which mirrors Banco Central data and sends
@@ -16,7 +16,7 @@ const BASE = "https://mindicador.cl/api";
 
 interface Point { fecha?: unknown; valor?: unknown }
 
-const toUfValue = (p: Point): UfValue | null => {
+const toDatedValue = (p: Point): DatedValue | null => {
   if (typeof p.fecha !== "string" || typeof p.valor !== "number") return null;
   const date = parseIso(p.fecha.slice(0, 10));
   if (date === null || !Number.isFinite(p.valor)) return null;
@@ -24,13 +24,13 @@ const toUfValue = (p: Point): UfValue | null => {
   return { date, value: money(String(p.valor)) };
 };
 
-export const fetchUfYear = async (year: number, signal?: AbortSignal): Promise<UfValue[]> => {
+export const fetchUfYear = async (year: number, signal?: AbortSignal): Promise<DatedValue[]> => {
   const response = await fetch(`${BASE}/uf/${year}`, { signal });
   if (!response.ok) throw new Error(`mindicador respondió ${response.status}`);
   const body = (await response.json()) as { serie?: Point[] };
   return (body.serie ?? [])
-    .map(toUfValue)
-    .filter((v): v is UfValue => v !== null)
+    .map(toDatedValue)
+    .filter((v): v is DatedValue => v !== null)
     .sort((a, b) => (a.date < b.date ? -1 : 1));
 };
 

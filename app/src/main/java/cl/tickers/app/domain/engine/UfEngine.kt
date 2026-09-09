@@ -1,6 +1,6 @@
 package cl.tickers.app.domain.engine
 
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -35,10 +35,10 @@ object UfEngine {
      * whole history.
      */
     fun historyWindow(
-        series: List<UfValue>,
+        series: List<DatedValue>,
         months: Long?,
         today: LocalDate = LocalDate.now(),
-    ): List<UfValue> {
+    ): List<DatedValue> {
         val history = series.filter { !it.date.isAfter(today) }
         if (months == null) return history
         val from = today.minusMonths(months)
@@ -54,10 +54,10 @@ object UfEngine {
      * range would rebuild an 18.000-segment path on every pointer event. The UF
      * moves smoothly, so even sampling is visually indistinguishable.
      */
-    fun downsample(values: List<UfValue>, maxPoints: Int): List<UfValue> {
+    fun downsample(values: List<DatedValue>, maxPoints: Int): List<DatedValue> {
         if (maxPoints < 2 || values.size <= maxPoints) return values
         val step = (values.size - 1).toDouble() / (maxPoints - 1)
-        val out = ArrayList<UfValue>(maxPoints)
+        val out = ArrayList<DatedValue>(maxPoints)
         for (i in 0 until maxPoints) {
             out += values[Math.round(i * step).toInt().coerceIn(0, values.lastIndex)]
         }
@@ -104,10 +104,10 @@ object UfEngine {
      * The last value in [series] that is not in the future.
      * The series may legitimately contain published future dates.
      */
-    fun currentOf(series: List<UfValue>, today: java.time.LocalDate): UfValue? =
+    fun currentOf(series: List<DatedValue>, today: java.time.LocalDate): DatedValue? =
         series.filter { !it.date.isAfter(today) }.maxByOrNull { it.date }
 
     /** Published values that lie beyond [today]. */
-    fun futureOf(series: List<UfValue>, today: java.time.LocalDate): List<UfValue> =
+    fun futureOf(series: List<DatedValue>, today: java.time.LocalDate): List<DatedValue> =
         series.filter { it.date.isAfter(today) }.sortedBy { it.date }
 }

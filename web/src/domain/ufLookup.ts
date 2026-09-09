@@ -1,5 +1,5 @@
 import { daysBetween, isAfter, isBefore, of, type IsoDate } from "./dates.ts";
-import type { UfValue } from "./models.ts";
+import type { DatedValue } from "./models.ts";
 
 /**
  * Outcome of asking what the UF was worth on a date.
@@ -9,8 +9,8 @@ import type { UfValue } from "./models.ts";
  * an unpublished date as official. Both of those shipped once.
  */
 export type LookupResult =
-  | { kind: "exact"; value: UfValue; isFuture: boolean }
-  | { kind: "nearest"; value: UfValue; requested: IsoDate }
+  | { kind: "exact"; value: DatedValue; isFuture: boolean }
+  | { kind: "nearest"; value: DatedValue; requested: IsoDate }
   | { kind: "notPublishedYet"; lastPublished: IsoDate | null }
   | { kind: "beforeCoverage"; earliest: IsoDate }
   | { kind: "unavailable" }
@@ -27,8 +27,8 @@ export const SERIES_START: IsoDate = of(1977, 8, 1);
  */
 export const resolve = (
   requested: IsoDate,
-  exact: UfValue | null,
-  nearestEarlier: UfValue | null,
+  exact: DatedValue | null,
+  nearestEarlier: DatedValue | null,
   lastPublished: IsoDate | null,
   day: IsoDate,
   earliest: IsoDate = SERIES_START,
@@ -45,7 +45,7 @@ export const resolve = (
 };
 
 /** Latest date a user may ask about: the last published day. */
-export const maxSelectable = (series: readonly UfValue[]): IsoDate | null => {
+export const maxSelectable = (series: readonly DatedValue[]): IsoDate | null => {
   let max: IsoDate | null = null;
   for (const v of series) if (max === null || v.date > max) max = v.date;
   return max;

@@ -3,7 +3,7 @@ package cl.tickers.app.parity
 import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.domain.engine.UfEngine
 import cl.tickers.app.domain.engine.UfReajuste
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -125,8 +125,8 @@ class UfGoldenVectorTest {
             val to = c["to"]!!.jsonObject
             val result = UfReajuste.convert(
                 c.dec("amount"),
-                UfValue(LocalDate.parse(from.str("date")), from.dec("value")),
-                UfValue(LocalDate.parse(to.str("date")), to.dec("value")),
+                DatedValue(LocalDate.parse(from.str("date")), from.dec("value")),
+                DatedValue(LocalDate.parse(to.str("date")), to.dec("value")),
             )
             val expected = c["expected"]!!.jsonObject
             val label = "reajuste ${c.str("amount")} ${from.str("date")}->${to.str("date")}"

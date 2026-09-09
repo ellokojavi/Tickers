@@ -1,7 +1,7 @@
 package cl.tickers.app.ui
 
 import cl.tickers.app.domain.engine.UfReajuste
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import cl.tickers.app.ui.inflation.ShareReajuste
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -12,8 +12,8 @@ class ShareReajusteTest {
 
     private val result = UfReajuste.convert(
         amount = BigDecimal("4000"),
-        from = UfValue(LocalDate.of(1990, 1, 1), BigDecimal("5435.28")),
-        to = UfValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
+        from = DatedValue(LocalDate.of(1990, 1, 1), BigDecimal("5435.28")),
+        to = DatedValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
     )
     private val message = ShareReajuste.buildMessage(result)
 
@@ -64,7 +64,7 @@ class ShareReajusteTest {
 
     @Test
     fun `a same-day restatement still produces a coherent message`() {
-        val day = UfValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68"))
+        val day = DatedValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68"))
         val text = ShareReajuste.buildMessage(UfReajuste.convert(BigDecimal("1000"), day, day))
 
         assertThat(text).contains("$1.000 del 6 de septiembre de 2026")

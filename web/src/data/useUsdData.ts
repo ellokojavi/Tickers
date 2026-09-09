@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { parseSeedText } from "./seed.ts";
-import type { UfValue } from "../domain/models.ts";
+import type { DatedValue } from "../domain/models.ts";
 
 /**
  * The daily dólar observado series, shipped as a static asset beside the UF's.
@@ -9,19 +9,16 @@ import type { UfValue } from "../domain/models.ts";
  * business days only, and "no value today" is exactly what an empty line in
  * that format already means, so weekends and holidays are gaps rather than
  * invented numbers.
- *
- * The values come back as UfValue because that type is a date and an amount and
- * nothing more; the name has outlived its accuracy now that three series use it.
  */
 export interface UsdData {
-  readonly series: readonly UfValue[];
+  readonly series: readonly DatedValue[];
   readonly loading: boolean;
 }
 
 const ASSET = `${import.meta.env.BASE_URL}usd_daily.txt`;
 
 export const useUsdData = (): UsdData => {
-  const [series, setSeries] = useState<readonly UfValue[]>([]);
+  const [series, setSeries] = useState<readonly DatedValue[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

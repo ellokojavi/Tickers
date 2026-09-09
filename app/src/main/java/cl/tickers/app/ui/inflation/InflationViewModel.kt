@@ -8,7 +8,7 @@ import cl.tickers.app.domain.engine.LookupResult
 import cl.tickers.app.domain.engine.UfLookup
 import cl.tickers.app.domain.engine.UfReajuste
 import cl.tickers.app.domain.model.ReajusteResult
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -107,7 +107,7 @@ class InflationViewModel(private val repo: UfRepository) : ViewModel() {
         }
     }
 
-    private suspend fun resolve(date: LocalDate): UfValue? {
+    private suspend fun resolve(date: LocalDate): DatedValue? {
         val outcome = UfLookup.resolve(
             requested = date,
             exact = repo.exactUfOn(date),

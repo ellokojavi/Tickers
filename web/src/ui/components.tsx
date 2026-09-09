@@ -184,7 +184,7 @@ export const DateField = (
  */
 export const Sparkline = (
   { values, height = 200, selected, onScrub, label }: {
-    // Only the values are drawn; x is the index. Widened from UfValue so the
+    // Only the values are drawn; x is the index. Widened from DatedValue so the
     // bitcoin chart, whose points are timestamps rather than calendar days,
     // can use the same one.
     values: readonly { readonly value: Money }[];

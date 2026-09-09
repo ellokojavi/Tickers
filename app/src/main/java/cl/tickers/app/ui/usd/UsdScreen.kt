@@ -183,7 +183,7 @@ private fun CopyValueButton(label: String, text: String) {
     }
 }
 
-private fun buildShare(current: cl.tickers.app.domain.model.UfValue, delta: BigDecimal?): String =
+private fun buildShare(current: cl.tickers.app.domain.model.DatedValue, delta: BigDecimal?): String =
     buildList<String> {
         add("*Dólar observado*")
         add(Fmt.longDate(current.date))

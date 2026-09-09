@@ -2,7 +2,7 @@ package cl.tickers.app.domain
 
 import cl.tickers.app.domain.engine.LookupResult
 import cl.tickers.app.domain.engine.UfLookup
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.math.BigDecimal
@@ -14,7 +14,7 @@ class UfLookupTest {
     private val lastPublished = LocalDate.of(2026, 9, 9)
 
     private fun uf(date: LocalDate, value: String = "40880.36") =
-        UfValue(date, BigDecimal(value))
+        DatedValue(date, BigDecimal(value))
 
     /**
      * The regression this class exists for: asking about a date past the

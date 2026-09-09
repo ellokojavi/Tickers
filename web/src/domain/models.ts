@@ -1,7 +1,14 @@
 import { ZERO, type Money } from "./money.ts";
 import type { IsoDate } from "./dates.ts";
 
-export interface UfValue {
+/**
+ * A calendar day and an amount, and nothing more.
+ *
+ * The UF and the dólar observado are both published this way, so both are
+ * series of these. Bitcoin is not: its points are timestamps rather than days,
+ * which is why the chart takes anything with a `value` rather than this.
+ */
+export interface DatedValue {
   readonly date: IsoDate;
   readonly value: Money;
 }

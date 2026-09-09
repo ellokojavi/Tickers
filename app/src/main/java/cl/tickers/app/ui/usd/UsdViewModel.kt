@@ -7,7 +7,7 @@ import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.data.seed.UfDailySeed
 import cl.tickers.app.domain.engine.FxEngine
 import cl.tickers.app.domain.engine.UfEngine
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import cl.tickers.app.ui.value.Range
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,12 +30,12 @@ import java.time.temporal.ChronoUnit
  */
 data class UsdUiState(
     val loading: Boolean = true,
-    val series: List<UfValue> = emptyList(),
-    val current: UfValue? = null,
-    val previous: UfValue? = null,
+    val series: List<DatedValue> = emptyList(),
+    val current: DatedValue? = null,
+    val previous: DatedValue? = null,
     val range: Range = Range.Y1,
-    val rangeValues: List<UfValue> = emptyList(),
-    val chartValues: List<UfValue> = emptyList(),
+    val rangeValues: List<DatedValue> = emptyList(),
+    val chartValues: List<DatedValue> = emptyList(),
     val scrubIndex: Int? = null,
     val usdText: String = "1",
     val clpText: String = "",

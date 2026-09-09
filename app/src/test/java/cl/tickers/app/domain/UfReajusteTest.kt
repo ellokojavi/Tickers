@@ -1,7 +1,7 @@
 package cl.tickers.app.domain
 
 import cl.tickers.app.domain.engine.UfReajuste
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -10,7 +10,7 @@ import java.time.LocalDate
 
 class UfReajusteTest {
 
-    private fun uf(date: String, value: String) = UfValue(LocalDate.parse(date), BigDecimal(value))
+    private fun uf(date: String, value: String) = DatedValue(LocalDate.parse(date), BigDecimal(value))
 
     @Test
     fun `an amount is restated by the ratio of the two UF values`() {

@@ -11,7 +11,7 @@ import cl.tickers.app.domain.engine.ConverterEngine
 import cl.tickers.app.domain.engine.UfEngine
 import cl.tickers.app.domain.engine.UfLookup
 import cl.tickers.app.domain.model.Indicator
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -34,10 +34,10 @@ enum class Range(val label: String, val months: Long?) {
 data class UfUiState(
     val loading: Boolean = true,
     val refreshing: Boolean = false,
-    val current: UfValue? = null,
-    val previous: UfValue? = null,
-    val monthAgo: UfValue? = null,
-    val future: List<UfValue> = emptyList(),
+    val current: DatedValue? = null,
+    val previous: DatedValue? = null,
+    val monthAgo: DatedValue? = null,
+    val future: List<DatedValue> = emptyList(),
     val indicators: List<Indicator> = emptyList(),
     val sync: SyncInfo = SyncInfo(null, 0L),
     val error: String? = null,
@@ -47,17 +47,17 @@ data class UfUiState(
 
     // --- history
     val range: Range = Range.M3,
-    val all: List<UfValue> = emptyList(),
+    val all: List<DatedValue> = emptyList(),
 
     /**
      * Every day in the selected window. Carried as state rather than computed
      * in a getter: the full series is ~18.000 days, and a getter would re-filter
      * it on every pointer event while scrubbing.
      */
-    val rangeValues: List<UfValue> = emptyList(),
+    val rangeValues: List<DatedValue> = emptyList(),
 
     /** [rangeValues] thinned to what a chart can actually draw. */
-    val chartValues: List<UfValue> = emptyList(),
+    val chartValues: List<DatedValue> = emptyList(),
 
     val scrubIndex: Int? = null,
     val lookupDate: LocalDate = LocalDate.now(),
@@ -130,7 +130,7 @@ class UfViewModel(
         const val MAX_CHART_POINTS = 400
     }
 
-    private fun project(series: List<UfValue>, indicators: List<Indicator>, sync: SyncInfo) {
+    private fun project(series: List<DatedValue>, indicators: List<Indicator>, sync: SyncInfo) {
         val today = LocalDate.now()
         val current = UfEngine.currentOf(series, today)
         val previous = current?.let { c -> series.filter { it.date < c.date }.maxByOrNull { it.date } }

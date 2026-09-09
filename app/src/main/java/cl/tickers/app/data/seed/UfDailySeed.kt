@@ -1,7 +1,7 @@
 package cl.tickers.app.data.seed
 
 import android.content.Context
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -40,13 +40,13 @@ object UfDailySeed {
      * Returns an empty list when the header is missing or unreadable rather
      * than throwing into app startup.
      */
-    fun parse(lines: List<String>): List<UfValue> {
+    fun parse(lines: List<String>): List<DatedValue> {
         val start = lines.firstOrNull { it.startsWith(START_KEY) }
             ?.removePrefix(START_KEY)?.trim()
             ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
             ?: return emptyList()
 
-        val out = ArrayList<UfValue>(lines.size)
+        val out = ArrayList<DatedValue>(lines.size)
         var day = start
         for (line in lines) {
             if (line.startsWith("#")) continue
@@ -55,7 +55,7 @@ object UfDailySeed {
                 val value = cents.toIntOrNull()
                 if (value != null) {
                     // Centavos to pesos with exactly two decimals, no float step.
-                    out += UfValue(day, BigDecimal.valueOf(value.toLong(), 2))
+                    out += DatedValue(day, BigDecimal.valueOf(value.toLong(), 2))
                 }
             }
             day = day.plusDays(1)
@@ -67,7 +67,7 @@ object UfDailySeed {
      * The whole series. Deliberately not cached: it is read once to seed the
      * database and holding ~18.000 objects afterwards would be pure waste.
      */
-    fun readAll(context: Context, asset: String = UF_ASSET): List<UfValue> =
+    fun readAll(context: Context, asset: String = UF_ASSET): List<DatedValue> =
         runCatching {
             context.assets.open(asset).bufferedReader().use { parse(it.readLines()) }
         }.getOrDefault(emptyList())
