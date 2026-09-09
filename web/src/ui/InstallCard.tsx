@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { ShareIcon } from "./icons.tsx";
-import { canShare, shareText } from "./share.tsx";
+import { canShare, isSafari, shareText } from "./share.tsx";
 
 /**
  * Offers to put the app on the home screen, so nobody has to retype the URL.
@@ -27,11 +27,6 @@ const DISMISSED_KEY = "ufchile.installDismissed.v1";
 const isStandalone = (): boolean =>
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as { standalone?: boolean }).standalone === true;
-
-const isSafari = (): boolean =>
-  /^((?!chrome|chromium|android|crios|fxios|edg|opr|samsungbrowser).)*safari/i.test(
-    navigator.userAgent,
-  );
 
 /**
  * True where installing means going through the share menu, which is Safari on
@@ -97,8 +92,8 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
     window.setTimeout(() => setCopied(null), 2500);
   };
 
-  // A browser that cannot hand the link to another app can only copy it, and
-  // the button says which one it is about to do.
+  // On a laptop the link is copied rather than shared, and the button says
+  // which one it is about to do.
   const linkLabel = copied === "copied"
     ? "Enlace copiado"
     : copied === "failed"
