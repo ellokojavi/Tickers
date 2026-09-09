@@ -46,6 +46,16 @@ grouping on the web. It caught two real divergences the first time it ran.
 - `app/src/test/java/cl/tickers/app/parity/UfGoldenVectorTest.kt`
 - `web/src/domain/__tests__/ufGoldenVectors.test.ts`
 
+`btc.json` covers the bitcoin conversions, the chart plan and the classification
+of a failed price fetch, wording included. The chart plan is in there because it
+is a design decision rather than an implementation detail: which candle width
+each span uses decides how the chart reads and what it costs in requests, and
+the two channels drawing the same span at different resolutions would be a real
+difference nobody would think to look for.
+
+- `app/src/test/java/cl/tickers/app/parity/BtcGoldenVectorTest.kt`
+- `web/src/domain/__tests__/btcGoldenVectors.test.ts`
+
 Neither side generates the file. It is the contract, and both must agree with
 it exactly - string equality of the decimal representation, not a tolerance.
 Changing the engine on purpose means changing the fixture once, and then both

@@ -1,0 +1,304 @@
+{
+  "rates": {
+    "btcUsd": "80341.30",
+    "usdClp": "926.94",
+    "uf": "40885.63"
+  },
+  "btcUsdToClp": [
+    {
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "expected": "74471565"
+    },
+    {
+      "btcUsd": "0.005",
+      "usdClp": "926.94",
+      "expected": "5"
+    },
+    {
+      "btcUsd": "100000",
+      "usdClp": "1000",
+      "expected": "100000000"
+    },
+    {
+      "btcUsd": "1",
+      "usdClp": "0.5",
+      "expected": "1"
+    },
+    {
+      "btcUsd": "67890.125",
+      "usdClp": "955.005",
+      "expected": "64835409"
+    }
+  ],
+  "btcToClp": [
+    {
+      "btc": "1",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "74471565"
+    },
+    {
+      "btc": "0.00000001",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "1"
+    },
+    {
+      "btc": "0.5",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "37235782"
+    },
+    {
+      "btc": "0.12345678",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "9194020"
+    },
+    {
+      "btc": "21000000",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "1563902857062000"
+    },
+    {
+      "btc": "0",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "0"
+    }
+  ],
+  "clpToBtc": [
+    {
+      "clp": "1000000",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "0.01342794"
+    },
+    {
+      "clp": "1",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "0.00000001"
+    },
+    {
+      "clp": "74000000",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "0.99366786"
+    },
+    {
+      "clp": "0",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "0.00000000"
+    },
+    {
+      "clp": "999999999999",
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "13427.94400889"
+    }
+  ],
+  "btcUsdToUf": [
+    {
+      "btcUsd": "80341.30",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "1821.4606"
+    },
+    {
+      "btcUsd": "0.005",
+      "usdClp": "926.94",
+      "uf": "40885.63",
+      "expected": "0.0001"
+    },
+    {
+      "btcUsd": "100000",
+      "usdClp": "1000",
+      "uf": "40885.63",
+      "expected": "2445.8471"
+    },
+    {
+      "btcUsd": "1",
+      "usdClp": "0.5",
+      "uf": "40885.63",
+      "expected": "0.0000"
+    },
+    {
+      "btcUsd": "67890.125",
+      "usdClp": "955.005",
+      "uf": "40885.63",
+      "expected": "1585.7750"
+    }
+  ],
+  "chartPlan": [
+    {
+      "horizon": "H1",
+      "granularitySec": 60,
+      "keepEvery": 1,
+      "refreshMs": 60000,
+      "candlesNeeded": 60
+    },
+    {
+      "horizon": "D1",
+      "granularitySec": 300,
+      "keepEvery": 1,
+      "refreshMs": 300000,
+      "candlesNeeded": 288
+    },
+    {
+      "horizon": "D7",
+      "granularitySec": 3600,
+      "keepEvery": 1,
+      "refreshMs": 3600000,
+      "candlesNeeded": 168
+    },
+    {
+      "horizon": "D30",
+      "granularitySec": 21600,
+      "keepEvery": 1,
+      "refreshMs": 21600000,
+      "candlesNeeded": 120
+    },
+    {
+      "horizon": "Y1",
+      "granularitySec": 86400,
+      "keepEvery": 1,
+      "refreshMs": 86400000,
+      "candlesNeeded": 365
+    },
+    {
+      "horizon": "Y5",
+      "granularitySec": 86400,
+      "keepEvery": 7,
+      "refreshMs": 86400000,
+      "candlesNeeded": 1826
+    }
+  ],
+  "classify": [
+    {
+      "name": "sin red",
+      "network": "NONE",
+      "failures": [
+        {
+          "source": "Coinbase",
+          "message": "timeout",
+          "transport": true
+        }
+      ],
+      "expected": "OFFLINE",
+      "isConnectivity": true
+    },
+    {
+      "name": "sin red, sin fallos registrados",
+      "network": "NONE",
+      "failures": [],
+      "expected": "OFFLINE",
+      "isConnectivity": true
+    },
+    {
+      "name": "red sin internet",
+      "network": "UNVALIDATED",
+      "failures": [
+        {
+          "source": "Coinbase",
+          "message": "HTTP 500",
+          "transport": false
+        }
+      ],
+      "expected": "NO_INTERNET",
+      "isConnectivity": true
+    },
+    {
+      "name": "online, todo transporte",
+      "network": "ONLINE",
+      "failures": [
+        {
+          "source": "Coinbase",
+          "message": "timeout",
+          "transport": true
+        },
+        {
+          "source": "Kraken",
+          "message": "timeout",
+          "transport": true
+        }
+      ],
+      "expected": "UNREACHABLE",
+      "isConnectivity": false
+    },
+    {
+      "name": "online, sin fallos",
+      "network": "ONLINE",
+      "failures": [],
+      "expected": "UNREACHABLE",
+      "isConnectivity": false
+    },
+    {
+      "name": "online, una fuente responde mal",
+      "network": "ONLINE",
+      "failures": [
+        {
+          "source": "Coinbase",
+          "message": "timeout",
+          "transport": true
+        },
+        {
+          "source": "Kraken",
+          "message": "HTTP 500",
+          "transport": false
+        }
+      ],
+      "expected": "SOURCE",
+      "isConnectivity": false
+    },
+    {
+      "name": "online, todas responden mal",
+      "network": "ONLINE",
+      "failures": [
+        {
+          "source": "Coinbase",
+          "message": "HTTP 500",
+          "transport": false
+        }
+      ],
+      "expected": "SOURCE",
+      "isConnectivity": false
+    }
+  ],
+  "copy": [
+    {
+      "kind": "OFFLINE",
+      "headline": "Sin conexión",
+      "hint": "Revisa el wifi o los datos móviles. El precio se actualiza solo al volver."
+    },
+    {
+      "kind": "NO_INTERNET",
+      "headline": "La red no llega a internet",
+      "hint": "Este wifi puede necesitar que inicies sesión."
+    },
+    {
+      "kind": "UNREACHABLE",
+      "headline": "No se pudo llegar a las fuentes de precio",
+      "hint": "Tu conexión está activa, así que probablemente sea pasajero."
+    },
+    {
+      "kind": "SOURCE",
+      "headline": "Las fuentes de precio respondieron con error",
+      "hint": "No hay nada que hacer; la app sigue reintentando."
+    }
+  ]
+}
