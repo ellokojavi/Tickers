@@ -6,7 +6,7 @@
 > La **Unidad de Fomento** a mano: el valor de hoy, toda su historia desde 1977,
 > una calculadora de inflación y un simulador de créditos hipotecarios.
 
-**[⬇ Download the latest APK &nbsp;·&nbsp; Descargar la última versión](https://github.com/ellokojavi/UFChile/releases/latest/download/UFChile.apk)**
+**[⬇ Download the APK &nbsp;·&nbsp; Descargar el APK](https://github.com/ellokojavi/UFChile/releases/latest/download/UFChile.apk)** &nbsp;·&nbsp; **[🌐 Open the web app &nbsp;·&nbsp; Abrir la app web](https://ellokojavi.github.io/UFChile/)**
 
 | Today's value<br><sub>El valor de hoy</sub> | History since 1977<br><sub>Historia desde 1977</sub> | Inflation calculator<br><sub>Calculadora de inflación</sub> |
 |:---:|:---:|:---:|
@@ -45,9 +45,16 @@ asks for no sensitive permission and never prompts you for one: beyond internet
 access it declares only what the background-refresh library needs, none of
 which touches your data.
 
-**Requirements:** Android 8.0 or newer. The app is signed but is not
-distributed through Google Play, so Android will ask you to allow the install
-from your file manager or browser the first time.
+**There is also a web version** at
+[ellokojavi.github.io/UFChile](https://ellokojavi.github.io/UFChile/). It does
+everything the Android app does, works offline once opened, and installs to a
+home screen from the browser menu. It needs no store and no account, which
+makes it the way to use this on an iPhone.
+
+**Requirements:** Android 8.0 or newer for the APK; any current browser for the
+web version. The APK is signed but is not distributed through Google Play, so
+Android will ask you to allow the install from your file manager or browser the
+first time.
 
 ## Español
 
@@ -74,9 +81,16 @@ No pide ningún permiso sensible ni te muestra un diálogo de permisos: además 
 acceso a internet solo declara los que necesita la librería de actualización en
 segundo plano, y ninguno toca tus datos.
 
-**Requisitos:** Android 8.0 o superior. La app está firmada pero no se
-distribuye por Google Play, así que Android te pedirá autorizar la instalación
-desde tu gestor de archivos o navegador la primera vez.
+**También hay versión web** en
+[ellokojavi.github.io/UFChile](https://ellokojavi.github.io/UFChile/). Hace todo
+lo que hace la app de Android, funciona sin conexión una vez abierta, y se
+instala en la pantalla de inicio desde el menú del navegador. No necesita tienda
+ni cuenta, que es lo que la vuelve la forma de usar esto en un iPhone.
+
+**Requisitos:** Android 8.0 o superior para el APK; cualquier navegador actual
+para la versión web. El APK está firmado pero no se distribuye por Google Play,
+así que Android te pedirá autorizar la instalación desde tu gestor de archivos o
+navegador la primera vez.
 
 **Para recibir actualizaciones automáticas**, agrega este repositorio a
 [Obtainium](https://github.com/ImranR98/Obtainium), una app libre y gratuita que
