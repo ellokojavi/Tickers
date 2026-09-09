@@ -206,6 +206,8 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
 .table-scroll { overflow: auto; max-height: calc(100vh - 120px); }
 
 .footer { text-align: center; padding: 24px 8px 8px; }
+/* Room for the floating button, which would otherwise sit on the last line. */
+.view-creditos > .footer { padding-bottom: 72px; }
 .empty { text-align: center; padding: 40px 16px; color: var(--on-surface-variant); }
 .fab {
   position: fixed; right: 20px; bottom: calc(84px + env(safe-area-inset-bottom));

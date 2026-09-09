@@ -111,6 +111,18 @@ fun CreditListScreen(onOpen: (Long) -> Unit) {
                     onDelete = { vm.delete(summary.simulation) },
                 )
             }
+
+            // Anyone typing in what they earn and what they owe deserves to be
+            // told where it goes: nowhere.
+            item {
+                Text(
+                    "Tus simulaciones son anónimas y seguras: se guardan solo en este " +
+                        "dispositivo. No se envían a ningún servidor ni se comparten con nadie.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
     }
 }

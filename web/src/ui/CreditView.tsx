@@ -147,6 +147,15 @@ export const CreditView = ({ data }: { data: UfData }) => {
         );
       })}
       </div>
+      {/* Anyone typing in what they earn and what they owe deserves to be told
+          where it goes: nowhere. */}
+      <div class="footer">
+        <p class="tiny">
+          Tus simulaciones son anónimas y seguras: se guardan solo en el navegador de este
+          dispositivo. No se envían a ningún servidor ni se comparten con nadie. Si borras los
+          datos del navegador, se pierden.
+        </p>
+      </div>
       <button type="button" class="fab" onClick={() => setEditing({ id: null })}>+ Nueva</button>
     </>
   );
