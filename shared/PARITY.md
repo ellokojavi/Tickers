@@ -103,5 +103,7 @@ matter: without it the Kotlin half only runs when someone remembers.
 | Offline service worker | Web | The Android app bundles its data and its code already. |
 | Background refresh (WorkManager) | Android | The web app fetches when it is opened. |
 | Room database for saved simulations | Android | The web app uses localStorage, same data, same shape. |
+| Binance in the bitcoin price chain | Android | It sends no CORS header, so a browser cannot read it. The other three sources are shared. |
+| NO_INTERNET as a failure wording | Android | A browser can say it has no network but cannot tell a captive portal from a working one. |
 
 Anything not in this table is expected on both.
