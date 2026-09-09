@@ -183,7 +183,7 @@ export const DateField = (
  * scroll the page.
  */
 export const Sparkline = (
-  { values, height = 200, selected, onScrub }: {
+  { values, height = 200, selected, onScrub, label }: {
     // Only the values are drawn; x is the index. Widened from UfValue so the
     // bitcoin chart, whose points are timestamps rather than calendar days,
     // can use the same one.
@@ -191,6 +191,8 @@ export const Sparkline = (
     height?: number;
     selected: number | null;
     onScrub: (index: number | null) => void;
+    /** What the line is of, for screen readers: "Evolución del valor de la UF". */
+    label: string;
   },
 ) => {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -289,7 +291,7 @@ export const Sparkline = (
       class="chart"
       style={{ height }}
       role="img"
-      aria-label="Evolución del valor de la UF"
+      aria-label={label}
       onPointerDown={(e: JSX.TargetedPointerEvent<HTMLCanvasElement>) => onScrub(indexFrom(e.clientX))}
       onPointerMove={(e: JSX.TargetedPointerEvent<HTMLCanvasElement>) => {
         if (e.buttons > 0) onScrub(indexFrom(e.clientX));

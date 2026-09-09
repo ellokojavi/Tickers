@@ -1,7 +1,6 @@
 package cl.tickers.app.ui.usd
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,36 +32,22 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.core.share.shareText
-import cl.tickers.app.domain.engine.UfEngine
 import cl.tickers.app.ui.appViewModel
 import cl.tickers.app.ui.components.AppCard
-import cl.tickers.app.ui.components.ChipRow
+import cl.tickers.app.ui.components.HistoryChartCard
 import cl.tickers.app.ui.components.NumberField
 import cl.tickers.app.ui.components.Pill
 import cl.tickers.app.ui.components.ScreenHeader
 import cl.tickers.app.ui.components.SectionTitle
-import cl.tickers.app.ui.components.Sparkline
 import cl.tickers.app.ui.components.signColor
 import cl.tickers.app.ui.value.Range
 import java.math.BigDecimal
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun UsdScreen() {
     val context = LocalContext.current
     val vm = appViewModel { UsdViewModel(context.applicationContext) }
     val ui by vm.ui.collectAsStateWithLifecycle()
-
-    val spanPct = ui.rangeValues.takeIf { it.size >= 2 }?.let {
-        UfEngine.deltaPct(it.first().value, it.last().value)
-    }
-    val spanAnnual = ui.rangeValues.takeIf { it.size >= 2 }?.let {
-        UfEngine.annualisedPct(
-            it.first().value,
-            it.last().value,
-            ChronoUnit.DAYS.between(it.first().date, it.last().date),
-        )
-    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -79,7 +64,7 @@ fun UsdScreen() {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        ui.shown?.let { Fmt.longDate(it.date) }
+                        ui.current?.let { Fmt.longDate(it.date) }
                             ?: if (ui.loading) "Cargando…" else "Sin datos",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -98,7 +83,7 @@ fun UsdScreen() {
                     }
                 }
                 Text(
-                    ui.shown?.let { Fmt.clpExact(it.value) } ?: "—",
+                    ui.current?.let { Fmt.clpExact(it.value) } ?: "—",
                     style = MaterialTheme.typography.displaySmall,
                 )
                 ui.dailyDelta?.let {
@@ -148,45 +133,19 @@ fun UsdScreen() {
         }
 
         item {
-            AppCard {
-                SectionTitle("Histórico")
-                ChipRow(
-                    options = Range.entries,
-                    selected = ui.range,
-                    onSelect = vm::onRange,
-                    label = { it.label },
-                )
-                spanPct?.let {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        buildString {
-                            append("${Fmt.pctSigned(it)} en el período")
-                            spanAnnual?.let { a -> append(" · ${Fmt.pctSigned(a)} anualizado") }
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = signColor(it),
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                if (ui.chartValues.size < 2) {
-                    Text(
-                        if (ui.loading) "Cargando el gráfico…" else "Sin datos para este rango",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else {
-                    Sparkline(
-                        values = ui.chartValues,
-                        selectedIndex = ui.scrubIndex,
-                        onScrub = vm::onScrub,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        EndLabel(ui.chartValues.first())
-                        EndLabel(ui.chartValues.last())
-                    }
-                }
-            }
+            HistoryChartCard(
+                ranges = Range.entries,
+                range = ui.range,
+                onRange = vm::onRange,
+                rangeLabel = { it.label },
+                points = ui.chartValues,
+                stamp = { Fmt.shortDate(it.date) },
+                amount = { Fmt.clpExact(it.value) },
+                summary = ui.chartSummary,
+                scrubIndex = ui.scrubIndex,
+                onScrub = vm::onScrub,
+                loading = ui.loading,
+            )
         }
 
         item {
@@ -200,18 +159,6 @@ fun UsdScreen() {
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
-    }
-}
-
-@Composable
-private fun EndLabel(value: cl.tickers.app.domain.model.UfValue) {
-    Column {
-        Text(
-            Fmt.shortDate(value.date),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-        )
-        Text(Fmt.clpExact(value.value), style = MaterialTheme.typography.bodyMedium)
     }
 }
 

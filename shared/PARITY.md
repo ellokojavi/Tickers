@@ -37,8 +37,12 @@ zero-rate divisor.
 - `app/src/test/java/cl/tickers/app/parity/GoldenVectorTest.kt`
 - `web/src/domain/__tests__/goldenVectors.test.ts`
 
-`uf.json` covers peso conversions, deltas, the inflation re-adjustment, and
-formatting. Formatting is in there because a thousands separator or a rounding
+`uf.json` covers peso conversions, deltas, the inflation re-adjustment, the
+chart summary, and formatting. The chart summary is what every history chart
+says above its line, and it is in there because whether a window is long
+enough to annualise at all is a design decision: the two channels disagreeing
+about it would show as one chart saying more than the other. Formatting is in
+there because a thousands separator or a rounding
 mode that differs between the channels is as visible as a wrong figure, and the
 two get there by completely different routes: ICU on Android, hand-rolled
 grouping on the web. It caught two real divergences the first time it ran.

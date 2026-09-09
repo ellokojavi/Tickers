@@ -5,7 +5,7 @@ around one principle: **anything that produces a number must be verifiable
 without a device, and anything a user can tap must be verified on one.**
 
 ```bash
-./gradlew test                  # 146 JVM tests  — seconds, no device
+./gradlew test                  # 157 JVM tests  — seconds, no device
 ./gradlew connectedAndroidTest  # 12 UI tests    — needs a device or emulator
 ```
 

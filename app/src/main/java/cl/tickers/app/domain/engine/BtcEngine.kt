@@ -57,13 +57,14 @@ object BtcEngine {
 
 private const val MINUTE = 60_000L
 
+/** Labels are written the way the UF and dollar ranges are: "1A", not "1a". */
 enum class Horizon(val label: String, val millis: Long) {
-    H1("1h", 60 * MINUTE),
-    D1("24h", 24 * 60 * MINUTE),
-    D7("7d", 7 * 24 * 60 * MINUTE),
-    D30("30d", 30 * 24 * 60 * MINUTE),
-    Y1("1a", 365L * 24 * 60 * MINUTE),
-    Y5("5a", 1826L * 24 * 60 * MINUTE),
+    H1("1H", 60 * MINUTE),
+    D1("24H", 24 * 60 * MINUTE),
+    D7("7D", 7 * 24 * 60 * MINUTE),
+    D30("30D", 30 * 24 * 60 * MINUTE),
+    Y1("1A", 365L * 24 * 60 * MINUTE),
+    Y5("5A", 1826L * 24 * 60 * MINUTE),
 }
 
 data class ChartPlan(

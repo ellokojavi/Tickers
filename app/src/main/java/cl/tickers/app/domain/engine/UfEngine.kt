@@ -79,6 +79,28 @@ object UfEngine {
     }
 
     /**
+     * A window shorter than this is not annualised. Three weeks: a 1M window
+     * of a business-day series still qualifies whatever weekday it opens on,
+     * and a 7-day one never does. Compounding a week into a year gives a
+     * figure that is arithmetic but not information.
+     */
+    const val ANNUALISE_MIN_DAYS = 21L
+
+    /**
+     * What every history chart says above its line: the change over the window
+     * and, when the window is long enough to mean anything, the same change as
+     * a constant annual rate. Every chart in the app reads its window through
+     * this so they cannot disagree about when to annualise.
+     */
+    data class ChartSummary(val periodPct: BigDecimal, val annualisedPct: BigDecimal?)
+
+    fun chartSummary(from: BigDecimal, to: BigDecimal, days: Long): ChartSummary =
+        ChartSummary(
+            periodPct = deltaPct(from, to),
+            annualisedPct = if (days >= ANNUALISE_MIN_DAYS) annualisedPct(from, to, days) else null,
+        )
+
+    /**
      * The last value in [series] that is not in the future.
      * The series may legitimately contain published future dates.
      */
