@@ -319,7 +319,7 @@ in Room; deletions offer an undo. Nothing leaves the device.
 | RNF-9 | Light and dark themes, following the system until set manually |
 | RNF-10 | Calculation engines are pure Kotlin, testable without a device |
 | RNF-12 | State independence from the CMF, Banco Central and INE, and attribute sources as their terms require, without interrupting the user |
-| RNF-11 | Chilean iconography (the flag as the app mark, the copihue and condor as illustrations) without breaking the minimalist palette |
+| RNF-11 | A candlestick chart as the app mark, with Chilean illustrations (the condor, the bank) that do not break the minimalist palette |
 
 ---
 
@@ -630,25 +630,28 @@ UF change notifications; UTM and tax calculators; iOS.
 
 ## Iconography
 
-The app mark is the **Chilean flag in a circle** with the UF's own series
-climbing across it.
+The app mark is a **candlestick chart**: seven candles, three red and four
+green, climbing left to right on a black card with a green frame. Every icon is
+generated from one description of that geometry by `tools/build_icons.py`,
+which writes the SVG favicon, the PWA and apple-touch PNGs, and the Android
+vector drawables. Edit the script, not the outputs.
 
-A launcher crops the central 72×72 of a 108×108 adaptive icon and scales it up,
-so the circle is drawn at exactly that radius: on a circular mask it fills the
-icon edge to edge, and on a squircle it stays a clean circle rather than being
-cut into a rounded square. The source artwork separated the green line from the
-red field with a glow; a vector drawable cannot blur, so a white underlay stroke
-does the same job. Without it the bright green vibrates against the red. The
-themed (monochrome) variant drops the flag, which cannot survive a single tint,
-and keeps the ascending series.
+A launcher crops the central 72×72 of a 108×108 adaptive icon, and may mask it
+to a circle, so the Android foreground scales the candles to fit the 66dp safe
+zone and drops the frame, which no mask would preserve. The PWA ships a
+separate maskable icon for the same reason: full bleed, no frame, candles
+inside the safe zone. The apple-touch icon is opaque to the edge because iOS
+rounds the corners itself. The themed (monochrome) variant keeps the same
+candle silhouettes in one tone.
 
 Empty states reuse the symbol of the thing that is missing: the mortgage list
 shows the same bank mark its tab carries, and an empty chart shows a **condor**,
 drawn and compared at real sizes first, which is why it only ever appears
 large: below about 48px it loses its silhouette and reads as an insect.
 
-A copihue was drawn for both the app mark and the empty simulations state
-before the flag and the bank replaced them. The iterations are worth keeping in
+The mark was first the Chilean flag in a circle with the UF series climbing
+across it, and before that a copihue, which was also tried for the empty
+simulations state before the bank replaced it. The iterations are worth keeping in
 mind if the mark is ever revisited: an outline copihue reads as a scribble at
 list sizes, a narrow bell with steeply recurved tepals stops reading as a
 flower, and only a wide filled bell with tepals flaring at about 35° survives.
