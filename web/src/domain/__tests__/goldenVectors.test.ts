@@ -15,7 +15,7 @@ import type { MortgageInput, PrepaymentModeKey, RateConventionKey } from "../mod
  * both suites confirm the change landed on both platforms.
  *
  * The Android counterpart is
- * app/src/test/java/cl/ufchile/app/parity/GoldenVectorTest.kt.
+ * app/src/test/java/cl/tickers/app/parity/GoldenVectorTest.kt.
  */
 
 interface RawInput {

@@ -122,7 +122,7 @@ start = date.fromisoformat(keys[0])
 end = date.fromisoformat(keys[-1])
 
 lines = [
-    "# UF Chile - serie diaria completa de la Unidad de Fomento",
+    "# Tickers - serie diaria completa de la Unidad de Fomento",
     "# fuente: Banco Central de Chile / CMF, via mindicador.cl",
     f"# generado: {date.today().isoformat()}",
     f"# inicio: {start.isoformat()}",

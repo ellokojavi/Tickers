@@ -19,6 +19,9 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+// Keeps its old prefix for the reason given in data/store.ts: renaming a
+// storage key does not carry the value across, it abandons it, and someone who
+// has already dismissed this card should not be asked again.
 const DISMISSED_KEY = "ufchile.installDismissed.v1";
 
 const isStandalone = (): boolean =>
@@ -88,7 +91,7 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
 
   const shareLink = async () => {
     const url = window.location.href;
-    const outcome = await shareText("UF Chile", url);
+    const outcome = await shareText("Tickers", url);
     if (outcome !== "copied" && outcome !== "failed") return;
     setCopied(outcome);
     window.setTimeout(() => setCopied(null), 2500);

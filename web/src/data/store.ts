@@ -8,6 +8,10 @@ import type { MortgageInput, Simulation } from "../domain/models.ts";
  * makes. Money is stored as its decimal string, never as a JavaScript number,
  * for the same reason it is never a Double there.
  */
+// The "ufchile" prefix outlives the app's rename on purpose. These keys are
+// where a browser already holds someone's saved simulations and settings;
+// renaming them would not migrate that data, it would silently orphan it. The
+// key is an identifier, not a name, and it is never shown to anyone.
 const KEY = "ufchile.simulations.v1";
 
 interface StoredInput {

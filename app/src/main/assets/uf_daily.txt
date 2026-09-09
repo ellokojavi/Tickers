@@ -1,4 +1,4 @@
-# UF Chile - serie diaria completa de la Unidad de Fomento
+# Tickers - serie diaria completa de la Unidad de Fomento
 # fuente: Banco Central de Chile / CMF, via mindicador.cl
 # generado: 2026-09-09
 # inicio: 1977-08-01

@@ -1,6 +1,6 @@
 # Keeping the two channels the same app
 
-UF Chile ships twice: an Android app in Kotlin and a web app in TypeScript.
+Tickers ships twice: an Android app in Kotlin and a web app in TypeScript.
 They are two implementations, not one codebase compiled twice, so they can
 drift. This file says what is allowed to drift, what is not, and what to do
 when a feature arrives.
@@ -34,7 +34,7 @@ the engines' own scale, and both suites read both files.
 prepayment modes, insurance and upfront costs, month-end date clamping and the
 zero-rate divisor.
 
-- `app/src/test/java/cl/ufchile/app/parity/GoldenVectorTest.kt`
+- `app/src/test/java/cl/tickers/app/parity/GoldenVectorTest.kt`
 - `web/src/domain/__tests__/goldenVectors.test.ts`
 
 `uf.json` covers peso conversions, deltas, the inflation re-adjustment, and
@@ -43,7 +43,7 @@ mode that differs between the channels is as visible as a wrong figure, and the
 two get there by completely different routes: ICU on Android, hand-rolled
 grouping on the web. It caught two real divergences the first time it ran.
 
-- `app/src/test/java/cl/ufchile/app/parity/UfGoldenVectorTest.kt`
+- `app/src/test/java/cl/tickers/app/parity/UfGoldenVectorTest.kt`
 - `web/src/domain/__tests__/ufGoldenVectors.test.ts`
 
 Neither side generates the file. It is the contract, and both must agree with

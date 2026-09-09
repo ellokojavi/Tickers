@@ -11,7 +11,7 @@
 // that no longer exists and renders nothing at all. The page therefore goes to
 // the network first and falls back to the cache only when there is no network,
 // which is the case the cache is actually for.
-const VERSION = "ufchile-v2";
+const VERSION = "tickers-v3";
 const SHELL = [
   "./",
   "./index.html",

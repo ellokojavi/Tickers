@@ -20,7 +20,7 @@ export const AboutSheet = ({ onClose }: { onClose: () => void }) => (
     <Card>
       <SectionTitle>Aplicación independiente</SectionTitle>
       <p class="muted">
-        UF Chile es una aplicación independiente. No está afiliada, patrocinada ni respaldada por
+        Tickers es una aplicación independiente. No está afiliada, patrocinada ni respaldada por
         la Comisión para el Mercado Financiero (CMF), el Banco Central de Chile, el Instituto
         Nacional de Estadísticas (INE), ni por ningún banco o institución financiera.
       </p>
@@ -70,9 +70,9 @@ export const AboutSheet = ({ onClose }: { onClose: () => void }) => (
 
     <Card>
       <SectionTitle>Versión</SectionTitle>
-      <p class="muted">UF Chile {__APP_VERSION__} · versión web</p>
+      <p class="muted">Tickers {__APP_VERSION__} · versión web</p>
       <p>
-        <a href="https://github.com/ellokojavi/UFChile" target="_blank" rel="noreferrer">
+        <a href="https://github.com/ellokojavi/Tickers" target="_blank" rel="noreferrer">
           Código fuente, app para Android y licencia MIT
         </a>
       </p>

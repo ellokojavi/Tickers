@@ -7,8 +7,8 @@ const version = JSON.parse(readFileSync("./package.json", "utf8")).version as st
 export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(version) },
   plugins: [preact()],
-  // Served from https://<user>.github.io/UFChile/
-  base: "/UFChile/",
+  // Served from https://<user>.github.io/Tickers/
+  base: "/Tickers/",
   build: { target: "es2022" },
   test: { environment: "node" },
 });
