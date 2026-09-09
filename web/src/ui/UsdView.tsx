@@ -3,11 +3,12 @@ import * as Fmt from "../core/format.ts";
 import { money } from "../domain/money.ts";
 import { today as todayIso, daysBetween } from "../domain/dates.ts";
 import {
-  annualisedPct, currentOf, delta, deltaPct, downsample, historyWindow,
+  chartSummary, currentOf, delta, downsample, historyWindow,
 } from "../domain/ufEngine.ts";
 import { clpToUsd, usdToClp } from "../domain/fx.ts";
 import type { UsdData } from "../data/useUsdData.ts";
-import { Card, Chips, NumberField, Pill, SectionTitle, Sparkline } from "./components.tsx";
+import { Card, NumberField, Pill, SectionTitle } from "./components.tsx";
+import { HistoryCard } from "./HistoryCard.tsx";
 import { ShareButton } from "./share.tsx";
 
 /** Same ranges as the UF chart: the two series are read the same way. */
@@ -20,6 +21,9 @@ const RANGES = [
   { key: "MAX", label: "Máx", months: null },
 ] as const;
 type RangeKey = (typeof RANGES)[number]["key"];
+
+/** More points than this cannot be resolved on a phone-width chart. */
+const MAX_CHART_POINTS = 400;
 
 export const UsdView = ({ data }: { data: UsdData }) => {
   const [range, setRange] = useState<RangeKey>("1A");
@@ -40,20 +44,17 @@ export const UsdView = ({ data }: { data: UsdData }) => {
     () => historyWindow(data.series, months, today),
     [data.series, months, today],
   );
-  const points = useMemo(() => downsample(windowed, 400), [windowed]);
+  const points = useMemo(() => downsample(windowed, MAX_CHART_POINTS), [windowed]);
 
   const rate = current?.value ?? null;
   const dailyDelta = current !== null && previous !== null ? delta(previous.value, current.value) : null;
-  const spanPct = windowed.length >= 2
-    ? deltaPct(windowed[0]!.value, windowed.at(-1)!.value) : null;
-  const spanAnnual = windowed.length >= 2
-    ? annualisedPct(
+  // Read off the full window rather than the thinned one.
+  const summary = windowed.length >= 2
+    ? chartSummary(
         windowed[0]!.value, windowed.at(-1)!.value,
         daysBetween(windowed[0]!.date, windowed.at(-1)!.date),
       )
     : null;
-
-  const shown = scrub !== null && points[scrub] !== undefined ? points[scrub]! : current;
 
   // One dollar converted, so the card answers before anyone types in it.
   const clpShown = clpText === "" && rate !== null && usdText === "1"
@@ -79,17 +80,17 @@ export const UsdView = ({ data }: { data: UsdData }) => {
           <span class="muted">
             {current === null
               ? (data.loading ? "Cargando…" : "Sin datos")
-              : Fmt.longDate(shown!.date)}
+              : Fmt.longDate(current.date)}
           </span>
           {current !== null && (
             <ShareButton
               what="el valor del dólar"
               title="Dólar observado"
-              text={shareToday(shown!.date, shown!.value, dailyDelta)}
+              text={shareToday(current.date, current.value, dailyDelta)}
             />
           )}
         </div>
-        <p class="hero-value">{shown === null ? "—" : Fmt.clpExact(shown.value)}</p>
+        <p class="hero-value">{current === null ? "—" : Fmt.clpExact(current.value)}</p>
         {dailyDelta !== null && (
           <div class="row" style={{ justifyContent: "flex-start", gap: 14, marginTop: 8 }}>
             <span class={dailyDelta.cmp(0) >= 0 ? "positive" : "negative"}>
@@ -131,38 +132,19 @@ export const UsdView = ({ data }: { data: UsdData }) => {
         />
       </Card>
 
-      <Card>
-        <SectionTitle>Histórico</SectionTitle>
-        <Chips
-          label="Rango"
-          options={RANGES.map((r) => ({ key: r.key, label: r.label }))}
-          selected={range}
-          onSelect={setRange}
-        />
-        {spanPct !== null && (
-          <p class={spanPct.cmp(0) >= 0 ? "positive" : "negative"} style={{ margin: "10px 0 0" }}>
-            {Fmt.pctSigned(spanPct)} en el período
-            {spanAnnual !== null && ` · ${Fmt.pctSigned(spanAnnual)} anualizado`}
-          </p>
-        )}
-        {points.length < 2 ? (
-          <p class="muted" style={{ marginTop: 16 }}>Cargando el gráfico…</p>
-        ) : (
-          <>
-            <Sparkline values={points} selected={scrub} onScrub={setScrub} />
-            <div class="row" style={{ marginTop: 8, alignItems: "flex-start" }}>
-              <div>
-                <div class="tiny">{Fmt.shortDate(points[0]!.date)}</div>
-                <div>{Fmt.clpExact(points[0]!.value)}</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div class="tiny">{Fmt.shortDate(points.at(-1)!.date)}</div>
-                <div>{Fmt.clpExact(points.at(-1)!.value)}</div>
-              </div>
-            </div>
-          </>
-        )}
-      </Card>
+      <HistoryCard
+        ranges={RANGES}
+        range={range}
+        onRange={setRange}
+        points={points}
+        stamp={(v) => Fmt.shortDate(v.date)}
+        amount={(v) => Fmt.clpExact(v.value)}
+        summary={summary}
+        scrub={scrub}
+        onScrub={setScrub}
+        loading={data.loading}
+        chartLabel="Evolución del dólar observado"
+      />
 
       <div class="footer">
         <p class="tiny">

@@ -31,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SelectableDates
@@ -60,7 +59,7 @@ import cl.tickers.app.domain.model.DataSource
 import cl.tickers.app.ui.about.AboutDialog
 import cl.tickers.app.ui.appViewModel
 import cl.tickers.app.ui.components.AppCard
-import cl.tickers.app.ui.components.ChipRow
+import cl.tickers.app.ui.components.HistoryChartCard
 import cl.tickers.app.ui.components.KeyValueRow
 import cl.tickers.app.ui.components.toUtcDate
 import cl.tickers.app.ui.components.toUtcMillis
@@ -68,7 +67,6 @@ import cl.tickers.app.ui.components.NumberField
 import cl.tickers.app.ui.components.Pill
 import cl.tickers.app.ui.components.ScreenHeader
 import cl.tickers.app.ui.components.SectionTitle
-import cl.tickers.app.ui.components.Sparkline
 import cl.tickers.app.ui.components.signColor
 import java.time.Instant
 import java.time.LocalDate
@@ -196,7 +194,22 @@ fun UfValueScreen(
             }
         }
 
-        item { ChartCard(ui, vm) }
+        item {
+            HistoryChartCard(
+                ranges = Range.entries,
+                range = ui.range,
+                onRange = vm::setRange,
+                rangeLabel = { it.label },
+                points = ui.chartValues,
+                stamp = { Fmt.shortDate(it.date) },
+                amount = { Fmt.clpExact(it.value) },
+                summary = ui.chartSummary,
+                scrubIndex = ui.scrubIndex,
+                onScrub = vm::scrub,
+                loading = ui.loadingOlder,
+                message = ui.historyMessage,
+            )
+        }
 
         item { LookupCard(ui, onChangeDate = { showPicker = true }) }
 
@@ -372,105 +385,6 @@ private fun HeroCard(ui: UfUiState, onShare: () -> Unit, onSourceClick: () -> Un
                 Pill("Actualizado ${Fmt.relativeDay(it.date)}", icon = Icons.Outlined.Schedule)
             }
         }
-    }
-}
-
-@Composable
-private fun ChartCard(ui: UfUiState, vm: UfViewModel) {
-    AppCard {
-        SectionTitle("Histórico")
-
-        ChipRow(
-            options = Range.entries.toList(),
-            selected = ui.range,
-            onSelect = vm::setRange,
-            label = { it.label },
-        )
-        if (ui.loadingOlder) {
-            Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(Modifier.fillMaxWidth())
-        }
-        ui.historyMessage?.let {
-            Text(
-                it,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
-        Spacer(Modifier.height(10.dp))
-
-        // One line above the chart carries either the period summary or, while
-        // a finger is down, the day being explored. Below the chart it would
-        // fall past the fold.
-        val scrubbed = ui.scrubbed
-        if (scrubbed != null) {
-            Text(
-                "${Fmt.shortDate(scrubbed.date)}   ${Fmt.clpExact(scrubbed.value)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                val pct = ui.rangeChangePct
-                if (pct != null) {
-                    Text(
-                        "${Fmt.pctSigned(pct)} en el período",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = signColor(pct),
-                    )
-                    ui.rangeAnnualisedPct?.let { annual ->
-                        Text(
-                            "·",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline,
-                        )
-                        Text(
-                            "${Fmt.pctSigned(annual)} anualizado",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = signColor(annual),
-                        )
-                    }
-                } else {
-                    Text(" ", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-
-        Sparkline(
-            values = ui.chartValues,
-            height = 200.dp,
-            selectedIndex = ui.scrubIndex,
-            onScrub = vm::scrub,
-        )
-
-        // Both ends are labelled with their value, so the chart can be read
-        // without touching it.
-        Row(
-            Modifier.fillMaxWidth().padding(top = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            EndpointLabel(ui.rangeValues.firstOrNull(), alignEnd = false)
-            EndpointLabel(ui.rangeValues.lastOrNull(), alignEnd = true)
-        }
-    }
-}
-
-@Composable
-private fun EndpointLabel(value: cl.tickers.app.domain.model.UfValue?, alignEnd: Boolean) {
-    if (value == null) return
-    Column(horizontalAlignment = if (alignEnd) Alignment.End else Alignment.Start) {
-        Text(
-            Fmt.shortDate(value.date),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            Fmt.clpExact(value.value),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
     }
 }
 

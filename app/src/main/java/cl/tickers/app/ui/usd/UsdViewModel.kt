@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 /**
  * The dólar observado, read from the bundled series.
@@ -39,8 +40,17 @@ data class UsdUiState(
     val usdText: String = "1",
     val clpText: String = "",
 ) {
-    /** The value under the finger while scrubbing, otherwise the latest one. */
-    val shown: UfValue? get() = scrubIndex?.let { chartValues.getOrNull(it) } ?: current
+    /** The line above the chart, read off the full window rather than the thinned one. */
+    val chartSummary: UfEngine.ChartSummary?
+        get() {
+            val first = rangeValues.firstOrNull() ?: return null
+            val last = rangeValues.lastOrNull() ?: return null
+            return UfEngine.chartSummary(
+                first.value,
+                last.value,
+                ChronoUnit.DAYS.between(first.date, last.date),
+            )
+        }
 
     val dailyDelta: BigDecimal?
         get() = if (current != null && previous != null) {

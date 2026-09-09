@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { money, type Money } from "../money.ts";
-import { annualisedPct, clpToUf, delta, deltaPct, ufToClp } from "../ufEngine.ts";
+import { annualisedPct, chartSummary, clpToUf, delta, deltaPct, ufToClp } from "../ufEngine.ts";
 import { convert } from "../ufReajuste.ts";
 import * as Fmt from "../../core/format.ts";
 
@@ -24,6 +24,10 @@ interface Golden {
   delta: (Case & { from: string; to: string })[];
   deltaPct: (Case & { from: string; to: string })[];
   annualisedPct: (Case & { from: string; to: string; days: number })[];
+  chartSummary: {
+    from: string; to: string; days: number;
+    expected: { periodPct: string; annualisedPct: string | null };
+  }[];
   reajuste: {
     amount: string;
     from: { date: string; value: string };
@@ -60,6 +64,26 @@ describe("uf conversions", () => {
         `annualisedPct(${c.from}, ${c.to}, ${c.days})`,
         annualisedPct(money(c.from), money(c.to), c.days).toFixed(2),
         c.expected,
+      );
+    }
+  });
+});
+
+/**
+ * The line above every history chart. In the fixture because whether a window
+ * is annualised at all is a design decision, and the two channels disagreeing
+ * about it would show as one chart saying more than the other.
+ */
+describe("chart summary", () => {
+  it("matches the shared fixture", () => {
+    for (const c of golden.chartSummary) {
+      const label = `chartSummary(${c.from}, ${c.to}, ${c.days})`;
+      const s = chartSummary(money(c.from), money(c.to), c.days);
+      check(`${label} periodPct`, s.periodPct.toFixed(2), c.expected.periodPct);
+      check(
+        `${label} annualisedPct`,
+        s.annualisedPct?.toFixed(2) ?? "null",
+        c.expected.annualisedPct ?? "null",
       );
     }
   });

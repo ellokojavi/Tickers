@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -90,6 +91,28 @@ class UfGoldenVectorTest {
                 "annualisedPct(${c.str("from")}, ${c.str("to")}, $days)",
                 UfEngine.annualisedPct(c.dec("from"), c.dec("to"), days).at(2),
                 c.str("expected"),
+            )
+        }
+    }
+
+    /**
+     * The line above every history chart. In the fixture because whether a
+     * window is annualised at all is a design decision, and the two channels
+     * disagreeing about it would show as one chart saying more than the other.
+     */
+    @Test
+    fun `chart summary matches the shared fixture`() {
+        for (e in section("chartSummary")) {
+            val c = e.jsonObject
+            val days = c.str("days").toLong()
+            val label = "chartSummary(${c.str("from")}, ${c.str("to")}, $days)"
+            val expected = c["expected"]!!.jsonObject
+            val summary = UfEngine.chartSummary(c.dec("from"), c.dec("to"), days)
+            check("$label periodPct", summary.periodPct.at(2), expected.str("periodPct"))
+            check(
+                "$label annualisedPct",
+                summary.annualisedPct?.at(2) ?: "null",
+                expected["annualisedPct"]!!.jsonPrimitive.contentOrNull ?: "null",
             )
         }
     }

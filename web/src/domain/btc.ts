@@ -44,8 +44,9 @@ export const btcUsdToUf = (btcUsd: Money, usdClp: Money, ufValue: Money): Money 
 export const HORIZONS = ["H1", "D1", "D7", "D30", "Y1", "Y5"] as const;
 export type Horizon = (typeof HORIZONS)[number];
 
+/** Written the way the UF and dollar ranges are: "1A", not "1a". */
 export const horizonLabel: Record<Horizon, string> = {
-  H1: "1h", D1: "24h", D7: "7d", D30: "30d", Y1: "1a", Y5: "5a",
+  H1: "1H", D1: "24H", D7: "7D", D30: "30D", Y1: "1A", Y5: "5A",
 };
 
 const MINUTE = 60_000;

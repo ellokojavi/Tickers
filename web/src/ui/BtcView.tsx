@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import * as Fmt from "../core/format.ts";
 import { money, type Money } from "../domain/money.ts";
 import { btcConvert } from "../domain/converter.ts";
-import { currentOf, deltaPct } from "../domain/ufEngine.ts";
+import { chartSummary, currentOf } from "../domain/ufEngine.ts";
 import { today as todayIso } from "../domain/dates.ts";
 import {
   HORIZONS, btcUsdToClp, btcUsdToUf, chartPlan,
@@ -10,11 +10,16 @@ import {
 } from "../domain/btc.ts";
 import { fetchCandles, fetchSpot, type Candle, type Spot, type SpotFailure } from "../data/btcApi.ts";
 import type { UfData } from "../data/useUfData.ts";
-import { Card, Chips, KeyValue, NumberField, Pill, SectionTitle, Sparkline } from "./components.tsx";
+import { Card, KeyValue, NumberField, Pill, SectionTitle } from "./components.tsx";
+import { HistoryCard } from "./HistoryCard.tsx";
 import { ShareButton } from "./share.tsx";
 
 /** How long a spot price is shown as current before it is called stale. */
 const FRESH_MS = 60_000;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const RANGES = HORIZONS.map((h) => ({ key: h, label: horizonLabel[h] }));
 
 const isOk = (r: Spot | SpotFailure | null): r is Spot => r !== null && "usd" in r;
 
@@ -22,6 +27,7 @@ export const BtcView = ({ data }: { data: UfData }) => {
   const [spot, setSpot] = useState<Spot | SpotFailure | null>(null);
   const [horizon, setHorizon] = useState<Horizon>("D30");
   const [candles, setCandles] = useState<readonly Candle[]>([]);
+  const [chartLoading, setChartLoading] = useState(true);
   const [scrub, setScrub] = useState<number | null>(null);
   const [btcText, setBtcText] = useState("1");
   const [usdText, setUsdText] = useState("");
@@ -55,10 +61,12 @@ export const BtcView = ({ data }: { data: UfData }) => {
   useEffect(() => {
     wanted.current = horizon;
     setCandles([]);
+    setChartLoading(true);
     setScrub(null);
     void fetchCandles(horizon)
       .then((c) => { if (wanted.current === horizon) setCandles(c); })
-      .catch(() => { if (wanted.current === horizon) setCandles([]); });
+      .catch(() => { if (wanted.current === horizon) setCandles([]); })
+      .finally(() => { if (wanted.current === horizon) setChartLoading(false); });
     const id = window.setInterval(() => {
       void fetchCandles(horizon)
         .then((c) => { if (wanted.current === horizon) setCandles(c); })
@@ -101,15 +109,21 @@ export const BtcView = ({ data }: { data: UfData }) => {
     clpText === "" ? opening(price, rate)?.clp.toString() ?? "" : clpText;
 
   const usd = isOk(spot) ? spot.usd : null;
-  const shown = scrub !== null && candles[scrub] !== undefined ? candles[scrub]!.usd : usd;
 
-  const spanPct = candles.length >= 2
-    ? deltaPct(candles[0]!.usd, candles.at(-1)!.usd)
+  // The chart draws `value`; a candle's is its dollar price.
+  const points = useMemo(() => candles.map((c) => ({ ...c, value: c.usd })), [candles]);
+
+  // Candles are stamped in millis, so the days are whole ones.
+  const summary = candles.length >= 2
+    ? chartSummary(
+        candles[0]!.usd, candles.at(-1)!.usd,
+        Math.floor((candles.at(-1)!.at - candles[0]!.at) / DAY_MS),
+      )
     : null;
 
-  const clp = shown !== null && dollar !== null ? btcUsdToClp(shown, dollar.value) : null;
-  const inUf = shown !== null && dollar !== null && uf !== null
-    ? btcUsdToUf(shown, dollar.value, uf) : null;
+  const clp = usd !== null && dollar !== null ? btcUsdToClp(usd, dollar.value) : null;
+  const inUf = usd !== null && dollar !== null && uf !== null
+    ? btcUsdToUf(usd, dollar.value, uf) : null;
 
   const stale = isOk(spot) && now - spot.at > FRESH_MS;
 
@@ -135,18 +149,15 @@ export const BtcView = ({ data }: { data: UfData }) => {
           <p class="muted" style={{ margin: "10px 0 0" }}>{fetchErrorCopy[spot.kind].hint}</p>
         ) : (
           <>
-            <p class="hero-value">{shown === null ? "—" : Fmt.usd(shown)}</p>
+            <p class="hero-value">{usd === null ? "—" : Fmt.usd(usd)}</p>
             {clp !== null && (
               <p class="display" style={{ fontSize: 24, margin: "2px 0 0" }}>{Fmt.clp(clp)}</p>
             )}
-            <div class="row" style={{ justifyContent: "flex-start", gap: 14, marginTop: 8 }}>
-              {inUf !== null && <span class="muted">{Fmt.uf(inUf)}</span>}
-              {spanPct !== null && (
-                <span class={spanPct.cmp(0) >= 0 ? "positive" : "negative"}>
-                  {Fmt.pctSigned(spanPct)} en {horizonLabel[horizon]}
-                </span>
-              )}
-            </div>
+            {inUf !== null && (
+              <div class="row" style={{ justifyContent: "flex-start", gap: 14, marginTop: 8 }}>
+                <span class="muted">{Fmt.uf(inUf)}</span>
+              </div>
+            )}
             <div class="row" style={{ justifyContent: "flex-start", gap: 8, marginTop: 14 }}>
               {isOk(spot) && <Pill>{spot.source}</Pill>}
               {dollar !== null && (
@@ -157,36 +168,20 @@ export const BtcView = ({ data }: { data: UfData }) => {
         )}
       </Card>
 
-      <Card class="btc-chart">
-        <SectionTitle>Histórico</SectionTitle>
-        <Chips
-          label="Rango"
-          options={HORIZONS.map((h) => ({ key: h, label: horizonLabel[h] }))}
-          selected={horizon}
-          onSelect={setHorizon}
-        />
-        {candles.length < 2 ? (
-          <p class="muted" style={{ marginTop: 16 }}>Cargando el gráfico…</p>
-        ) : (
-          <>
-            <Sparkline
-              values={candles.map((c) => ({ value: c.usd }))}
-              selected={scrub}
-              onScrub={setScrub}
-            />
-            <div class="row" style={{ marginTop: 8, alignItems: "flex-start" }}>
-              <div>
-                <div class="tiny">{stamp(candles[0]!.at, horizon)}</div>
-                <div>{Fmt.usd(candles[0]!.usd)}</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div class="tiny">{stamp(candles.at(-1)!.at, horizon)}</div>
-                <div>{Fmt.usd(candles.at(-1)!.usd)}</div>
-              </div>
-            </div>
-          </>
-        )}
-      </Card>
+      <HistoryCard
+        class="btc-chart"
+        ranges={RANGES}
+        range={horizon}
+        onRange={setHorizon}
+        points={points}
+        stamp={(c) => stamp(c.at, horizon)}
+        amount={(c) => Fmt.usd(c.usd)}
+        summary={summary}
+        scrub={scrub}
+        onScrub={setScrub}
+        loading={chartLoading}
+        chartLabel="Evolución del precio del bitcoin"
+      />
 
       {usd !== null && dollar !== null && (
         <Card class="btc-conv">

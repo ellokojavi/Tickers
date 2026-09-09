@@ -11,6 +11,7 @@ import cl.tickers.app.data.remote.Connectivity
 import cl.tickers.app.domain.engine.ConverterEngine
 import cl.tickers.app.domain.engine.FetchErrorKind
 import cl.tickers.app.domain.engine.Horizon
+import cl.tickers.app.domain.engine.UfEngine
 import cl.tickers.app.domain.engine.chartPlan
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -35,8 +36,17 @@ data class BtcUiState(
     val usdText: String = "",
     val clpText: String = "",
 ) {
-    /** The price under the finger while scrubbing, otherwise the live one. */
-    val shown: BigDecimal? get() = scrubIndex?.let { candles.getOrNull(it)?.usd } ?: usd
+    /** The line above the chart. Candles are stamped in millis, so the days are whole ones. */
+    val chartSummary: UfEngine.ChartSummary?
+        get() {
+            val first = candles.firstOrNull() ?: return null
+            val last = candles.lastOrNull() ?: return null
+            return UfEngine.chartSummary(first.usd, last.usd, (last.at - first.at) / DAY_MS)
+        }
+
+    private companion object {
+        const val DAY_MS = 24 * 60 * 60 * 1000L
+    }
 }
 
 class BtcViewModel(

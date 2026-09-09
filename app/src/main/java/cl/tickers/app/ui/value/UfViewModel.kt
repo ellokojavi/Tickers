@@ -86,25 +86,16 @@ data class UfUiState(
     val lastPublished: LocalDate?
         get() = UfLookup.maxSelectable(all)
 
-    /** The day the finger is on, if any. Never replaces [current] in the UI. */
-    val scrubbed: UfValue?
-        get() = scrubIndex?.let { chartValues.getOrNull(it) }
-
-    val rangeChangePct: BigDecimal?
+    /** The line above the chart, read off the full window rather than the thinned one. */
+    val chartSummary: UfEngine.ChartSummary?
         get() {
             val first = rangeValues.firstOrNull() ?: return null
             val last = rangeValues.lastOrNull() ?: return null
-            return UfEngine.deltaPct(first.value, last.value)
-        }
-
-    /** The same movement expressed as a constant annual rate. */
-    val rangeAnnualisedPct: BigDecimal?
-        get() {
-            val first = rangeValues.firstOrNull() ?: return null
-            val last = rangeValues.lastOrNull() ?: return null
-            val days = java.time.temporal.ChronoUnit.DAYS.between(first.date, last.date)
-            if (days <= 0L) return null
-            return UfEngine.annualisedPct(first.value, last.value, days)
+            return UfEngine.chartSummary(
+                first.value,
+                last.value,
+                java.time.temporal.ChronoUnit.DAYS.between(first.date, last.date),
+            )
         }
 }
 

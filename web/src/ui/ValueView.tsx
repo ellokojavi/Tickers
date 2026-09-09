@@ -3,13 +3,14 @@ import * as Fmt from "../core/format.ts";
 import { money, type Money } from "../domain/money.ts";
 import { isAfter, today as todayIso, type IsoDate } from "../domain/dates.ts";
 import {
-  annualisedPct, currentOf, delta, deltaPct, downsample, futureOf, historyWindow,
+  chartSummary, currentOf, delta, deltaPct, downsample, futureOf, historyWindow,
 } from "../domain/ufEngine.ts";
 import { daysBetween } from "../domain/dates.ts";
 import { resolve, SERIES_START, type LookupResult } from "../domain/ufLookup.ts";
 import { DataSource } from "../domain/models.ts";
 import type { UfData } from "../data/useUfData.ts";
-import { Card, Chips, DateField, KeyValue, NumberField, Pill, SectionTitle, Sparkline } from "./components.tsx";
+import { Card, DateField, KeyValue, NumberField, Pill, SectionTitle } from "./components.tsx";
+import { HistoryCard } from "./HistoryCard.tsx";
 import { ShareButton } from "./share.tsx";
 import { ufConvert } from "../domain/converter.ts";
 import { InstallCard } from "./InstallCard.tsx";
@@ -57,14 +58,13 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
   const chartValues = useMemo(() => downsample(rangeValues, MAX_CHART_POINTS), [rangeValues]);
   const future = useMemo(() => futureOf(data.series, today), [data.series, today]);
 
+  // Read off the full window rather than the thinned one.
   const first = rangeValues[0] ?? null;
   const last = rangeValues[rangeValues.length - 1] ?? null;
-  const changePct = first !== null && last !== null ? deltaPct(first.value, last.value) : null;
-  const annualPct = first !== null && last !== null && daysBetween(first.date, last.date) > 0
-    ? annualisedPct(first.value, last.value, daysBetween(first.date, last.date))
+  const summary = first !== null && last !== null
+    ? chartSummary(first.value, last.value, daysBetween(first.date, last.date))
     : null;
 
-  const scrubbed = scrub === null ? null : chartValues[scrub] ?? null;
   const rate = current?.value ?? null;
   // The observed dollar the app already fetches. It has its own publication
   // day, which the field says, because it is not the UF's day.
@@ -195,39 +195,18 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
         )}
       </Card>
 
-      <Card>
-        <SectionTitle>Histórico</SectionTitle>
-        <Chips
-          label="Rango"
-          options={RANGES.map((r) => ({ key: r.key, label: r.label }))}
-          selected={range}
-          onSelect={(key) => { setRange(key); setScrub(null); }}
-        />
-        <p class="muted" style={{ minHeight: 24, marginTop: 12 }}>
-          {scrubbed !== null
-            ? `${Fmt.shortDate(scrubbed.date)}   ${Fmt.clpExact(scrubbed.value)}`
-            : changePct !== null
-              ? <>
-                  <span class={toneOf(changePct)}>{Fmt.pctSigned(changePct)} en el período</span>
-                  {annualPct !== null && <>
-                    {" · "}
-                    <span class={toneOf(annualPct)}>{Fmt.pctSigned(annualPct)} anualizado</span>
-                  </>}
-                </>
-              : " "}
-        </p>
-        <Sparkline values={chartValues} selected={scrub} onScrub={setScrub} />
-        <div class="row" style={{ marginTop: 8, alignItems: "flex-start" }}>
-          {first !== null && (
-            <div><div class="tiny">{Fmt.shortDate(first.date)}</div><div>{Fmt.clpExact(first.value)}</div></div>
-          )}
-          {last !== null && (
-            <div style={{ textAlign: "right" }}>
-              <div class="tiny">{Fmt.shortDate(last.date)}</div><div>{Fmt.clpExact(last.value)}</div>
-            </div>
-          )}
-        </div>
-      </Card>
+      <HistoryCard
+        ranges={RANGES}
+        range={range}
+        onRange={setRange}
+        points={chartValues}
+        stamp={(v) => Fmt.shortDate(v.date)}
+        amount={(v) => Fmt.clpExact(v.value)}
+        summary={summary}
+        scrub={scrub}
+        onScrub={setScrub}
+        chartLabel="Evolución del valor de la UF"
+      />
 
       <Card>
         <SectionTitle>Consultar una fecha</SectionTitle>
