@@ -1,7 +1,7 @@
 {
   "name": "Tickers",
   "short_name": "Tickers",
-  "description": "UF, dólar observado y bitcoin, con su historia diaria completa, calculadora de inflación y simulador de créditos hipotecarios.",
+  "description": "UF, dólar observado y bitcoin al día y con toda su historia, calculadora de inflación y simulador de créditos hipotecarios con su tabla de pagos.",
   "lang": "es-CL",
   "dir": "ltr",
   "start_url": "./",
