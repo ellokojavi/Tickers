@@ -382,8 +382,8 @@ before a release.
 - [ ] Landscape orientation
 - [ ] Expanding the history keeps its range selector and its change figures on screen
 - [ ] Sharing today's card produces readable text in WhatsApp and in mail
-- [ ] The launcher icon fills a circular mask edge to edge, stays a circle under
-      a squircle mask, and its themed variant still reads in one tone
+- [ ] The launcher icon shows all seven candles uncut under circular and
+      squircle masks, and its themed variant still reads in one tone
 - [ ] The "Máx" range scrubs smoothly across all 49 years
 - [ ] Both chart endpoints show a date and a value that match the series
 - [ ] Typing a long amount groups it live, and the cursor stays where expected
