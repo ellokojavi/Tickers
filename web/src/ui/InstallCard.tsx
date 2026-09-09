@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { ShareIcon } from "./icons.tsx";
-import { canShare, isSafari, shareText } from "./share.tsx";
+import { canShare, isHandheld, isSafari, shareText } from "./share.tsx";
 
 /**
  * Offers to put the app on the home screen, so nobody has to retype the URL.
@@ -9,6 +9,11 @@ import { canShare, isSafari, shareText } from "./share.tsx";
  * beforeinstallprompt and can install in one tap, while iOS Safari has no
  * programmatic install at all and the only honest thing to do is name the two
  * taps it takes. Firefox has neither, so it gets its menu described.
+ *
+ * On a laptop or a desktop there is no home screen to speak of, and even
+ * where the browser can install the app as a window, what people actually
+ * do to come back to a site is bookmark it. So there the card asks for a
+ * bookmark instead, and names the shortcut for it.
  *
  * It disappears once the app is installed, and dismissing it is remembered.
  * A prompt that keeps coming back after a "no" is a nag, not a convenience.
@@ -41,6 +46,9 @@ const usesShareMenu = (): boolean => {
   if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
   return isSafari() && navigator.maxTouchPoints > 1;
 };
+
+/** Where the bookmark shortcut is ⌘ D rather than Ctrl D. */
+const isMacLike = (): boolean => /Mac|iPhone|iPad|iPod/i.test(navigator.platform);
 
 const wasDismissed = (): boolean => {
   try { return localStorage.getItem(DISMISSED_KEY) === "1"; } catch { return false; }
@@ -102,13 +110,39 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
     ? "Compartir enlace"
     : "Copiar enlace";
 
+  const closeButton = !compact && (
+    <button type="button" class="btn icon install-close" aria-label="Ocultar" onClick={dismiss}>
+      ✕
+    </button>
+  );
+
+  if (!isHandheld()) {
+    return (
+      <section class="card install">
+        {closeButton}
+        <h2 class="section-title">Guardar en favoritos</h2>
+        <p class="muted">
+          En un computador lo práctico es tener Tickers entre los favoritos del navegador, para
+          volver sin escribir la dirección.
+        </p>
+        <ol class="steps">
+          <li>
+            Presiona <kbd>{isMacLike() ? "⌘" : "Ctrl"}</kbd> <kbd>D</kbd>, o la estrella en la barra
+            de direcciones
+          </li>
+          <li>Elige dónde guardarlo y confirma</li>
+        </ol>
+        <button type="button" class="btn outlined" style={{ width: "100%" }}
+          onClick={() => void shareLink()}>
+          {linkLabel}
+        </button>
+      </section>
+    );
+  }
+
   return (
     <section class="card install">
-      {!compact && (
-        <button type="button" class="btn icon install-close" aria-label="Ocultar" onClick={dismiss}>
-          ✕
-        </button>
-      )}
+      {closeButton}
       <h2 class="section-title">Descargar acceso directo</h2>
 
       {deferred !== null ? (
