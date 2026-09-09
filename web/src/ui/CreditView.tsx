@@ -134,6 +134,14 @@ export const CreditView = ({ data }: { data: UfData }) => {
             )}
             <KeyValue label="Monto del crédito" value={Fmt.uf(r.loanAmountUf)} />
             {r.caePct !== null && <KeyValue label="CAE" value={Fmt.pct(r.caePct)} />}
+            {/* The name opens the simulation, but nothing said so. An affordance
+                you have to discover by tapping is not an affordance. */}
+            <button
+              type="button"
+              class="btn text"
+              style={{ padding: "8px 0 0" }}
+              onClick={() => setEditing({ id: s.id })}
+            >Detalles ›</button>
           </Card>
         );
       })}
