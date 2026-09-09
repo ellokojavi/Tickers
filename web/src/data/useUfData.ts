@@ -3,10 +3,10 @@ import { parseSeedText } from "./seed.ts";
 import { fetchIndicators, fetchUfYear } from "./api.ts";
 import { filterImplausible } from "../domain/ufSanity.ts";
 import { today, year as yearOf, type IsoDate } from "../domain/dates.ts";
-import type { DataSourceKey, Indicator, UfValue } from "../domain/models.ts";
+import type { DataSourceKey, Indicator, DatedValue } from "../domain/models.ts";
 
 export interface UfData {
-  readonly series: readonly UfValue[];
+  readonly series: readonly DatedValue[];
   readonly indicators: readonly Indicator[];
   readonly source: DataSourceKey;
   readonly loading: boolean;
@@ -22,7 +22,7 @@ export interface UfData {
  * plausibility before it is allowed to override the bundled data.
  */
 export const useUfData = (): UfData => {
-  const [series, setSeries] = useState<readonly UfValue[]>([]);
+  const [series, setSeries] = useState<readonly DatedValue[]>([]);
   const [indicators, setIndicators] = useState<readonly Indicator[]>([]);
   const [source, setSource] = useState<DataSourceKey>("BUNDLED");
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export const useUfData = (): UfData => {
     const controller = new AbortController();
 
     const run = async () => {
-      let base: readonly UfValue[] = series;
+      let base: readonly DatedValue[] = series;
       if (base.length === 0) {
         try {
           const response = await fetch(`${import.meta.env.BASE_URL}uf_daily.txt`, {

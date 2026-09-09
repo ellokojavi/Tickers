@@ -1,6 +1,6 @@
 package cl.tickers.app.domain.engine
 
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import java.time.LocalDate
 
 /**
@@ -13,13 +13,13 @@ import java.time.LocalDate
 sealed interface LookupResult {
 
     /** The date has its own published value. */
-    data class Exact(val value: UfValue, val isFuture: Boolean) : LookupResult
+    data class Exact(val value: DatedValue, val isFuture: Boolean) : LookupResult
 
     /**
      * No value for that exact day, so the closest earlier one is offered —
      * explicitly, as a substitute the user can see.
      */
-    data class Nearest(val value: UfValue, val requested: LocalDate) : LookupResult
+    data class Nearest(val value: DatedValue, val requested: LocalDate) : LookupResult
 
     /** Beyond the published horizon. There is no value, and none is invented. */
     data class NotPublishedYet(val lastPublished: LocalDate?) : LookupResult
@@ -51,8 +51,8 @@ object UfLookup {
      */
     fun resolve(
         requested: LocalDate,
-        exact: UfValue?,
-        nearestEarlier: UfValue?,
+        exact: DatedValue?,
+        nearestEarlier: DatedValue?,
         lastPublished: LocalDate?,
         today: LocalDate,
         earliest: LocalDate = SERIES_START,
@@ -72,6 +72,6 @@ object UfLookup {
     }
 
     /** Latest date a user may ask about: the last published day. */
-    fun maxSelectable(series: List<UfValue>): LocalDate? =
+    fun maxSelectable(series: List<DatedValue>): LocalDate? =
         series.maxOfOrNull { it.date }
 }

@@ -2,7 +2,7 @@ import {
   ZERO, HUNDRED, divScale, isZero, money, scale, type Money,
 } from "./money.ts";
 import { daysBetween, isAfter, isBefore, plusMonths, today as todayIso, type IsoDate } from "./dates.ts";
-import type { UfValue } from "./models.ts";
+import type { DatedValue } from "./models.ts";
 
 /** Conversions, deltas and windowing over the UF series. */
 
@@ -58,15 +58,15 @@ export const chartSummary = (from: Money, to: Money, days: number): ChartSummary
  * The last value that is not in the future. The series legitimately contains
  * days already published beyond today.
  */
-export const currentOf = (series: readonly UfValue[], day: IsoDate): UfValue | null => {
-  let best: UfValue | null = null;
+export const currentOf = (series: readonly DatedValue[], day: IsoDate): DatedValue | null => {
+  let best: DatedValue | null = null;
   for (const v of series) {
     if (!isAfter(v.date, day) && (best === null || v.date > best.date)) best = v;
   }
   return best;
 };
 
-export const futureOf = (series: readonly UfValue[], day: IsoDate): UfValue[] =>
+export const futureOf = (series: readonly DatedValue[], day: IsoDate): DatedValue[] =>
   series.filter((v) => isAfter(v.date, day)).sort((a, b) => (a.date < b.date ? -1 : 1));
 
 /**
@@ -75,10 +75,10 @@ export const futureOf = (series: readonly UfValue[], day: IsoDate): UfValue[] =>
  * record of what has happened; those days have their own card on the screen.
  */
 export const historyWindow = (
-  series: readonly UfValue[],
+  series: readonly DatedValue[],
   months: number | null,
   day: IsoDate = todayIso(),
-): UfValue[] => {
+): DatedValue[] => {
   const history = series.filter((v) => !isAfter(v.date, day));
   if (months === null) return history;
   const from = plusMonths(day, -months);
@@ -92,10 +92,10 @@ export const historyWindow = (
  * points than it has pixels; without this, dragging across "Máx" would rebuild
  * an 18.000-segment path on every pointer event.
  */
-export const downsample = (values: readonly UfValue[], maxPoints: number): readonly UfValue[] => {
+export const downsample = (values: readonly DatedValue[], maxPoints: number): readonly DatedValue[] => {
   if (maxPoints < 2 || values.length <= maxPoints) return values;
   const step = (values.length - 1) / (maxPoints - 1);
-  const out: UfValue[] = [];
+  const out: DatedValue[] = [];
   for (let i = 0; i < maxPoints; i++) {
     const index = Math.min(values.length - 1, Math.max(0, Math.round(i * step)));
     out.push(values[index]!);

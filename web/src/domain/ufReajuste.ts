@@ -1,6 +1,6 @@
 import { HUNDRED, ONE, ZERO, divScale, money, scale, type Money } from "./money.ts";
 import { daysBetween } from "./dates.ts";
-import type { ReajusteResult, UfValue } from "./models.ts";
+import type { ReajusteResult, DatedValue } from "./models.ts";
 
 /**
  * Restates an amount between two dates through the UF.
@@ -13,7 +13,7 @@ import type { ReajusteResult, UfValue } from "./models.ts";
  */
 const DAYS_IN_YEAR = 365.25;
 
-export const convert = (amount: Money, from: UfValue, to: UfValue): ReajusteResult => {
+export const convert = (amount: Money, from: DatedValue, to: DatedValue): ReajusteResult => {
   if (from.value.cmp(0) <= 0 || to.value.cmp(0) <= 0) {
     throw new Error("El valor de la UF debe ser positivo");
   }

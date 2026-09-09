@@ -1,6 +1,6 @@
 import { money, type Money } from "../domain/money.ts";
 import { of, parseIso, plusDays, type IsoDate, type YearMonth } from "../domain/dates.ts";
-import type { UfValue } from "../domain/models.ts";
+import type { DatedValue } from "../domain/models.ts";
 
 /**
  * The complete daily UF series, shipped as a static asset.
@@ -17,12 +17,12 @@ import type { UfValue } from "../domain/models.ts";
  */
 const START_KEY = "# inicio:";
 
-export const parseSeed = (lines: readonly string[]): UfValue[] => {
+export const parseSeed = (lines: readonly string[]): DatedValue[] => {
   const header = lines.find((l) => l.startsWith(START_KEY));
   const start = header === undefined ? null : parseIso(header.slice(START_KEY.length).trim());
   if (start === null) return [];
 
-  const out: UfValue[] = [];
+  const out: DatedValue[] = [];
   let day: IsoDate = start;
   for (const line of lines) {
     if (line.startsWith("#")) continue;
@@ -39,10 +39,10 @@ export const parseSeed = (lines: readonly string[]): UfValue[] => {
   return out;
 };
 
-export const parseSeedText = (text: string): UfValue[] => parseSeed(text.split("\n"));
+export const parseSeedText = (text: string): DatedValue[] => parseSeed(text.split("\n"));
 
 /** UF value on the 9th of each month: the CPI index anchors. */
-export const anchorsOf = (series: readonly UfValue[]): Map<YearMonth, Money> => {
+export const anchorsOf = (series: readonly DatedValue[]): Map<YearMonth, Money> => {
   const map = new Map<YearMonth, Money>();
   for (const v of series) {
     if (Number(v.date.slice(8, 10)) === 9) map.set(v.date.slice(0, 7), v.value);

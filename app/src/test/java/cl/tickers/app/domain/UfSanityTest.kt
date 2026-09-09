@@ -1,7 +1,7 @@
 package cl.tickers.app.domain
 
 import cl.tickers.app.domain.engine.UfSanity
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.math.BigDecimal
@@ -10,7 +10,7 @@ import java.time.LocalDate
 class UfSanityTest {
 
     private fun uf(day: Int, value: String) =
-        UfValue(LocalDate.of(2014, 12, day), BigDecimal(value))
+        DatedValue(LocalDate.of(2014, 12, day), BigDecimal(value))
 
     /** The exact corruption the public source actually serves. */
     @Test
@@ -54,7 +54,7 @@ class UfSanityTest {
 
     @Test
     fun `an anchor checks the first value of a batch too`() {
-        val anchor = UfValue(LocalDate.of(2014, 12, 28), BigDecimal("24627.10"))
+        val anchor = DatedValue(LocalDate.of(2014, 12, 28), BigDecimal("24627.10"))
 
         val kept = UfSanity.filter(listOf(uf(29, "608.15")), anchor)
 

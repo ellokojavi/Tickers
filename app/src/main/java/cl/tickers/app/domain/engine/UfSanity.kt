@@ -1,6 +1,6 @@
 package cl.tickers.app.domain.engine
 
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import java.time.temporal.ChronoUnit
 
 /**
@@ -27,10 +27,10 @@ object UfSanity {
      *   first value of a batch is checked too.
      * @return the values that survive, in date order.
      */
-    fun filter(values: List<UfValue>, anchor: UfValue? = null): List<UfValue> {
+    fun filter(values: List<DatedValue>, anchor: DatedValue? = null): List<DatedValue> {
         if (values.isEmpty()) return values
         val sorted = values.sortedBy { it.date }
-        val out = ArrayList<UfValue>(sorted.size)
+        val out = ArrayList<DatedValue>(sorted.size)
         var previous = anchor
 
         for (candidate in sorted) {

@@ -1,5 +1,5 @@
 import { daysBetween } from "./dates.ts";
-import type { UfValue } from "./models.ts";
+import type { DatedValue } from "./models.ts";
 
 /**
  * Rejects values that cannot be real.
@@ -21,12 +21,12 @@ export const MAX_DAILY_CHANGE = 0.01;
  * @returns the survivors, in date order.
  */
 export const filterImplausible = (
-  values: readonly UfValue[],
-  anchor: UfValue | null = null,
-): UfValue[] => {
+  values: readonly DatedValue[],
+  anchor: DatedValue | null = null,
+): DatedValue[] => {
   if (values.length === 0) return [];
   const sorted = [...values].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
-  const out: UfValue[] = [];
+  const out: DatedValue[] = [];
   let previous = anchor;
 
   for (const candidate of sorted) {

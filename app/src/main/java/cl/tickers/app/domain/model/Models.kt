@@ -4,13 +4,20 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-/** A single published UF value for a calendar day. */
 /** Anything a chart can draw: a series of amounts, in order. */
 interface HasValue {
     val value: BigDecimal
 }
 
-data class UfValue(
+/**
+ * A calendar day and an amount, and nothing more.
+ *
+ * The UF and the dólar observado are both published this way, so both are
+ * series of these. Bitcoin is not: its points are timestamps rather than
+ * days, which is why [HasValue] exists separately and why the chart takes
+ * that rather than this.
+ */
+data class DatedValue(
     val date: LocalDate,
     override val value: BigDecimal,
 ) : HasValue {

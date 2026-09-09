@@ -11,7 +11,7 @@ import cl.tickers.app.data.seed.UfDailySeed
 import cl.tickers.app.domain.model.DataSource
 import cl.tickers.app.domain.model.Indicator
 import cl.tickers.app.domain.engine.UfSanity
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -35,8 +35,8 @@ class UfRepository(
     /** Ordered by preference: the first available one that answers wins. */
     private val sources: List<UfRemoteDataSource>,
 ) {
-    fun observeSeries(): Flow<List<UfValue>> =
-        ufDao.observeAll().map { list -> list.map { UfValue(it.date, it.value) } }
+    fun observeSeries(): Flow<List<DatedValue>> =
+        ufDao.observeAll().map { list -> list.map { DatedValue(it.date, it.value) } }
 
     fun observeIndicators(): Flow<List<Indicator>> =
         indicatorDao.observeAll().map { list ->
@@ -44,18 +44,18 @@ class UfRepository(
         }
 
     /** The value published for exactly [date], or null. Never a substitute. */
-    suspend fun exactUfOn(date: LocalDate): UfValue? =
-        ufDao.byDate(date)?.let { UfValue(it.date, it.value) }
+    suspend fun exactUfOn(date: LocalDate): DatedValue? =
+        ufDao.byDate(date)?.let { DatedValue(it.date, it.value) }
 
     /** The closest published day at or before [date]. */
-    suspend fun nearestUfOn(date: LocalDate): UfValue? =
-        ufDao.atOrBefore(date)?.let { UfValue(it.date, it.value) }
+    suspend fun nearestUfOn(date: LocalDate): DatedValue? =
+        ufDao.atOrBefore(date)?.let { DatedValue(it.date, it.value) }
 
     /**
      * Convenience read used where a substitute is acceptable, such as pricing
      * a simulation in pesos. Date lookups must not use this.
      */
-    suspend fun ufOn(date: LocalDate): UfValue? = exactUfOn(date) ?: nearestUfOn(date)
+    suspend fun ufOn(date: LocalDate): DatedValue? = exactUfOn(date) ?: nearestUfOn(date)
 
     suspend fun isEmpty(): Boolean = ufDao.count() == 0
 
@@ -117,7 +117,7 @@ class UfRepository(
         for (source in sources) {
             if (!source.available) continue
             try {
-                val fetched = mutableListOf<UfValue>()
+                val fetched = mutableListOf<DatedValue>()
                 for (year in targets) fetched += source.ufForYear(year)
 
                 // The feed has served corrupt values before, so nothing is

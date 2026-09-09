@@ -1,7 +1,7 @@
 package cl.tickers.app.domain
 
 import cl.tickers.app.domain.engine.UfEngine
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.math.BigDecimal
@@ -12,11 +12,11 @@ class UfEngineTest {
     private val today = LocalDate.of(2026, 9, 5)
 
     private val series = listOf(
-        UfValue(LocalDate.of(2026, 9, 3), BigDecimal("40877.73")),
-        UfValue(LocalDate.of(2026, 9, 4), BigDecimal("40879.04")),
-        UfValue(LocalDate.of(2026, 9, 5), BigDecimal("40880.36")),
-        UfValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
-        UfValue(LocalDate.of(2026, 9, 9), BigDecimal("40885.63")),
+        DatedValue(LocalDate.of(2026, 9, 3), BigDecimal("40877.73")),
+        DatedValue(LocalDate.of(2026, 9, 4), BigDecimal("40879.04")),
+        DatedValue(LocalDate.of(2026, 9, 5), BigDecimal("40880.36")),
+        DatedValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
+        DatedValue(LocalDate.of(2026, 9, 9), BigDecimal("40885.63")),
     )
 
     @Test
@@ -140,7 +140,7 @@ class UfEngineTest {
     @Test
     fun `downsampling keeps the endpoints and the requested size`() {
         val long = (0 until 18_000).map {
-            UfValue(LocalDate.of(1977, 8, 1).plusDays(it.toLong()), BigDecimal(1000 + it))
+            DatedValue(LocalDate.of(1977, 8, 1).plusDays(it.toLong()), BigDecimal(1000 + it))
         }
 
         val thinned = UfEngine.downsample(long, 400)
@@ -154,7 +154,7 @@ class UfEngineTest {
     @Test
     fun `downsampling preserves the overall movement`() {
         val long = (0 until 18_000).map {
-            UfValue(LocalDate.of(1977, 8, 1).plusDays(it.toLong()), BigDecimal(1000 + it))
+            DatedValue(LocalDate.of(1977, 8, 1).plusDays(it.toLong()), BigDecimal(1000 + it))
         }
         val thinned = UfEngine.downsample(long, 400)
 
@@ -171,7 +171,7 @@ class UfEngineTest {
     // ------------------------------------------------------- history window
 
     private val longSeries = (0L until 400L).map {
-        UfValue(LocalDate.of(2025, 9, 5).plusDays(it), BigDecimal(40000 + it))
+        DatedValue(LocalDate.of(2025, 9, 5).plusDays(it), BigDecimal(40000 + it))
     }
 
     /**
@@ -219,8 +219,8 @@ class UfEngineTest {
     @Test
     fun `a series entirely in the future yields nothing to chart`() {
         val future = listOf(
-            UfValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
-            UfValue(LocalDate.of(2026, 9, 9), BigDecimal("40885.63")),
+            DatedValue(LocalDate.of(2026, 9, 6), BigDecimal("40881.68")),
+            DatedValue(LocalDate.of(2026, 9, 9), BigDecimal("40885.63")),
         )
 
         assertThat(UfEngine.historyWindow(future, months = null, today = LocalDate.of(2026, 9, 5)))

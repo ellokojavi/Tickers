@@ -1,7 +1,7 @@
 package cl.tickers.app.domain.engine
 
 import cl.tickers.app.domain.model.ReajusteResult
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.DatedValue
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -22,7 +22,7 @@ object UfReajuste {
     private val MC = MathContext.DECIMAL64
     private const val DAYS_IN_YEAR = 365.25
 
-    fun convert(amount: BigDecimal, from: UfValue, to: UfValue): ReajusteResult {
+    fun convert(amount: BigDecimal, from: DatedValue, to: DatedValue): ReajusteResult {
         require(from.value.signum() > 0 && to.value.signum() > 0) {
             "El valor de la UF debe ser positivo"
         }
