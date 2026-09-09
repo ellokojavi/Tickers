@@ -42,6 +42,23 @@ export const ShareIcon = () => svg(
   </>,
 );
 
+export const MenuIcon = () => svg(
+  <>
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </>,
+);
+
+export const CopyIcon = () => svg(
+  <>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M5 15V6a2 2 0 0 1 2-2h8" />
+  </>,
+);
+
+export const CheckIcon = () => svg(<polyline points="4,13 9,18 20,6" />);
+
 export const RefreshIcon = () => svg(
   <>
     <path d="M20 12a8 8 0 1 1-2.6-5.9" />

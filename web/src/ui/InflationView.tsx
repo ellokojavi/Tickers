@@ -7,8 +7,8 @@ import { resolve, SERIES_START } from "../domain/ufLookup.ts";
 import type { ReajusteResult } from "../domain/models.ts";
 import type { UfData } from "../data/useUfData.ts";
 import { Card, DateField, KeyValue, NumberField, SectionTitle } from "./components.tsx";
-import { share } from "./ValueView.tsx";
-import { ShareIcon, SwapIcon } from "./icons.tsx";
+import { ShareButton } from "./share.tsx";
+import { SwapIcon } from "./icons.tsx";
 
 /**
  * Restates an amount between two dates, not two months.
@@ -84,12 +84,11 @@ export const InflationView = ({ data }: { data: UfData }) => {
             <span class="muted">
               {Fmt.clp(result.amount)} del {Fmt.longDate(result.from)} equivalen a
             </span>
-            <button
-              type="button"
-              class="btn icon"
-              aria-label="Compartir la equivalencia"
-              onClick={() => void share("Equivalencia de valores", buildShare(result))}
-            ><ShareIcon /></button>
+            <ShareButton
+              what="la equivalencia"
+              title="Equivalencia de valores"
+              text={buildShare(result)}
+            />
           </div>
           <p class="display">{Fmt.clp(result.adjustedAmount)}</p>
           <p class="muted">del {Fmt.longDate(result.to)}</p>

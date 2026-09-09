@@ -154,7 +154,9 @@ fun UfValueScreen(
                 NumberField(
                     ui.clpText,
                     vm::onClpInput,
-                    label = "Pesos",
+                    // A conversion is only true for one day, and this card sits
+                    // far enough from the date at the top to be read on its own.
+                    label = ui.current?.let { "Pesos (al ${Fmt.dayMonth(it.date)})" } ?: "Pesos",
                     suffix = "CLP",
                     allowDecimals = false,
                 )

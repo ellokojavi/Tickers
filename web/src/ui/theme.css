@@ -157,13 +157,13 @@ nav.tabs {
   background: var(--surface); border-top: 1px solid var(--outline-variant);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
 }
-nav.tabs button {
+nav.tabs > button {
   border: none; background: transparent; color: var(--on-surface-variant);
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   font-size: 12px; padding: 4px 12px;
 }
-nav.tabs button[aria-current="page"] { color: var(--on-primary-container); }
-nav.tabs button[aria-current="page"] .tab-icon { background: var(--primary-container); }
+nav.tabs > button[aria-current="page"] { color: var(--on-primary-container); }
+nav.tabs > button[aria-current="page"] .tab-icon { background: var(--primary-container); }
 .tab-icon { border-radius: 999px; padding: 4px 16px; display: flex; }
 
 .chart { width: 100%; display: block; touch-action: pan-y; }
@@ -194,8 +194,17 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
   border: none; border-radius: 18px; padding: 16px 22px; font-size: 15px; font-weight: 500;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-.install { position: relative; border: 1px solid var(--outline-variant); }
-.install-close { position: absolute; top: 10px; right: 10px; color: var(--outline); }
+/* The one card that asks for something rather than reporting a figure, so it
+   is tinted with the accent instead of sitting on the same surface as the
+   readings around it. */
+.install {
+  position: relative; border: none;
+  background: var(--primary-container); color: var(--on-primary-container);
+}
+.install .section-title, .install .muted, .install .steps { color: inherit; }
+.install .section-title, .install .install-close { opacity: 0.7; }
+.install .btn.outlined { color: inherit; border-color: currentColor; }
+.install-close { position: absolute; top: 10px; right: 10px; color: inherit; }
 .steps { margin: 10px 0 14px; padding-left: 20px; color: var(--on-surface-variant); font-size: 14px; }
 .steps li { margin-bottom: 6px; }
 .glyph { display: inline-flex; vertical-align: -6px; }
@@ -204,6 +213,9 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
 .banner { background: var(--surface-variant); border-radius: 10px; padding: 12px; font-size: 13px; margin-bottom: 12px; }
 
 .rail-brand { display: none; }
+.rail-head { display: none; }
+.share { display: inline-flex; align-items: center; gap: 6px; }
+.share-flash { font-size: 12px; color: var(--on-surface-variant); white-space: nowrap; }
 
 /* ---------------------------------------------------------------- desktop --
    The phone layout is a single 560px column with a bottom tab bar. Left as-is
@@ -227,23 +239,39 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
     border-top: none; border-right: 1px solid var(--outline-variant);
     padding: 20px 16px;
   }
-  nav.tabs button {
+  nav.tabs > button {
     flex-direction: row; justify-content: flex-start; gap: 14px;
     width: 100%; border-radius: 999px; padding: 12px 18px;
     font-size: 15px; text-align: left;
   }
-  nav.tabs button[aria-current="page"] { background: var(--primary-container); }
+  nav.tabs > button[aria-current="page"] { background: var(--primary-container); }
   /* The pill is the rail item itself up here, so the icon drops its own. */
-  nav.tabs button[aria-current="page"] .tab-icon { background: transparent; }
+  nav.tabs > button[aria-current="page"] .tab-icon { background: transparent; }
   .tab-icon { padding: 0; }
 
+  .rail-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 6px 20px;
+  }
+  .rail-toggle { flex: 0 0 auto; padding: 8px; }
   .rail-brand {
     display: block;
     font-size: 20px; font-weight: 600; letter-spacing: -0.2px;
-    padding: 8px 18px 20px;
+    white-space: nowrap; overflow: hidden;
   }
 
   .app { max-width: none; padding: 0 40px 48px 272px; }
+
+  /* ------------------------------------------------ the rail, collapsed --
+     Icons only, so the page keeps the 160px the labels were using. The names
+     survive as tooltips and as the buttons' accessible names, which is what a
+     screen reader reads either way, so nothing is actually lost. */
+  .rail-collapsed nav.tabs { width: 72px; padding: 20px 12px; }
+  .rail-collapsed .rail-head { justify-content: center; padding: 4px 0 20px; }
+  .rail-collapsed .rail-brand { display: none; }
+  .rail-collapsed nav.tabs > button { justify-content: center; padding: 12px 0; }
+  .rail-collapsed .tab-label { display: none; }
+  .rail-collapsed.app { padding-left: 112px; }
   .screen-title, .view { max-width: 1120px; margin: 0 auto; }
   .screen-title { min-height: 72px; font-size: 26px; }
 
