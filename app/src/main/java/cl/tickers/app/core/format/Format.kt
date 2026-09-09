@@ -4,7 +4,10 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -125,6 +128,38 @@ object Fmt {
     // ICU abbreviates as "ago." and the period falls in the middle of "ago.
     // 1977", so removeSuffix never had anything to remove and the abbreviation
     // kept a full stop the web version does not have.
+    // ------------------------------------------ instants, in Chilean time
+    //
+    // A bitcoin chart is labelled with moments, not calendar days, and a moment
+    // has to be pinned to a zone or the two channels label the same candle
+    // differently depending on where the device thinks it is. This app is for
+    // Chile, so Chile is the zone, stated rather than inherited from the phone.
+    private val ZONE: ZoneId = ZoneId.of("America/Santiago")
+
+    private fun at(millis: Long): LocalDateTime =
+        Instant.ofEpochMilli(millis).atZone(ZONE).toLocalDateTime()
+
+    /** "14:35" */
+    fun timeHm(millis: Long): String {
+        val t = at(millis)
+        return "%02d:%02d".format(LOCALE, t.hour, t.minute)
+    }
+
+    /** "08-09" — day and month, no year, for a span short enough that the year is obvious. */
+    fun dayMonthNum(millis: Long): String {
+        val t = at(millis)
+        return "%02d-%02d".format(LOCALE, t.dayOfMonth, t.monthValue)
+    }
+
+    /** "Sep 2026" */
+    fun monthYearOf(millis: Long): String {
+        val t = at(millis)
+        return monthYearShort(YearMonth.of(t.year, t.month))
+    }
+
+    /** "US$78.250,18" */
+    fun usd(v: BigDecimal): String = "US$" + pesosDec.format(v)
+
     fun monthYearShort(m: YearMonth): String =
         monthYearShort.format(m).replaceFirstChar { it.uppercase() }.replace(".", "")
 

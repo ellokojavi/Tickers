@@ -22,7 +22,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cl.tickers.app.R
-import cl.tickers.app.domain.model.UfValue
+import cl.tickers.app.domain.model.HasValue
 
 /**
  * A minimal line chart drawn on a Canvas.
@@ -34,7 +34,10 @@ import cl.tickers.app.domain.model.UfValue
  */
 @Composable
 fun Sparkline(
-    values: List<UfValue>,
+    // Only the values are drawn; x is the index. Widened from UfValue so the
+    // bitcoin chart, whose points are timestamps rather than calendar days,
+    // can use the same one.
+    values: List<HasValue>,
     modifier: Modifier = Modifier,
     height: Dp = 180.dp,
     lineColor: Color = MaterialTheme.colorScheme.primary,

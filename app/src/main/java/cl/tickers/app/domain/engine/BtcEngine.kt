@@ -145,3 +145,17 @@ fun classifyFetchError(network: NetworkStatus, failures: List<SourceFailure>): F
         failures.isEmpty() || failures.all { it.transport } -> FetchErrorKind.UNREACHABLE
         else -> FetchErrorKind.SOURCE
     }
+
+/**
+ * How precise a chart label has to be for a span to be readable. The domain
+ * picks the granularity; the formatting layer knows how to write one. An hour
+ * of trading labelled by date says nothing, and five years labelled by minute
+ * says too much.
+ */
+enum class StampKind { TIME, DAY, MONTH }
+
+fun stampKind(h: Horizon): StampKind = when (h) {
+    Horizon.H1, Horizon.D1 -> StampKind.TIME
+    Horizon.D7, Horizon.D30 -> StampKind.DAY
+    Horizon.Y1, Horizon.Y5 -> StampKind.MONTH
+}

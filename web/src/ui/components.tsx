@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { ComponentChildren, JSX } from "preact";
 import * as Fmt from "../core/format.ts";
 import type { IsoDate } from "../domain/dates.ts";
-import type { UfValue } from "../domain/models.ts";
+import type { Money } from "../domain/money.ts";
 
 export const Card = ({ children }: { children: ComponentChildren }) => (
   <section class="card">{children}</section>
@@ -177,7 +177,10 @@ export const DateField = (
  */
 export const Sparkline = (
   { values, height = 200, selected, onScrub }: {
-    values: readonly UfValue[];
+    // Only the values are drawn; x is the index. Widened from UfValue so the
+    // bitcoin chart, whose points are timestamps rather than calendar days,
+    // can use the same one.
+    values: readonly { readonly value: Money }[];
     height?: number;
     selected: number | null;
     onScrub: (index: number | null) => void;

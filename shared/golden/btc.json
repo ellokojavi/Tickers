@@ -300,5 +300,121 @@
       "headline": "Las fuentes de precio respondieron con error",
       "hint": "No hay nada que hacer; la app sigue reintentando."
     }
-  ]
+  ],
+  "stampKind": [
+    {
+      "horizon": "H1",
+      "expected": "time"
+    },
+    {
+      "horizon": "D1",
+      "expected": "time"
+    },
+    {
+      "horizon": "D7",
+      "expected": "day"
+    },
+    {
+      "horizon": "D30",
+      "expected": "day"
+    },
+    {
+      "horizon": "Y1",
+      "expected": "month"
+    },
+    {
+      "horizon": "Y5",
+      "expected": "month"
+    }
+  ],
+  "format": {
+    "usd": [
+      {
+        "v": "0",
+        "expected": "US$0,00"
+      },
+      {
+        "v": "1",
+        "expected": "US$1,00"
+      },
+      {
+        "v": "78250.175",
+        "expected": "US$78.250,18"
+      },
+      {
+        "v": "1234567.891",
+        "expected": "US$1.234.567,89"
+      },
+      {
+        "v": "-4321.05",
+        "expected": "US$-4.321,05"
+      }
+    ],
+    "timeHm": [
+      {
+        "v": 1768501800000,
+        "expected": "15:30"
+      },
+      {
+        "v": 1784140200000,
+        "expected": "14:30"
+      },
+      {
+        "v": 1788922800000,
+        "expected": "00:00"
+      },
+      {
+        "v": 1788922740000,
+        "expected": "23:59"
+      },
+      {
+        "v": 1640995140000,
+        "expected": "20:59"
+      }
+    ],
+    "dayMonthNum": [
+      {
+        "v": 1768501800000,
+        "expected": "15-01"
+      },
+      {
+        "v": 1784140200000,
+        "expected": "15-07"
+      },
+      {
+        "v": 1788922800000,
+        "expected": "09-09"
+      },
+      {
+        "v": 1788922740000,
+        "expected": "08-09"
+      },
+      {
+        "v": 1640995140000,
+        "expected": "31-12"
+      }
+    ],
+    "monthYearOf": [
+      {
+        "v": 1768501800000,
+        "expected": "Ene 2026"
+      },
+      {
+        "v": 1784140200000,
+        "expected": "Jul 2026"
+      },
+      {
+        "v": 1788922800000,
+        "expected": "Sep 2026"
+      },
+      {
+        "v": 1788922740000,
+        "expected": "Sep 2026"
+      },
+      {
+        "v": 1640995140000,
+        "expected": "Dic 2021"
+      }
+    ]
+  }
 }

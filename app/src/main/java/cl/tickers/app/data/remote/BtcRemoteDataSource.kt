@@ -7,6 +7,7 @@ import cl.tickers.app.domain.engine.candlesNeeded
 import cl.tickers.app.domain.engine.chartPlan
 import cl.tickers.app.domain.engine.classifyFetchError
 import cl.tickers.app.domain.engine.FetchErrorKind
+import cl.tickers.app.domain.model.HasValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -148,7 +149,9 @@ class BtcRemoteDataSource(private val client: OkHttpClient) {
     }
 }
 
-data class BtcCandle(val at: Long, val usd: BigDecimal)
+data class BtcCandle(val at: Long, val usd: BigDecimal) : HasValue {
+    override val value: BigDecimal get() = usd
+}
 
 sealed interface BtcSpotResult {
     data class Ok(val usd: BigDecimal, val source: String, val at: Long) : BtcSpotResult

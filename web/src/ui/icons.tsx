@@ -42,6 +42,14 @@ export const ShareIcon = () => svg(
   </>,
 );
 
+export const BitcoinIcon = () => svg(
+  <>
+    <path d="M7 5.5h6.2a3.25 3.25 0 0 1 0 6.5H7z" />
+    <path d="M7 12h6.8a3.25 3.25 0 0 1 0 6.5H7z" />
+    <path d="M7 5.5v13M10 3v2.5M10 18.5V21M14 3v2.5M14 18.5V21" />
+  </>,
+);
+
 export const MenuIcon = () => svg(
   <>
     <line x1="4" y1="7" x2="20" y2="7" />

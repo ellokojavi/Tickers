@@ -22,7 +22,8 @@
 
 ## English
 
-**Tickers** shows Chile's Unidad de Fomento and helps you work with it.
+**Tickers** shows the numbers Chilean money is measured in, and helps you work
+with them.
 
 - **Today's value**, how much it moved since yesterday and over the last 30
   days, and a two-way UF ⇄ peso converter.
@@ -30,6 +31,11 @@
   finger across, plus a lookup for any single date. Days already published into
   the future are kept separate and labelled as official, never presented as a
   guess.
+- **Bitcoin**, priced in dollars as the market does, converted to pesos with the
+  Banco Central's observed rate, and shown in UF as well: the only way to read
+  it net of Chilean inflation. Charts from an hour to five years, and four
+  independent price sources so one exchange having a bad afternoon is not an
+  outage.
 - **An inflation calculator** that restates an amount between two exact dates:
   *$4.000 from 1 January 1990 is worth $30.086 today.*
 - **A mortgage simulator** for `UF + x%` loans, covering insurance, stamp tax,
@@ -58,7 +64,8 @@ first time.
 
 ## Español
 
-**Tickers** muestra la Unidad de Fomento y te ayuda a trabajar con ella.
+**Tickers** muestra las cifras con que se mide el dinero en Chile y te ayuda a
+trabajar con ellas.
 
 - **El valor de hoy**, cuánto se movió respecto de ayer y en los últimos 30
   días, y un conversor UF ⇄ pesos en ambos sentidos.
@@ -66,6 +73,11 @@ first time.
   recorrer con el dedo, más la consulta de cualquier fecha. Los días ya
   publicados hacia adelante van aparte y marcados como oficiales, nunca
   presentados como una estimación.
+- **Bitcoin**, cotizado en dólares como lo hace el mercado, convertido a pesos
+  con el dólar observado del Banco Central, y también en UF: la única forma de
+  leerlo descontada la inflación chilena. Gráficos desde una hora hasta cinco
+  años, y cuatro fuentes de precio independientes para que una casa de cambio
+  con un mal día no sea una caída.
 - **Una calculadora de inflación** que reajusta un monto entre dos fechas
   exactas: *$4.000 del 1 de enero de 1990 equivalen a $30.086 de hoy.*
 - **Un simulador de créditos hipotecarios** UF + tasa, con seguros, impuesto de
