@@ -67,6 +67,13 @@ export const decimal1 = (v: number): string => {
 /** "13.397 días (36,7 años)" */
 export const period = (days: number): string => {
   const count = integer(days);
+  // Only a span of exactly one day is singular. Zero is plural in Spanish
+  // ("0 días"), and a reversed range is reachable — the inflation screen lets
+  // either date be the later one — so -1 is singular too. The parenthetical
+  // needs no such case: the months branch cannot start below "2,0 meses"
+  // (60 / 30,44) nor the years branch below "2,0 años" (730 / 365,25), and a
+  // decimal quantity takes the plural in any event.
+  if (days === 1 || days === -1) return `${count} día`;
   if (days < 60) return `${count} días`;
   if (days < 730) return `${count} días (${decimal1(days / 30.44)} meses)`;
   return `${count} días (${decimal1(days / 365.25)} años)`;
