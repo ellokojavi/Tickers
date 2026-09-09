@@ -1,4 +1,5 @@
 import { Card, SectionTitle, Sheet } from "./components.tsx";
+import { InstallCard } from "./InstallCard.tsx";
 
 /**
  * Independence notice, source attribution and the financial disclaimer.
@@ -12,6 +13,10 @@ import { Card, SectionTitle, Sheet } from "./components.tsx";
  */
 export const AboutSheet = ({ onClose }: { onClose: () => void }) => (
   <Sheet title="Acerca de" onClose={onClose}>
+    {/* Not dismissible here: this is the permanent home for the offer, so
+        hiding the card on the main screen does not lose it for good. */}
+    <InstallCard compact />
+
     <Card>
       <SectionTitle>Aplicación independiente</SectionTitle>
       <p class="muted">

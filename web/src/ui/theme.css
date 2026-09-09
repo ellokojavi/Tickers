@@ -194,4 +194,11 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
   border: none; border-radius: 18px; padding: 16px 22px; font-size: 15px; font-weight: 500;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
+.install { position: relative; border: 1px solid var(--outline-variant); }
+.install-close { position: absolute; top: 10px; right: 10px; color: var(--outline); }
+.steps { margin: 10px 0 14px; padding-left: 20px; color: var(--on-surface-variant); font-size: 14px; }
+.steps li { margin-bottom: 6px; }
+.glyph { display: inline-flex; vertical-align: -6px; }
+.glyph svg { width: 18px; height: 18px; }
+
 .banner { background: var(--surface-variant); border-radius: 10px; padding: 12px; font-size: 13px; margin-bottom: 12px; }

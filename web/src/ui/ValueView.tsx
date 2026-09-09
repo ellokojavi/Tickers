@@ -11,6 +11,7 @@ import { DataSource } from "../domain/models.ts";
 import type { UfData } from "../data/useUfData.ts";
 import { Card, Chips, DateField, KeyValue, NumberField, Pill, SectionTitle, Sparkline } from "./components.tsx";
 import { ShareIcon } from "./icons.tsx";
+import { InstallCard } from "./InstallCard.tsx";
 
 const RANGES = [
   { key: "M1", label: "1M", months: 1 },
@@ -234,6 +235,8 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
           )}
         </Card>
       )}
+
+      <InstallCard />
 
       <div class="footer">
         <p class="tiny">App independiente, sin relación con la CMF, el Banco Central ni el INE.</p>
