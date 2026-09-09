@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -72,7 +74,16 @@ private fun TickersRoot() {
             bottomBar = {
                 if (showBar) {
                     NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                        Tab.entries.forEach { tab ->
+                        Tab.entries.forEachIndexed { i, tab ->
+                            // The hairline between the two sections. It is
+                            // inset from the bar's edges so it reads as a
+                            // mark between the items, not a break in the bar.
+                            if (i > 0 && Tab.entries[i - 1].section != tab.section) {
+                                VerticalDivider(
+                                    modifier = Modifier.padding(vertical = 18.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                )
+                            }
                             NavigationBarItem(
                                 selected = route == tab.route,
                                 onClick = {

@@ -175,6 +175,15 @@ nav.tabs > button > .tab-label {
 nav.tabs > button[aria-current="page"] { color: var(--on-primary-container); }
 nav.tabs > button[aria-current="page"] .tab-icon { background: var(--primary-container); }
 .tab-icon { border-radius: 999px; padding: 4px 16px; display: flex; }
+/* Along the bottom bar the separator between the two sections stands on end:
+   a hairline between the third and fourth buttons, inset so it does not
+   touch the bar's own edges. */
+nav.tabs > .tab-divider {
+  align-self: stretch; width: 0; margin: 6px 0;
+  border: none; border-left: 1px solid var(--outline-variant);
+}
+/* The section headings have nowhere to go on a phone. */
+nav.tabs > .tab-group { display: none; }
 
 .chart { width: 100%; display: block; touch-action: pan-y; }
 
@@ -258,6 +267,17 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
     flex: 0 0 auto;
   }
   nav.tabs > button[aria-current="page"] { background: var(--primary-container); }
+  /* Down the rail the separator lies flat again, and each section gets its
+     name above it in the same small capitals the cards use for theirs. */
+  nav.tabs > .tab-divider {
+    align-self: auto; width: auto; margin: 10px 6px 6px;
+    border-left: none; border-top: 1px solid var(--outline-variant);
+  }
+  nav.tabs > .tab-group {
+    display: block; padding: 6px 18px 4px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--on-surface-variant);
+  }
   /* The pill is the rail item itself up here, so the icon drops its own. */
   nav.tabs > button[aria-current="page"] .tab-icon { background: transparent; }
   .tab-icon { padding: 0; }
@@ -284,6 +304,9 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
   .rail-collapsed .rail-brand { display: none; }
   .rail-collapsed nav.tabs > button { justify-content: center; padding: 12px 0; }
   .rail-collapsed .tab-label { display: none; }
+  /* Icons only: the line still marks the two sections, the names do not fit. */
+  .rail-collapsed nav.tabs > .tab-group { display: none; }
+  .rail-collapsed nav.tabs > .tab-divider { margin: 8px 4px; }
   .rail-collapsed.app { padding-left: 112px; }
   .screen-title, .view { max-width: 1120px; margin: 0 auto; }
   .screen-title { min-height: 72px; font-size: 26px; }
