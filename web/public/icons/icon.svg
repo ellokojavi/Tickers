@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="512" height="512">
+  <title>UF Chile</title>
+  <rect width="108" height="108" rx="24" fill="#0B0F0F"/>
+  <defs><clipPath id="c"><circle cx="54" cy="54" r="36"/></clipPath></defs>
+  <g clip-path="url(#c)">
+    <rect x="18" y="18" width="36" height="36" fill="#0F3E9F"/>
+    <rect x="54" y="18" width="36" height="36" fill="#FFFFFF"/>
+    <rect x="18" y="54" width="72" height="36" fill="#D63B2C"/>
+    <path d="M36.41,30.28 L38.15,35.65 L43.8,35.65 L39.23,38.97 L40.98,44.34 L36.41,41.02 L31.84,44.34 L33.59,38.97 L29.02,35.65 L34.67,35.65 Z" fill="#fff"/>
+    <path d="M31.2,81.1 C36,74.5 39,71 42.1,70.5 C46.5,69.8 50.5,66.5 53,62.3 C56.5,56.5 61,50 70.6,42.5"
+          stroke="#ffffff" stroke-opacity="0.9" stroke-width="7.8" fill="none"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M76.5,35.73 L74.53,45.93 L66.67,39.11 Z" fill="#fff" fill-opacity="0.9"
+          stroke="#ffffff" stroke-opacity="0.9" stroke-width="3.6" stroke-linejoin="round"/>
+    <path d="M31.2,81.1 C36,74.5 39,71 42.1,70.5 C46.5,69.8 50.5,66.5 53,62.3 C56.5,56.5 61,50 70.6,42.5"
+          stroke="#5CE06A" stroke-width="4.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M76.5,35.73 L74.53,45.93 L66.67,39.11 Z" fill="#1E9E45"/>
+  </g>
+</svg>
