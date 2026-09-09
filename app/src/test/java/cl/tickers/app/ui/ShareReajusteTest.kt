@@ -51,9 +51,11 @@ class ShareReajusteTest {
         assertThat(message).doesNotContain("40881.68")
     }
 
+    /** The method is explained on the next card, not on the one being shared. */
     @Test
-    fun `the method is stated rather than left implied`() {
-        assertThat(message).contains("Reajustado con la UF")
+    fun `nothing that is not on the result card is included`() {
+        assertThat(message).doesNotContain("Reajustado con la UF")
+        assertThat(message.trim().lines().last()).startsWith("UF el 06-09-2026")
     }
 
     @Test

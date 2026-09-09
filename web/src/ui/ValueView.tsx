@@ -120,7 +120,7 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
             <ShareButton
               what="el valor de la UF"
               title="Valor de la UF"
-              text={todayShareText(current.value, current.date, dailyDelta, monthPct, future, data.source)}
+              text={todayShareText(current.value, current.date, dailyDelta, monthPct, data.source)}
             />
           )}
         </div>
@@ -340,9 +340,13 @@ const shiftMonth = (d: IsoDate, months: number): IsoDate => {
   return `${String(ny).padStart(4, "0")}-${String(nm).padStart(2, "0")}-${String(nd).padStart(2, "0")}`;
 };
 
+/**
+ * The card as a message: what is on it and nothing more. The future values
+ * live in their own card further down and are not this card's to send.
+ */
 const todayShareText = (
   value: Money, date: IsoDate, dailyDelta: Money | null, monthPct: Money | null,
-  future: readonly { date: IsoDate; value: Money }[], source: keyof typeof DataSource,
+  source: keyof typeof DataSource,
 ): string => {
   const deltas = [
     dailyDelta === null ? null : `${Fmt.clpSigned(dailyDelta)} vs. ayer`,
@@ -352,10 +356,6 @@ const todayShareText = (
   const lines = [
     "*UF de hoy*", Fmt.longDate(date), Fmt.clpExact(value),
     ...(deltas.length > 0 ? ["", deltas.join("  ·  ")] : []),
-    ...(future.length > 0
-      ? ["", "*Próximos valores ya publicados*",
-         ...future.slice(0, 8).map((v) => `${Fmt.shortDate(v.date)}   ${Fmt.clpExact(v.value)}`)]
-      : []),
     "", `Fuente: ${DataSource[source].label}`,
   ];
   return lines.join("\n");

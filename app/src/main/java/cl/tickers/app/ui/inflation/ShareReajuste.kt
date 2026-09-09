@@ -9,7 +9,9 @@ import cl.tickers.app.domain.model.ReajusteResult
  * Turns a restatement into a plain-text message for the share sheet.
  *
  * The equivalence itself leads, because that is what gets quoted in a chat;
- * the arithmetic behind it follows for anyone who wants to check it.
+ * the arithmetic behind it follows for anyone who wants to check it. Only
+ * what the result card shows goes in: the sentence about the method belongs
+ * to the card below it and stays there.
  */
 object ShareReajuste {
 
@@ -28,9 +30,7 @@ object ShareReajuste {
         appendLine("*Cálculo por UF*")
         appendLine("UF el ${Fmt.shortDate(result.from)}: ${Fmt.clpExact(result.ufAtFrom)}")
         appendLine("Equivale a: ${Fmt.uf4(result.ufUnits)}")
-        appendLine("UF el ${Fmt.shortDate(result.to)}: ${Fmt.clpExact(result.ufAtTo)}")
-        appendLine()
-        append("Reajustado con la UF, que sigue al IPC con un mes de desfase.")
+        append("UF el ${Fmt.shortDate(result.to)}: ${Fmt.clpExact(result.ufAtTo)}")
     }
 
     fun share(context: Context, result: ReajusteResult) = shareText(

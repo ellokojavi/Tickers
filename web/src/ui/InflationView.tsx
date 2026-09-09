@@ -120,6 +120,11 @@ export const InflationView = ({ data }: { data: UfData }) => {
   );
 };
 
+/**
+ * The result card as a message: the equivalence, the arithmetic behind it and
+ * the UF values it rests on, all of which are on the card. The sentence about
+ * the method belongs to the card below this one and stays there.
+ */
 const buildShare = (r: ReajusteResult): string => [
   "*Equivalencia de valores*", "",
   `${Fmt.clp(r.amount)} del ${Fmt.longDate(r.from)}`,
@@ -132,6 +137,5 @@ const buildShare = (r: ReajusteResult): string => [
   "*Cálculo por UF*",
   `UF el ${Fmt.shortDate(r.from)}: ${Fmt.clpExact(r.ufAtFrom)}`,
   `Equivale a: ${Fmt.uf4(r.ufUnits)}`,
-  `UF el ${Fmt.shortDate(r.to)}: ${Fmt.clpExact(r.ufAtTo)}`, "",
-  "Reajustado con la UF, que sigue al IPC con un mes de desfase.",
+  `UF el ${Fmt.shortDate(r.to)}: ${Fmt.clpExact(r.ufAtTo)}`,
 ].join("\n");

@@ -4,7 +4,11 @@ import android.content.Context
 import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.core.share.shareText
 
-/** Turns the "today" card into a plain-text message for the share sheet. */
+/**
+ * Turns the "today" card into a plain-text message for the share sheet: what
+ * is on the card and nothing more. The future values live in their own card
+ * further down and are not this card's to send.
+ */
 object ShareToday {
 
     fun buildMessage(ui: UfUiState): String {
@@ -22,14 +26,6 @@ object ShareToday {
         if (deltas.isNotEmpty()) {
             sb.appendLine()
             sb.appendLine(deltas.joinToString("  ·  "))
-        }
-
-        if (ui.future.isNotEmpty()) {
-            sb.appendLine()
-            sb.appendLine("*Próximos valores ya publicados*")
-            ui.future.take(8).forEach {
-                sb.appendLine("${Fmt.shortDate(it.date)}   ${Fmt.clpExact(it.value)}")
-            }
         }
 
         sb.appendLine()
