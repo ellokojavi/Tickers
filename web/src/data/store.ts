@@ -129,3 +129,13 @@ export const readTheme = (): ThemeMode => {
 export const writeTheme = (mode: ThemeMode): void => {
   try { localStorage.setItem(THEME_KEY, mode); } catch { /* ignore */ }
 };
+
+const RAIL_KEY = "ufchile.railCollapsed.v1";
+
+export const readRailCollapsed = (): boolean => {
+  try { return localStorage.getItem(RAIL_KEY) === "1"; } catch { return false; }
+};
+
+export const writeRailCollapsed = (collapsed: boolean): void => {
+  try { localStorage.setItem(RAIL_KEY, collapsed ? "1" : "0"); } catch { /* ignore */ }
+};

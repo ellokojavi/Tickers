@@ -91,6 +91,9 @@ export const shortDate = (d: IsoDate): string =>
 
 export const monthYearShort = (d: IsoDate): string => `${MONTHS_SHORT[month(d) - 1]} ${year(d)}`;
 
+/** Day and month with no year, for labelling something already known to be recent. */
+export const dayMonth = (d: IsoDate): string => `${dayOfMonth(d)} de ${MONTHS[month(d) - 1]}`;
+
 /** "hoy", "ayer", "hace 3 días" */
 export const relativeDay = (d: IsoDate, day: IsoDate = todayIso()): string => {
   const diff = daysBetween(d, day);

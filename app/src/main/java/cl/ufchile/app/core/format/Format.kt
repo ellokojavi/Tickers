@@ -95,11 +95,15 @@ object Fmt {
     // ------------------------------------------------------------- dates
 
     private val dayMonthYear = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", LOCALE)
+    private val dayMonth = DateTimeFormatter.ofPattern("d 'de' MMMM", LOCALE)
     private val shortDate = DateTimeFormatter.ofPattern("dd-MM-yyyy", LOCALE)
     private val monthYear = DateTimeFormatter.ofPattern("MMMM yyyy", LOCALE)
     private val monthYearShort = DateTimeFormatter.ofPattern("MMM yyyy", LOCALE)
 
     fun longDate(d: LocalDate): String = dayMonthYear.format(d).replaceFirstChar { it.uppercase() }
+
+    /** Day and month with no year, for labelling something already known to be recent. */
+    fun dayMonth(d: LocalDate): String = dayMonth.format(d)
     fun shortDate(d: LocalDate): String = shortDate.format(d)
     fun monthYear(m: YearMonth): String = monthYear.format(m).replaceFirstChar { it.uppercase() }
     fun monthYearShort(m: YearMonth): String =

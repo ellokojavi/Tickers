@@ -10,7 +10,7 @@ import { resolve, SERIES_START, type LookupResult } from "../domain/ufLookup.ts"
 import { DataSource } from "../domain/models.ts";
 import type { UfData } from "../data/useUfData.ts";
 import { Card, Chips, DateField, KeyValue, NumberField, Pill, SectionTitle, Sparkline } from "./components.tsx";
-import { ShareIcon } from "./icons.tsx";
+import { ShareButton } from "./share.tsx";
 import { InstallCard } from "./InstallCard.tsx";
 
 const RANGES = [
@@ -80,12 +80,11 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
         <div class="row">
           <span class="muted">{current === null ? "Cargando…" : Fmt.longDate(current.date)}</span>
           {current !== null && (
-            <button
-              type="button"
-              class="btn icon"
-              aria-label="Compartir el valor de la UF"
-              onClick={() => shareToday(current.value, current.date, dailyDelta, monthPct, future, data.source)}
-            ><ShareIcon /></button>
+            <ShareButton
+              what="el valor de la UF"
+              title="Valor de la UF"
+              text={todayShareText(current.value, current.date, dailyDelta, monthPct, future, data.source)}
+            />
           )}
         </div>
         <p class="hero-value">{current === null ? "—" : Fmt.clpExact(current.value)}</p>
@@ -126,7 +125,9 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
           }}
         />
         <NumberField
-          label="Pesos"
+          // A conversion is only true for one day, and the card sits far
+          // enough from the date at the top to be read on its own.
+          label={current === null ? "Pesos" : `Pesos (al ${Fmt.dayMonth(current.date)})`}
           suffix="CLP"
           decimals={false}
           value={clpText === "" && rate !== null && ufText === "1"
@@ -306,10 +307,10 @@ const shiftMonth = (d: IsoDate, months: number): IsoDate => {
   return `${String(ny).padStart(4, "0")}-${String(nm).padStart(2, "0")}-${String(nd).padStart(2, "0")}`;
 };
 
-const shareToday = (
+const todayShareText = (
   value: Money, date: IsoDate, dailyDelta: Money | null, monthPct: Money | null,
   future: readonly { date: IsoDate; value: Money }[], source: keyof typeof DataSource,
-): void => {
+): string => {
   const deltas = [
     dailyDelta === null ? null : `${Fmt.clpSigned(dailyDelta)} vs. ayer`,
     monthPct === null ? null : `${Fmt.pctSigned(monthPct)} en 30 días`,
@@ -324,13 +325,5 @@ const shareToday = (
       : []),
     "", `Fuente: ${DataSource[source].label}`,
   ];
-  void share("Valor de la UF", lines.join("\n"));
-};
-
-export const share = async (title: string, text: string): Promise<void> => {
-  if (typeof navigator.share === "function") {
-    try { await navigator.share({ title, text }); return; } catch { /* dismissed */ }
-  }
-  try { await navigator.clipboard.writeText(text); alert("Copiado al portapapeles"); }
-  catch { /* nothing else to try */ }
+  return lines.join("\n");
 };

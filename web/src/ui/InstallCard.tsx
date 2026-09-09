@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { ShareIcon } from "./icons.tsx";
+import { canShare, shareText } from "./share.tsx";
 
 /**
  * Offers to put the app on the home screen, so nobody has to retype the URL.
@@ -51,7 +52,7 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
   const [deferred, setDeferred] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(isStandalone);
   const [dismissed, setDismissed] = useState(() => !compact && wasDismissed());
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"copied" | "failed" | null>(null);
 
   useEffect(() => {
     const onPrompt = (event: Event) => {
@@ -87,15 +88,21 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
 
   const shareLink = async () => {
     const url = window.location.href;
-    if (typeof navigator.share === "function") {
-      try { await navigator.share({ title: "UF Chile", url }); return; } catch { /* dismissed */ }
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2500);
-    } catch { /* nothing else to try */ }
+    const outcome = await shareText("UF Chile", url);
+    if (outcome !== "copied" && outcome !== "failed") return;
+    setCopied(outcome);
+    window.setTimeout(() => setCopied(null), 2500);
   };
+
+  // A browser that cannot hand the link to another app can only copy it, and
+  // the button says which one it is about to do.
+  const linkLabel = copied === "copied"
+    ? "Enlace copiado"
+    : copied === "failed"
+    ? "No se pudo copiar"
+    : canShare()
+    ? "Compartir enlace"
+    : "Copiar enlace";
 
   return (
     <section class="card install">
@@ -104,7 +111,7 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
           ✕
         </button>
       )}
-      <h2 class="section-title">Tenerla a mano</h2>
+      <h2 class="section-title">Descargar acceso directo</h2>
 
       {deferred !== null ? (
         <>
@@ -116,7 +123,7 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
               Instalar
             </button>
             <button type="button" class="btn outlined" onClick={() => void shareLink()}>
-              {copied ? "Enlace copiado" : "Compartir enlace"}
+              {linkLabel}
             </button>
           </div>
         </>
@@ -134,7 +141,7 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
           </ol>
           <button type="button" class="btn outlined" style={{ width: "100%" }}
             onClick={() => void shareLink()}>
-            {copied ? "Enlace copiado" : "Compartir enlace"}
+            {linkLabel}
           </button>
         </>
       ) : (
@@ -149,7 +156,7 @@ export const InstallCard = ({ compact = false }: { compact?: boolean }) => {
           </ol>
           <button type="button" class="btn outlined" style={{ width: "100%" }}
             onClick={() => void shareLink()}>
-            {copied ? "Enlace copiado" : "Compartir enlace"}
+            {linkLabel}
           </button>
         </>
       )}
