@@ -33,7 +33,10 @@ describe("es-CL formatting", () => {
 
   it("a span reads in the unit that suits its length", () => {
     expect(Fmt.period(0)).toBe("0 días");
+    expect(Fmt.period(1)).toBe("1 día");
+    expect(Fmt.period(-1)).toBe("-1 día");
     expect(Fmt.period(45)).toBe("45 días");
+    expect(Fmt.period(60)).toBe("60 días (2,0 meses)");
     expect(Fmt.period(365)).toBe("365 días (12,0 meses)");
     expect(Fmt.period(13_397)).toBe("13.397 días (36,7 años)");
   });

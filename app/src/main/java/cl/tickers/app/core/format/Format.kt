@@ -71,6 +71,14 @@ object Fmt {
     fun period(days: Long): String {
         val count = integer(days)
         return when {
+            // Only a span of exactly one day is singular. Zero is plural in
+            // Spanish ("0 días"), and a reversed range is reachable — the
+            // inflation screen lets either date be the later one — so -1 is
+            // singular too. The parenthetical needs no such case: the months
+            // branch cannot start below "2,0 meses" (60 / 30,44) nor the years
+            // branch below "2,0 años" (730 / 365,25), and a decimal quantity
+            // takes the plural in any event.
+            days == 1L || days == -1L -> "$count día"
             days < 60 -> "$count días"
             days < 730 -> "$count días (${decimal1(days / 30.44)} meses)"
             else -> "$count días (${decimal1(days / 365.25)} años)"

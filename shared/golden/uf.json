@@ -476,16 +476,28 @@
     ],
     "period": [
       {
+        "v": -1,
+        "expected": "-1 día"
+      },
+      {
         "v": 0,
         "expected": "0 días"
       },
       {
         "v": 1,
-        "expected": "1 días"
+        "expected": "1 día"
+      },
+      {
+        "v": 2,
+        "expected": "2 días"
       },
       {
         "v": 30,
         "expected": "30 días"
+      },
+      {
+        "v": 60,
+        "expected": "60 días (2,0 meses)"
       },
       {
         "v": 365,
@@ -494,6 +506,10 @@
       {
         "v": 400,
         "expected": "400 días (13,1 meses)"
+      },
+      {
+        "v": 730,
+        "expected": "730 días (2,0 años)"
       },
       {
         "v": 13399,
