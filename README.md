@@ -31,6 +31,9 @@ with them.
   finger across, plus a lookup for any single date. Days already published into
   the future are kept separate and labelled as official, never presented as a
   guess.
+- **The dólar observado**, every business day back to January 1984, with the
+  same chart and converter as the UF. Weekends and holidays have no publication
+  and none is invented: the last published value is shown, with its date.
 - **Bitcoin**, priced in dollars as the market does, converted to pesos with the
   Banco Central's observed rate, and shown in UF as well: the only way to read
   it net of Chilean inflation. Charts from an hour to five years, and four
@@ -73,6 +76,10 @@ trabajar con ellas.
   recorrer con el dedo, más la consulta de cualquier fecha. Los días ya
   publicados hacia adelante van aparte y marcados como oficiales, nunca
   presentados como una estimación.
+- **El dólar observado**, cada día hábil desde enero de 1984, con el mismo
+  gráfico y conversor que la UF. Los fines de semana y feriados no tienen
+  publicación y no se inventa ninguna: se muestra el último valor publicado, con
+  su fecha.
 - **Bitcoin**, cotizado en dólares como lo hace el mercado, convertido a pesos
   con el dólar observado del Banco Central, y también en UF: la única forma de
   leerlo descontada la inflación chilena. Gráficos desde una hora hasta cinco

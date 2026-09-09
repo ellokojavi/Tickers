@@ -29,6 +29,7 @@ import cl.tickers.app.data.prefs.ThemeMode
 import cl.tickers.app.ui.credit.CreditEditorScreen
 import cl.tickers.app.ui.credit.CreditListScreen
 import cl.tickers.app.ui.btc.BtcScreen
+import cl.tickers.app.ui.usd.UsdScreen
 import cl.tickers.app.ui.inflation.InflationScreen
 import cl.tickers.app.ui.nav.Routes
 import cl.tickers.app.ui.nav.Tab
@@ -112,6 +113,7 @@ private fun TickersRoot() {
                         themeMode = themeMode,
                     )
                 }
+                composable(Tab.DOLLAR.route) { UsdScreen() }
                 composable(Tab.BITCOIN.route) { BtcScreen() }
                 composable(Tab.INFLATION.route) { InflationScreen() }
                 composable(Tab.CREDITS.route) {
