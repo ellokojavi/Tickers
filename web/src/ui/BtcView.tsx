@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import * as Fmt from "../core/format.ts";
 import { money, type Money } from "../domain/money.ts";
-import { deltaPct } from "../domain/ufEngine.ts";
-import { currentOf } from "../domain/ufEngine.ts";
+import { btcConvert } from "../domain/converter.ts";
+import { currentOf, deltaPct } from "../domain/ufEngine.ts";
 import { today as todayIso } from "../domain/dates.ts";
 import {
-  HORIZONS, btcToClp, btcUsdToClp, btcUsdToUf, chartPlan, clpToBtc,
+  HORIZONS, btcUsdToClp, btcUsdToUf, chartPlan,
   fetchErrorCopy, horizonLabel, stampKind, type Horizon,
 } from "../domain/btc.ts";
 import { fetchCandles, fetchSpot, type Candle, type Spot, type SpotFailure } from "../data/btcApi.ts";
@@ -24,6 +24,7 @@ export const BtcView = ({ data }: { data: UfData }) => {
   const [candles, setCandles] = useState<readonly Candle[]>([]);
   const [scrub, setScrub] = useState<number | null>(null);
   const [btcText, setBtcText] = useState("1");
+  const [usdText, setUsdText] = useState("");
   const [clpText, setClpText] = useState("");
   const [now, setNow] = useState(Date.now());
 
@@ -66,6 +67,39 @@ export const BtcView = ({ data }: { data: UfData }) => {
     return () => window.clearInterval(id);
   }, [horizon]);
 
+  /**
+   * One value is typed, the other two follow. The arithmetic lives in the
+   * domain because it has to give the same answers here and on Android, and
+   * because deriving one rounded figure from another is how a converter starts
+   * disagreeing with itself.
+   */
+  const setConverter = (field: "btc" | "usd" | "clp", raw: string, price: Money, rate: Money) => {
+    if (field === "btc") setBtcText(raw);
+    if (field === "usd") setUsdText(raw);
+    if (field === "clp") setClpText(raw);
+
+    const parsed = Fmt.parseNumber(raw);
+    const result = parsed === null ? null
+      : btcConvert(field, money(String(parsed)), price, rate);
+    if (result === null) {
+      if (field !== "btc") setBtcText("");
+      if (field !== "usd") setUsdText("");
+      if (field !== "clp") setClpText("");
+      return;
+    }
+    if (field !== "btc") setBtcText(result.btc.toString().replace(".", ","));
+    if (field !== "usd") setUsdText(result.usd.toString().replace(".", ","));
+    if (field !== "clp") setClpText(result.clp.toString());
+  };
+
+  // The card opens on one bitcoin rather than empty, so it answers before use.
+  const opening = (price: Money, rate: Money) =>
+    btcText === "1" ? btcConvert("btc", money(1), price, rate) : null;
+  const usdShown = (price: Money, rate: Money): string =>
+    usdText === "" ? opening(price, rate)?.usd.toString().replace(".", ",") ?? "" : usdText;
+  const clpShown = (price: Money, rate: Money): string =>
+    clpText === "" ? opening(price, rate)?.clp.toString() ?? "" : clpText;
+
   const usd = isOk(spot) ? spot.usd : null;
   const shown = scrub !== null && candles[scrub] !== undefined ? candles[scrub]!.usd : usd;
 
@@ -81,7 +115,7 @@ export const BtcView = ({ data }: { data: UfData }) => {
 
   return (
     <>
-      <Card>
+      <Card class="btc-hero">
         <div class="row">
           <span class="muted">
             {spot === null ? "Cargando…"
@@ -123,7 +157,7 @@ export const BtcView = ({ data }: { data: UfData }) => {
         )}
       </Card>
 
-      <Card>
+      <Card class="btc-chart">
         <SectionTitle>Histórico</SectionTitle>
         <Chips
           label="Rango"
@@ -155,32 +189,47 @@ export const BtcView = ({ data }: { data: UfData }) => {
       </Card>
 
       {usd !== null && dollar !== null && (
-        <Card>
+        <Card class="btc-conv">
           <SectionTitle>Conversor</SectionTitle>
           <NumberField
             label="Bitcoin"
             suffix="BTC"
-            decimals
             value={btcText}
-            onChange={(raw) => {
-              setBtcText(raw);
-              const parsed = Fmt.parseNumber(raw);
-              setClpText(parsed === null ? ""
-                : btcToClp(money(String(parsed)), usd, dollar.value).toString());
-            }}
+            onChange={(raw) => setConverter("btc", raw, usd, dollar.value)}
           />
           <NumberField
-            label={`Pesos (al ${Fmt.dayMonth(dollar.date)})`}
+            label="Dólares"
+            suffix="USD"
+            value={usdShown(usd, dollar.value)}
+            onChange={(raw) => setConverter("usd", raw, usd, dollar.value)}
+            action={(
+              <span class="field-action">
+                <ShareButton
+                  what="el precio en dólares"
+                  title="Precio del bitcoin"
+                  text={convShare(btcText, usdShown(usd, dollar.value), null)}
+                />
+              </span>
+            )}
+          />
+          <NumberField
+            label="Pesos"
             suffix="CLP"
             decimals={false}
-            value={clpText === "" && btcText === "1"
-              ? btcToClp(money(1), usd, dollar.value).toString() : clpText}
-            onChange={(raw) => {
-              setClpText(raw);
-              const parsed = Fmt.parseNumber(raw);
-              setBtcText(parsed === null ? ""
-                : clpToBtc(money(String(parsed)), usd, dollar.value).toString().replace(".", ","));
-            }}
+            // The dollars above are the market's own price; only the pesos pass
+            // through a rate with a publication day, so only they carry it.
+            support={`Dólar observado del ${Fmt.dayMonth(dollar.date)}`}
+            value={clpShown(usd, dollar.value)}
+            onChange={(raw) => setConverter("clp", raw, usd, dollar.value)}
+            action={(
+              <span class="field-action">
+                <ShareButton
+                  what="el precio en dólares y pesos"
+                  title="Precio del bitcoin"
+                  text={convShare(btcText, usdShown(usd, dollar.value), clpShown(usd, dollar.value))}
+                />
+              </span>
+            )}
           />
           {inUf !== null && <KeyValue label="Un bitcoin en UF" value={Fmt.uf(inUf)} />}
         </Card>
@@ -218,3 +267,17 @@ const shareText = (
   ...(source === "" ? [] : [`Fuente: ${source}`]),
   ...(dollarDate === null ? [] : [`Dólar observado del ${Fmt.dayMonth(dollarDate)}`]),
 ].join("\n");
+
+/**
+ * What the share buttons send. Deliberately one line: it is meant to be pasted
+ * into a conversation, not read as a report.
+ */
+const convShare = (btcText: string, usd: string, clp: string | null): string => {
+  const amount = Fmt.parseNumber(btcText);
+  const head = amount === 1 ? "Bitcoin de hoy" : `${btcText} BTC`;
+  return [
+    head,
+    Fmt.usd(money(usd === "" ? "0" : usd.replace(",", "."))),
+    ...(clp === null || clp === "" ? [] : [`CLP${Fmt.clp(money(clp))}`]),
+  ].join(", ");
+};

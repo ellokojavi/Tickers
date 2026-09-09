@@ -1,4 +1,5 @@
 import { scale, type Money } from "./money.ts";
+import { usdToClp } from "./fx.ts";
 
 /**
  * Bitcoin, as a Chilean sees it.
@@ -21,8 +22,7 @@ export const BTC_SCALE = 8;
 export const UF_SCALE = 4;
 
 /** One bitcoin in pesos, from its dollar price and the dollar's peso value. */
-export const btcUsdToClp = (btcUsd: Money, usdClp: Money): Money =>
-  scale(btcUsd.times(usdClp), 0);
+export const btcUsdToClp = (btcUsd: Money, usdClp: Money): Money => usdToClp(btcUsd, usdClp);
 
 /** [btc] bitcoins in pesos. Rounded once, at the end. */
 export const btcToClp = (btc: Money, btcUsd: Money, usdClp: Money): Money =>

@@ -3,7 +3,7 @@ import * as Fmt from "../core/format.ts";
 import { money, type Money } from "../domain/money.ts";
 import { isAfter, today as todayIso, type IsoDate } from "../domain/dates.ts";
 import {
-  annualisedPct, clpToUf, currentOf, delta, deltaPct, downsample, futureOf, historyWindow, ufToClp,
+  annualisedPct, currentOf, delta, deltaPct, downsample, futureOf, historyWindow,
 } from "../domain/ufEngine.ts";
 import { daysBetween } from "../domain/dates.ts";
 import { resolve, SERIES_START, type LookupResult } from "../domain/ufLookup.ts";
@@ -11,6 +11,7 @@ import { DataSource } from "../domain/models.ts";
 import type { UfData } from "../data/useUfData.ts";
 import { Card, Chips, DateField, KeyValue, NumberField, Pill, SectionTitle, Sparkline } from "./components.tsx";
 import { ShareButton } from "./share.tsx";
+import { ufConvert } from "../domain/converter.ts";
 import { InstallCard } from "./InstallCard.tsx";
 
 const RANGES = [
@@ -33,6 +34,7 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
   const [detailOpen, setDetailOpen] = useState(false);
   const [ufText, setUfText] = useState("1");
   const [clpText, setClpText] = useState("");
+  const [usdText, setUsdText] = useState("");
   const [lookupDate, setLookupDate] = useState<IsoDate>(today);
 
   const current = useMemo(() => currentOf(data.series, today), [data.series, today]);
@@ -64,6 +66,9 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
 
   const scrubbed = scrub === null ? null : chartValues[scrub] ?? null;
   const rate = current?.value ?? null;
+  // The observed dollar the app already fetches. It has its own publication
+  // day, which the field says, because it is not the UF's day.
+  const dollar = data.indicators.find((i) => i.code === "dolar") ?? null;
 
   const lookup: LookupResult = useMemo(() => {
     const exact = data.series.find((v) => v.date === lookupDate) ?? null;
@@ -73,6 +78,38 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
 
   const dailyDelta = current !== null && previous !== null ? delta(previous.value, current.value) : null;
   const monthPct = current !== null && monthAgo !== null ? deltaPct(monthAgo.value, current.value) : null;
+
+  /**
+   * One value is typed, the other two follow. The arithmetic lives in the
+   * domain because it has to give the same answers here and on Android, and
+   * because deriving one rounded figure from another is how a converter starts
+   * disagreeing with itself.
+   */
+  const setConverter = (field: "uf" | "clp" | "usd", raw: string) => {
+    if (field === "uf") setUfText(raw);
+    if (field === "clp") setClpText(raw);
+    if (field === "usd") setUsdText(raw);
+
+    const parsed = Fmt.parseNumber(raw);
+    const result = parsed === null || rate === null ? null
+      : ufConvert(field, money(String(parsed)), rate, dollar?.value ?? null);
+    if (result === null) {
+      if (field !== "uf") setUfText("");
+      if (field !== "clp") setClpText("");
+      if (field !== "usd") setUsdText("");
+      return;
+    }
+    if (field !== "uf") setUfText(result.uf.toString().replace(".", ","));
+    if (field !== "clp") setClpText(result.clp.toString());
+    if (field !== "usd") setUsdText(result.usd?.toString().replace(".", ",") ?? "");
+  };
+
+  // The card opens on one UF rather than empty, so it answers before it is used.
+  const opening = rate === null || ufText !== "1" ? null
+    : ufConvert("uf", money(1), rate, dollar?.value ?? null);
+  const clpShown = clpText === "" && opening !== null ? opening.clp.toString() : clpText;
+  const usdShown = usdText === "" && opening?.usd != null
+    ? opening.usd.toString().replace(".", ",") : usdText;
 
   return (
     <>
@@ -114,31 +151,48 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
       <Card>
         <SectionTitle>Conversor</SectionTitle>
         <NumberField
-          label="UF"
+          // The date belongs to the UF, which is the value everything else on
+          // this card is derived from. It was on the peso field, where it read
+          // as if the peso were the thing with a date.
+          label={current === null ? "UF" : `UF (al ${Fmt.dayMonth(current.date)})`}
           suffix="UF"
           value={ufText}
-          onChange={(raw) => {
-            setUfText(raw);
-            const parsed = Fmt.parseNumber(raw);
-            setClpText(parsed !== null && rate !== null
-              ? ufToClp(money(String(parsed)), rate).toString() : "");
-          }}
+          onChange={(raw) => setConverter("uf", raw)}
         />
         <NumberField
-          // A conversion is only true for one day, and the card sits far
-          // enough from the date at the top to be read on its own.
-          label={current === null ? "Pesos" : `Pesos (al ${Fmt.dayMonth(current.date)})`}
+          label="Pesos"
           suffix="CLP"
           decimals={false}
-          value={clpText === "" && rate !== null && ufText === "1"
-            ? ufToClp(money(1), rate).toString() : clpText}
-          onChange={(raw) => {
-            setClpText(raw);
-            const parsed = Fmt.parseNumber(raw);
-            setUfText(parsed !== null && rate !== null
-              ? clpToUf(money(String(parsed)), rate).toString().replace(".", ",") : "");
-          }}
+          value={clpShown}
+          onChange={(raw) => setConverter("clp", raw)}
+          action={clpShown === "" ? undefined : (
+            <span class="field-action">
+              <ShareButton
+                what="el valor en pesos"
+                title="Valor de la UF"
+                text={converterShare(ufText, clpShown, null)}
+              />
+            </span>
+          )}
         />
+        {dollar !== null && (
+          <NumberField
+            label="Dólares"
+            suffix="USD"
+            support={`Dólar observado del ${Fmt.dayMonth(dollar.date)}`}
+            value={usdShown}
+            onChange={(raw) => setConverter("usd", raw)}
+            action={usdShown === "" ? undefined : (
+              <span class="field-action">
+                <ShareButton
+                  what="el valor en pesos y dólares"
+                  title="Valor de la UF"
+                  text={converterShare(ufText, clpShown, usdShown)}
+                />
+              </span>
+            )}
+          />
+        )}
       </Card>
 
       <Card>
@@ -326,4 +380,18 @@ const todayShareText = (
     "", `Fuente: ${DataSource[source].label}`,
   ];
   return lines.join("\n");
+};
+
+/**
+ * What the share buttons send. Deliberately one line: it is meant to be pasted
+ * into a conversation, not read as a report.
+ */
+const converterShare = (ufText: string, clp: string, usd: string | null): string => {
+  const amount = Fmt.parseNumber(ufText);
+  const head = amount === 1 ? "UF de hoy" : `${Fmt.uf(money(String(amount ?? 0)))}`;
+  return [
+    head,
+    `CLP${Fmt.clp(money(clp === "" ? "0" : clp))}`,
+    ...(usd === null || usd === "" ? [] : [Fmt.usd(money(usd.replace(",", ".")))]),
+  ].join(", ");
 };

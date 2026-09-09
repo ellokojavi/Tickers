@@ -4,8 +4,12 @@ import * as Fmt from "../core/format.ts";
 import type { IsoDate } from "../domain/dates.ts";
 import type { Money } from "../domain/money.ts";
 
-export const Card = ({ children }: { children: ComponentChildren }) => (
-  <section class="card">{children}</section>
+export const Card = (
+  // The class is how the desktop grid places a particular card; on a phone
+  // every card is simply the next one down and it goes unused.
+  { children, class: extra }: { children: ComponentChildren; class?: string },
+) => (
+  <section class={extra === undefined ? "card" : `card ${extra}`}>{children}</section>
 );
 
 export const SectionTitle = ({ children }: { children: ComponentChildren }) => (
@@ -70,7 +74,7 @@ export const Chips = <T extends string>(
  * seconds someone is typing into the box.
  */
 export const NumberField = (
-  { label, value, onChange, suffix, support, decimals = true, error }: {
+  { label, value, onChange, suffix, support, decimals = true, error, action }: {
     label: string;
     value: string;
     onChange: (raw: string) => void;
@@ -78,6 +82,8 @@ export const NumberField = (
     support?: string;
     decimals?: boolean;
     error?: boolean;
+    /** Sits after the suffix, inside the field's border. For acting on this one value. */
+    action?: ComponentChildren;
   },
 ) => {
   const [focused, setFocused] = useState(false);
@@ -96,6 +102,7 @@ export const NumberField = (
           onInput={(e) => onChange(sanitize((e.target as HTMLInputElement).value, decimals))}
         />
         {suffix !== undefined && <span class="suffix">{suffix}</span>}
+        {action}
       </div>
       {support !== undefined && <span class="support">{support}</span>}
     </label>

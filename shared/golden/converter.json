@@ -1,0 +1,154 @@
+{
+  "rates": {
+    "uf": "40885.63",
+    "usdClp": "926.94",
+    "btcUsd": "78189.4351"
+  },
+  "uf": [
+    {
+      "field": "uf",
+      "amount": "1",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "1.0000",
+        "clp": "40886",
+        "usd": "44.11"
+      }
+    },
+    {
+      "field": "uf",
+      "amount": "5",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "5.0000",
+        "clp": "204428",
+        "usd": "220.54"
+      }
+    },
+    {
+      "field": "uf",
+      "amount": "0",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "0.0000",
+        "clp": "0",
+        "usd": "0.00"
+      }
+    },
+    {
+      "field": "uf",
+      "amount": "1",
+      "usdClp": null,
+      "expected": {
+        "uf": "1.0000",
+        "clp": "40886",
+        "usd": null
+      }
+    },
+    {
+      "field": "clp",
+      "amount": "100000",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "2.4458",
+        "clp": "100000",
+        "usd": "107.88"
+      }
+    },
+    {
+      "field": "clp",
+      "amount": "1",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "0.0000",
+        "clp": "1",
+        "usd": "0.00"
+      }
+    },
+    {
+      "field": "usd",
+      "amount": "50",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "1.1336",
+        "clp": "46347",
+        "usd": "50.00"
+      }
+    },
+    {
+      "field": "usd",
+      "amount": "0.01",
+      "usdClp": "926.94",
+      "expected": {
+        "uf": "0.0002",
+        "clp": "9",
+        "usd": "0.01"
+      }
+    }
+  ],
+  "btc": [
+    {
+      "field": "btc",
+      "amount": "1",
+      "expected": {
+        "btc": "1.00000000",
+        "usd": "78189.44",
+        "clp": "72476915"
+      }
+    },
+    {
+      "field": "btc",
+      "amount": "0.5",
+      "expected": {
+        "btc": "0.50000000",
+        "usd": "39094.72",
+        "clp": "36238457"
+      }
+    },
+    {
+      "field": "btc",
+      "amount": "0.00000001",
+      "expected": {
+        "btc": "0.00000001",
+        "usd": "0.00",
+        "clp": "1"
+      }
+    },
+    {
+      "field": "usd",
+      "amount": "1000",
+      "expected": {
+        "btc": "0.01278945",
+        "usd": "1000.00",
+        "clp": "926940"
+      }
+    },
+    {
+      "field": "usd",
+      "amount": "78189.44",
+      "expected": {
+        "btc": "1.00000006",
+        "usd": "78189.44",
+        "clp": "72476920"
+      }
+    },
+    {
+      "field": "clp",
+      "amount": "1000000",
+      "expected": {
+        "btc": "0.01379750",
+        "usd": "1078.82",
+        "clp": "1000000"
+      }
+    },
+    {
+      "field": "clp",
+      "amount": "72476915",
+      "expected": {
+        "btc": "1.00000000",
+        "usd": "78189.44",
+        "clp": "72476915"
+      }
+    }
+  ]
+}

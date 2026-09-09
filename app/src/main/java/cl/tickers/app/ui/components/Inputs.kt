@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +28,8 @@ fun NumberField(
     supporting: String? = null,
     isError: Boolean = false,
     allowDecimals: Boolean = true,
+    /** Sits after the suffix, inside the field's border. For acting on this one value. */
+    action: (@Composable () -> Unit)? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -36,7 +39,18 @@ fun NumberField(
         onValueChange = { new -> onValueChange(sanitizeNumericInput(new, allowDecimals)) },
         visualTransformation = ThousandsTransformation(allowDecimals),
         label = { Text(label) },
-        suffix = suffix?.let { { Text(it) } },
+        suffix = when {
+            action != null -> {
+                {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        suffix?.let { Text(it) }
+                        action()
+                    }
+                }
+            }
+            suffix != null -> { { Text(suffix) } }
+            else -> null
+        },
         supportingText = supporting?.let { { Text(it) } },
         isError = isError,
         singleLine = true,

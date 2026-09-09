@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cl.tickers.app.core.format.Fmt
 import cl.tickers.app.core.share.shareText
 import cl.tickers.app.domain.engine.BtcEngine
+import cl.tickers.app.domain.engine.ConverterEngine
 import cl.tickers.app.domain.engine.Horizon
 import cl.tickers.app.domain.engine.StampKind
 import cl.tickers.app.domain.engine.UfEngine
@@ -41,6 +42,14 @@ import cl.tickers.app.ui.components.Sparkline
 import cl.tickers.app.ui.components.signColor
 import cl.tickers.app.ui.value.UfViewModel
 import java.math.BigDecimal
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Check
 
 /** How long a spot price is shown as current before it is called stale. */
 private const val FRESH_MS = 60_000L
@@ -191,44 +200,60 @@ fun BtcScreen() {
 
         val usd = ui.usd
         if (usd != null && dollar != null) {
+            // The card opens on one bitcoin rather than empty, so it answers
+            // before anyone types in it. Computed here rather than stored,
+            // because it depends on a price that arrives after the screen does.
+            val opening = if (ui.btcText == "1") {
+                ConverterEngine.btcConvert(
+                    ConverterEngine.BtcField.BTC, BigDecimal.ONE, usd, dollar.value,
+                )
+            } else {
+                null
+            }
+            val usdShown = ui.usdText.ifEmpty {
+                opening?.usd?.toPlainString()?.replace('.', ',').orEmpty()
+            }
+            val clpShown = ui.clpText.ifEmpty { opening?.clp?.toPlainString().orEmpty() }
+
             item {
                 AppCard {
                     SectionTitle("Conversor")
                     NumberField(
                         value = ui.btcText,
-                        onValueChange = { raw ->
-                            val parsed = Fmt.parseNumber(raw)
-                            vm.onBtcInput(
-                                raw,
-                                parsed?.let {
-                                    BtcEngine.btcToClp(it, usd, dollar.value).toPlainString()
-                                } ?: "",
-                            )
-                        },
+                        onValueChange = { vm.onBtcInput(it, usd, dollar.value) },
                         label = "Bitcoin",
                         suffix = "BTC",
                     )
                     Spacer(Modifier.height(10.dp))
                     NumberField(
-                        value = ui.clpText.ifEmpty {
-                            if (ui.btcText == "1") {
-                                BtcEngine.btcToClp(BigDecimal.ONE, usd, dollar.value).toPlainString()
-                            } else {
-                                ""
-                            }
-                        },
-                        onValueChange = { raw ->
-                            val parsed = Fmt.parseNumber(raw)
-                            vm.onClpInput(
-                                raw,
-                                parsed?.let {
-                                    BtcEngine.clpToBtc(it, usd, dollar.value).toPlainString()
-                                } ?: "",
+                        value = usdShown,
+                        onValueChange = { vm.onUsdInput(it, usd, dollar.value) },
+                        label = "Dólares",
+                        suffix = "USD",
+                        action = {
+                            CopyValueButton(
+                                label = "Copiar el precio en dólares",
+                                text = convShare(ui.btcText, usdShown, null),
                             )
                         },
-                        label = "Pesos (al ${Fmt.dayMonth(dollar.date)})",
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    NumberField(
+                        value = clpShown,
+                        onValueChange = { vm.onClpInput(it, usd, dollar.value) },
+                        label = "Pesos",
                         suffix = "CLP",
                         allowDecimals = false,
+                        // The dollars above are the market's own price; only the
+                        // pesos pass through a rate with a publication day, so
+                        // only they carry it.
+                        supporting = "Dólar observado del ${Fmt.dayMonth(dollar.date)}",
+                        action = {
+                            CopyValueButton(
+                                label = "Copiar el precio en dólares y pesos",
+                                text = convShare(ui.btcText, usdShown, clpShown),
+                            )
+                        },
                     )
                     inUf?.let {
                         Spacer(Modifier.height(8.dp))
@@ -283,3 +308,38 @@ private fun buildShare(
     if (source.isNotEmpty()) add("Fuente: $source")
     dollarDay?.let { add("Dólar observado del $it") }
 }.joinToString("\n")
+
+/** See ShareValueButton in the UF screen: one figure, one tap, no share sheet. */
+@Composable
+private fun CopyValueButton(label: String, text: String) {
+    var copied by remember { mutableStateOf(false) }
+    val clipboard = LocalClipboardManager.current
+
+    IconButton(onClick = { clipboard.setText(AnnotatedString(text)); copied = true }) {
+        Icon(
+            if (copied) Icons.Filled.Check else Icons.Filled.ContentCopy,
+            contentDescription = if (copied) "Copiado" else label,
+        )
+    }
+
+    LaunchedEffect(copied) {
+        if (copied) {
+            kotlinx.coroutines.delay(2_000)
+            copied = false
+        }
+    }
+}
+
+/**
+ * What the copy buttons send. Deliberately one line: it is meant to be pasted
+ * into a conversation, not read as a report.
+ */
+private fun convShare(btcText: String, usdText: String, clpText: String?): String {
+    val amount = Fmt.parseNumber(btcText)
+    val head = if (amount?.compareTo(BigDecimal.ONE) == 0) "Bitcoin de hoy" else "$btcText BTC"
+    return buildList<String> {
+        add(head)
+        add(Fmt.usd(Fmt.parseNumber(usdText) ?: BigDecimal.ZERO))
+        Fmt.parseNumber(clpText.orEmpty())?.let { add("CLP" + Fmt.clp(it)) }
+    }.joinToString(", ")
+}
