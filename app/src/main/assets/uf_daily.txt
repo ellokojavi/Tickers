@@ -1,6 +1,6 @@
 # Tickers - serie diaria completa de la Unidad de Fomento
 # fuente: Banco Central de Chile / CMF, via mindicador.cl
-# generado: 2026-09-09
+# generado: 2026-09-10
 # inicio: 1977-08-01
 # fin: 2026-10-09
 # unidad: centavos de peso (valor x 100); linea vacia = dia sin dato
