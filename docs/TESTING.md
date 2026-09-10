@@ -9,7 +9,7 @@ number**, which the shared golden vectors enforce.
 ```bash
 ./gradlew test                    # Android: 157 JVM tests, seconds, no device
 ./gradlew connectedAndroidTest    # Android: 13 instrumented tests, needs a device or emulator
-cd web && npm test                # Web: 112 tests, seconds
+cd web && npm test                # Web: 119 tests, seconds
 ```
 
 `.github/workflows/checks.yml` runs the JVM and web suites on every push and
@@ -19,12 +19,13 @@ pull request.
 
 | Layer | Android | Web | What it protects |
 |---|---|---|---|
-| Pure calculation | JUnit, 73 | Vitest, 60 | Mortgage maths, due dates, UF conversions and windows, the restatement, date-lookup rules, sanity filtering |
+| Pure calculation | JUnit, 73 | Vitest, 69 | Mortgage maths, due dates, UF conversions and windows, the restatement, date-lookup rules, sanity filtering |
 | Parity with the other channel | JUnit, 11 | Vitest, 18 | The golden vectors: mortgage, UF, bitcoin, converters, and the version string |
 | Formatting and input | JUnit, 34 | Vitest, 10 | `es-CL` output, input grouping, cursor mapping, default state |
 | Data contracts and assets | JUnit and Robolectric, 20 | Vitest, 15 | Both providers' payload shapes; the bundled series, read from the shipped files |
 | Persistence | Robolectric, 12 | | Room schema, type converters, CRUD |
 | Share text | JUnit, 7 | | The message a card turns into |
+| Documentation | | Vitest, 7 | The README and the docs against the code they describe |
 | UI flows | Instrumented, 13 | | Navigation, offline rendering, live computation, screen ordering |
 
 The engines live in `domain/` on both sides with no platform imports, which is
@@ -49,6 +50,33 @@ and both must match the fixture as strings, not within a tolerance.
 string. The fixtures caught two real formatting divergences the first time
 they ran, and the converter fixture was written after a real one: one bitcoin
 read 72.476.915 pesos on load and 72.476.920 after an edit.
+
+## The documentation is tested too
+
+The README is the front door, and a front door that describes a different
+house is worse than no door at all. Prose cannot be tested, but the facts
+around it can, and every one of these has drifted at least once:
+
+- the version the README gives is the one both manifests declare
+- the test counts in the README and in this file are the real ones
+- every relative link and every heading anchor across the README, `CLAUDE.md`,
+  `shared/PARITY.md` and `docs/` resolves
+- every screenshot kept in `docs/screenshots` is shown by the README, and every
+  one it shows is kept
+- every tab in the app's navigation is named somewhere in the README
+- every test file on both channels is classified in the layer table above, and
+  each row's counts are the real ones
+
+`docs.test.ts` runs inside `npm test`, so a change that outdates the README
+turns CI red in the commit that made it rather than a release later. When it
+fails the fix is to update the document, never to relax the check. It found
+its first bug immediately: the web column of the layer table above was missing
+the sanity-filter suite, so it summed to 103 where the suite has 112.
+
+The parts a test cannot read — whether the feature list still describes the
+app, whether the screenshots still look like it — are covered by the rule in
+[`CLAUDE.md`](../CLAUDE.md) and by the release checklist at the end of this
+document. Screenshots are cheap to redo: `cd web && npm run screenshots`.
 
 ## What each suite asserts
 

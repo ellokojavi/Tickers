@@ -139,6 +139,12 @@ lives in [`docs/`](docs/):
 | [Testing](docs/TESTING.md) | What each suite asserts on each channel, the bugs the suites caught, a postmortem, and the manual checklist |
 | [Design](docs/DESIGN.md) | The mark and its icons, and the interface rules that hold across both channels |
 | [Parity](shared/PARITY.md) | The contract between the channels: what may differ, what may not, and what to do when a feature arrives |
+| [Working agreements](CLAUDE.md) | The rules for changing this repository, starting with the one that keeps this page true |
+
+This page is not maintained on trust. Its version, its test counts, its links,
+its screenshots and the tabs it names are all checked against the code by
+`web/src/__tests__/docs.test.ts`, on every push and every pull request, so a
+change that outdates the README fails in the commit that made it.
 
 ### Principles
 
@@ -164,7 +170,7 @@ lives in [`docs/`](docs/):
 cd web
 npm ci
 npm run dev       # copies the bundled series in, then serves on :5173
-npm test          # 112 tests
+npm test          # 119 tests, the last seven of them checking this page
 npm run build     # type-check, then a static build in web/dist
 ```
 
