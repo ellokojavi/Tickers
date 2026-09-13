@@ -83,7 +83,10 @@ const LAYERS: { row: string; web: string[] }[] = [
   },
   {
     row: "Pinned expectations",
-    web: ["goldenVectors", "ufGoldenVectors", "btcGoldenVectors", "converterGoldenVectors"],
+    web: [
+      "goldenVectors", "ufGoldenVectors", "btcGoldenVectors", "converterGoldenVectors",
+      "companions",
+    ],
   },
   { row: "Formatting and input", web: ["format"] },
   { row: "Data contracts and assets", web: ["seed", "usdSeed"] },

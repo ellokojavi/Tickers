@@ -21,6 +21,67 @@ export interface Indicator {
   readonly value: Money;
 }
 
+/**
+ * The companion indicators, in the order they are shown, and how each one's
+ * date reads.
+ *
+ * The order is the decision, so it lives here rather than being whatever the
+ * source happened to serialise. It runs from the figures that measure the
+ * reader's own money to the ones that describe the country around it: the unit
+ * taxes and fines are owed in, then the two rates that price money and are
+ * what the app's own calculators are built on, then the other currencies and
+ * the commodity that moves ours, then the UF's forgotten sibling, and last the
+ * two macro readings, which are worth knowing and are not money you hold.
+ *
+ * The dólar observado is deliberately absent **from this list**: it has a card
+ * of its own at the top of the screen, and listing it twice invites the reader
+ * to wonder which of the two is the real one. It is still fetched — see
+ * `FETCHED_CODES` — because three screens convert through it.
+ *
+ * Two the source publishes are deliberately never shown. `dolar_intercambio`
+ * has not moved since 2014, so it would be a dead figure presented as a
+ * current one. `bitcoin` is stale here and already has a live card above.
+ *
+ * `cadence` is not decoration: a daily figure is dated to the day and a
+ * monthly one to its month, and printing "1 de septiembre" for a value that
+ * means "September" is a small lie that reads as a large one when the value
+ * turns out to be nine months old.
+ */
+export const COMPANIONS = [
+  { code: "utm", cadence: "monthly" },
+  { code: "tpm", cadence: "daily" },
+  { code: "ipc", cadence: "monthly" },
+  { code: "euro", cadence: "daily" },
+  { code: "libra_cobre", cadence: "daily" },
+  { code: "ivp", cadence: "daily" },
+  { code: "imacec", cadence: "monthly" },
+  { code: "tasa_desempleo", cadence: "monthly" },
+] as const;
+
+export type CompanionCode = (typeof COMPANIONS)[number]["code"];
+export type Cadence = (typeof COMPANIONS)[number]["cadence"];
+
+export const cadenceOf = (code: string): Cadence =>
+  COMPANIONS.find((c) => c.code === code)?.cadence ?? "daily";
+
+export const isCompanion = (code: string): boolean =>
+  COMPANIONS.some((c) => c.code === code);
+
+/**
+ * What the app asks the source for, which is not the same as what it lists.
+ *
+ * `dolar` is here and not in COMPANIONS: the UF converter's dollar field, the
+ * bitcoin card on the overview and the bitcoin screen all convert through the
+ * Banco Central's observed rate, and all three read it from here. Dropping it
+ * from the request because it had been dropped from a list is exactly the
+ * mistake this separation exists to prevent — it silently cost the bitcoin
+ * card its peso figure once.
+ */
+export const FETCHED_CODES: readonly string[] = [
+  ...COMPANIONS.map((c) => c.code),
+  "dolar",
+];
+
 export const DataSource = {
   CMF: { label: "CMF (oficial)", official: true },
   MINDICADOR: { label: "mindicador.cl", official: false },

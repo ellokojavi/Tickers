@@ -17,12 +17,20 @@ export const SectionTitle = ({ children }: { children: ComponentChildren }) => (
 );
 
 export const KeyValue = (
-  { label, value, strong = false, tone }: {
-    label: string; value: string; strong?: boolean; tone?: "positive" | "negative";
+  { label, note, value, strong = false, tone }: {
+    label: string;
+    /** When the figure's own date is not today's: it belongs under the name. */
+    note?: string | null;
+    value: string;
+    strong?: boolean;
+    tone?: "positive" | "negative";
   },
 ) => (
   <div class={`kv${strong ? " strong" : ""}`}>
-    <span>{label}</span>
+    <span>
+      {label}
+      {note !== null && note !== undefined && <span class="kv-note">{note}</span>}
+    </span>
     <span class={tone ?? ""}>{value}</span>
   </div>
 );

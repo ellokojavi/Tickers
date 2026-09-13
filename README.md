@@ -39,8 +39,9 @@ de inflación exacta al día y un simulador de créditos hipotecarios.
 
 - **Resumen.** La pantalla con que abre: la UF, el dólar y el bitcoin uno bajo
   otro, cada uno con su valor de hoy, cuánto se movió, su fuente y una línea de
-  tendencia, más el IVP, el euro, la UTM y el IPC. Cada tarjeta es un enlace a
-  la pantalla completa de ese indicador.
+  tendencia. Debajo, el resto de las cifras con su propia fecha: UTM, TPM, IPC,
+  euro, libra de cobre, IVP, Imacec y desempleo. Cada tarjeta es un enlace a la
+  pantalla completa de ese indicador.
 - **UF.** El valor de hoy, cuánto se movió respecto de ayer y en 30 días, un
   conversor UF ⇄ pesos ⇄ dólares, toda la serie diaria desde agosto de 1977 en
   un gráfico que se recorre con el dedo, la consulta de cualquier fecha y los
@@ -91,8 +92,9 @@ calculator and a mortgage simulator.
 
 - **Resumen.** The screen it opens on: the UF, the dollar and bitcoin one under
   the next, each with today's value, how it moved, where it came from and a
-  trend line, plus the IVP, the euro, the UTM and the CPI. Every card is a link
-  into that indicator's full screen.
+  trend line. Below them the rest, each carrying its own date: UTM, the policy
+  rate, CPI, the euro, copper, IVP, Imacec and unemployment. Every card is a
+  link into that indicator's full screen.
 - **UF.** Today's value, its change since yesterday and over 30 days, a UF ⇄
   peso ⇄ dollar converter, the entire daily series since August 1977 in a chart
   you can scrub, a lookup for any date, and the days already published into the
@@ -183,7 +185,7 @@ Node 22:
 cd web
 npm ci
 npm run dev       # serves on :5173
-npm test          # 125 tests, the last seven of them checking this page
+npm test          # 133 tests, the last seven of them checking this page
 npx tsc --noEmit  # types
 npm run build     # type-check, then a static build in web/dist
 ```

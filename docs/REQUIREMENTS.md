@@ -11,7 +11,9 @@ What the app is held to. The tests that enforce most of these are listed in
 |----|-------------|
 | RF-35 | Open on a screen showing every indicator at once, each with its current value, its change, its source and a trend line |
 | RF-36 | Make each indicator card a link into that indicator's own screen |
-| RF-37 | List the companion indicators here rather than inside one indicator's screen |
+| RF-37 | List the companion indicators here rather than inside one indicator's screen, ordered by how directly each measures the reader's own money |
+| RF-37b | Carry each companion's own date, to the month where the figure means a month |
+| RF-37c | Never list a figure that already has a card, a series the source has abandoned, or one the app holds live |
 | RF-38 | Render from the bundled series with no network, and say why the one figure that needs one is missing when it is |
 
 ### Addresses
@@ -29,7 +31,7 @@ What the app is held to. The tests that enforce most of these are listed in
 | RF-1 | Display today's official UF value with its publication date |
 | RF-2 | Display the change since the previous day and the 30-day percentage change |
 | RF-3 | Convert UF ⇄ CLP ⇄ USD, deriving every field from the one typed rather than from another field's rounded display |
-| RF-4 | Display the companion indicators (IVP, USD, EUR, UTM, CPI) — on the overview, per RF-37 |
+| RF-4 | Display the companion indicators (UTM, TPM, CPI, EUR, copper, IVP, Imacec, unemployment) — on the overview, per RF-37 |
 | RF-5 | Query the UF value for any date within coverage |
 | RF-5b | Present today's value and the historical series as one destination, with the history always visible |
 | RF-5c | Refuse to answer for a date with no published value, and make such dates unselectable |

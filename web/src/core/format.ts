@@ -98,6 +98,15 @@ export const shortDate = (d: IsoDate): string =>
 
 export const monthYearShort = (d: IsoDate): string => `${MONTHS_SHORT[month(d) - 1]} ${year(d)}`;
 
+/**
+ * "diciembre de 2025", for a figure whose period is a month rather than a day.
+ *
+ * The source stamps a monthly indicator on the first of its month, and
+ * printing that as "1 de diciembre" would claim a precision the figure does
+ * not have — and would read as current when it is nine months old.
+ */
+export const monthYear = (d: IsoDate): string => `${MONTHS[month(d) - 1]} de ${year(d)}`;
+
 // ------------------------------------------------ instants, in Chilean time
 //
 // A bitcoin chart is labelled with moments, not calendar days, and a moment

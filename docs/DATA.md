@@ -13,7 +13,7 @@ without a plausibility check; and nothing is ever invented.
 | UF, live | [mindicador.cl](https://mindicador.cl) | Third-party mirror of Banco Central data. Sends CORS headers, which is what lets a static page read it |
 | UF, bundled | `web/public/uf_daily.txt` | The complete daily series, 1 August 1977 to the day of the last refresh: about 18.000 days, some 50 kB compressed |
 | Dólar observado, bundled | `web/public/usd_daily.txt` | Every business day since 2 January 1984, about 10.600 published values. Weekends and holidays are blank lines |
-| Companion indicators | mindicador.cl | IVP, dólar, euro, UTM and monthly IPC, fetched with the day's UF |
+| Companion indicators | mindicador.cl | UTM, TPM, IPC, euro, copper, IVP, Imacec and unemployment, fetched with the day's UF. The dólar observado is fetched with them, and shown as its own card rather than in the list |
 | Bitcoin, spot | Coinbase, CoinGecko, Kraken | Tried in order; the first answer wins |
 | Bitcoin, candles | Coinbase Exchange | One request per horizon, at the candle width the horizon calls for |
 
@@ -27,6 +27,18 @@ bitcoin, opening the app now asks for a spot price and a thirty-day series
 where it previously asked for nothing until you went looking. The UF and the
 dollar on that screen are still read off the device, so the card is the only
 thing waiting, and it says so in words rather than sitting empty.
+
+Two of the keys the source publishes are never shown. `dolar_intercambio` has
+not moved since 13 November 2014, so listing it would present a dead figure as
+a current one. `bitcoin` is stale here and the app has a live price of its own.
+Both exclusions are pinned by a test, as is the order of the rest.
+
+**These arrive on different clocks.** The UTM is monthly, the TPM and the euro
+are daily, the Imacec and unemployment run about two months behind, and the
+source's IPC is further behind than that — it was serving December 2025 in
+September 2026. Every row therefore carries its own date, dated to the month
+where the figure means a month. Undated they all read as today's, which is the
+kind of wrong a user cannot detect.
 
 Every screen names its source. The UF card carries a badge saying whether the
 value came from mindicador.cl, from the bundled data or from the local cache,
