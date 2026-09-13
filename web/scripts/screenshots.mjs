@@ -38,23 +38,30 @@ const PHONE = {
 
 // The name each file keeps. The README shows them by these names, so adding a
 // shot here means adding it there: docs.test.ts fails until both agree.
+//
+// Each one goes straight to its screen's own address rather than hunting for
+// a tab to click. That used to mean clicking a button in the bar, which broke
+// the day the tools moved into a menu behind it — and it was always the wrong
+// way round, since every screen has an address precisely so it can be opened
+// directly.
 const SHOTS = [
-  { name: "01-uf" },
-  { name: "02-dolar", tab: "Dólar" },
-  { name: "03-bitcoin", tab: "Bitcoin" },
+  { name: "01-resumen", at: "#/" },
+  { name: "02-uf", at: "#/uf" },
+  { name: "03-dolar", at: "#/dolar" },
+  { name: "04-bitcoin", at: "#/bitcoin" },
   // Both tools are worth showing as answers rather than as empty forms, so
   // each scrolls to the card that carries the result.
-  { name: "04-inflacion", tab: "Inflación", scrollTo: "main .display" },
+  { name: "05-inflacion", at: "#/inflacion", scrollTo: "main .display" },
   {
-    name: "05-creditos",
-    tab: "Créditos",
+    name: "06-creditos",
+    at: "#/creditos",
     open: async (page) => {
       await page.locator("button.fab").click();
       await page.waitForTimeout(800);
     },
     scrollTo: "main .display",
   },
-  { name: "06-oscuro", dark: true },
+  { name: "07-oscuro", at: "#/uf", dark: true },
 ];
 
 mkdirSync(OUT, { recursive: true });
@@ -67,7 +74,7 @@ const browser = await chromium.launch({ channel: "chrome" }).catch(() => {
   process.exit(1);
 });
 
-for (const { name, tab, dark = false, open, scrollTo } of SHOTS) {
+for (const { name, at, dark = false, open, scrollTo } of SHOTS) {
   const context = await browser.newContext({
     ...PHONE,
     colorScheme: dark ? "dark" : "light",
@@ -79,17 +86,15 @@ for (const { name, tab, dark = false, open, scrollTo } of SHOTS) {
   const page = await context.newPage();
 
   try {
-    await page.goto(URL_, { waitUntil: "networkidle" });
+    await page.goto(new URL(at, URL_).href, { waitUntil: "networkidle" });
   } catch {
     console.error(`Nothing answering at ${URL_}. Start it with: npm run dev`);
     process.exit(1);
   }
-  await page.waitForTimeout(800);
+  // Long enough for the bundled series to parse and, on the screens that need
+  // one, for a price to arrive.
+  await page.waitForTimeout(2000);
 
-  if (tab) {
-    await page.locator("nav.tabs button", { hasText: tab }).click();
-    await page.waitForTimeout(1500);
-  }
   if (open) await open(page);
   if (scrollTo) {
     await page.evaluate((selector) => {

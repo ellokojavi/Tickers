@@ -87,6 +87,7 @@ const LAYERS: { row: string; web: string[] }[] = [
   },
   { row: "Formatting and input", web: ["format"] },
   { row: "Data contracts and assets", web: ["seed", "usdSeed"] },
+  { row: "Navigation", web: ["route"] },
   { row: "Documentation", web: ["docs"] },
 ];
 

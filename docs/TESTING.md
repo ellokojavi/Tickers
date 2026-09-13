@@ -6,7 +6,7 @@ without a browser**, and the figures a user could quote must be pinned so that
 changing one is always deliberate.
 
 ```bash
-cd web && npm test        # 118 tests, seconds
+cd web && npm test        # 125 tests, seconds
 cd web && npx tsc --noEmit
 ```
 
@@ -20,6 +20,7 @@ cd web && npx tsc --noEmit
 | Pinned expectations | Vitest, 17 | The golden fixtures: mortgage, UF, bitcoin, converters |
 | Formatting and input | Vitest, 10 | `es-CL` output and parsing |
 | Data contracts and assets | Vitest, 15 | The bundled series, read from the shipped files |
+| Navigation | Vitest, 7 | What a hash means, and what each screen's address is |
 | Documentation | Vitest, 7 | The README and the docs against the code they describe |
 
 The engines live in `domain/` with no DOM and no `fetch`, which is what makes
@@ -193,6 +194,23 @@ accepts `40.880,36`, `$1.000`, `4,5` and `1.234 UF`; rejects `""`, `"abc"` and
 `","`; formatting and parsing round trip. Counts get their separators too.
 None of it comes from the browser's locale data: the separators and the month
 names are the app's own, so no difference between browsers can change them.
+
+### Navigation, 7 tests
+
+Every screen has its own address, so a link to one can be sent, bookmarked or
+opened in a tab. The pure half of that — what a hash means and what a screen's
+hash is — is where the rules live, and they are rules about links that have
+been out in the world:
+
+- every screen's own hash resolves back to it, and no two screens share one
+- no hash at all opens the overview
+- the bitcoin screen is `btc` in the code and `#/bitcoin` in the address bar,
+  and the internal name is deliberately not a route
+- a hash mangled in transit still lands: a lost slash, a doubled one, a
+  trailing one, the wrong case, or the tracking parameters chat apps and mail
+  clients staple onto anything link-shaped
+- **a route that no longer exists opens the overview, never nothing**, which is
+  the same rule as everywhere else here: never a blank screen
 
 ## Bugs the suites found
 

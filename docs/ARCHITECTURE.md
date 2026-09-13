@@ -73,12 +73,21 @@ does not. The page itself goes to the network first and falls back to the
 cache, because its script tag names a content-hashed bundle and a cached page
 from an older deploy would ask for a file that no longer exists.
 
-**Layout.** On a phone the five tabs sit in a bottom bar, in two groups: the
-three indicators, then the two tools. On a wide screen the same navigation
-becomes a collapsible rail and the cards flow into two columns; the bitcoin
-view and the simulation list have their own arrangements because their cards
-relate to each other differently. It is the same app at a different size, not
-a different app.
+**Routing through the hash.** Every screen has its own address — `#/uf`,
+`#/bitcoin`, the bare hash for the overview — in about forty lines and with no
+dependency. The hash rather than the path because the app is a static file:
+GitHub Pages has no rewrite rule to send an unknown path back to index.html,
+and the service worker would have to grow one too. Navigation is by `<a href>`,
+so every move lands in the browser's history and the back button does what it
+looks like it does. An unknown hash resolves to the overview, never to nothing.
+
+**Layout.** On a phone the bottom bar holds the overview and the three
+indicators, with the two tools in a menu behind its fifth slot. On a wide
+screen the same navigation becomes a collapsible rail with both groups shown in
+full, and the cards flow into two columns; the overview, the bitcoin view and
+the simulation list have their own arrangements because their cards relate to
+each other differently. It is the same app at a different size, not a different
+app.
 
 **Installing.** On a phone or a tablet the app offers to put itself on the
 home screen, with the steps the platform actually needs: one tap where the

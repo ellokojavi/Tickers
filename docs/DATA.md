@@ -21,6 +21,13 @@ The app does not depend on the network being up. It opens on the bundled
 series, which is regenerated daily, so a first load is never more than a day
 behind even when every endpoint is unreachable.
 
+The one exception is bitcoin, and it is exactly that: a market price cannot be
+bundled. Since the overview is the screen the app opens on, and it shows
+bitcoin, opening the app now asks for a spot price and a thirty-day series
+where it previously asked for nothing until you went looking. The UF and the
+dollar on that screen are still read off the device, so the card is the only
+thing waiting, and it says so in words rather than sitting empty.
+
 Every screen names its source. The UF card carries a badge saying whether the
 value came from mindicador.cl, from the bundled data or from the local cache,
 and whether that source is official. The bitcoin card names the exchange that
