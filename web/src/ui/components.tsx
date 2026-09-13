@@ -183,14 +183,23 @@ export const DateField = (
  * scroll the page.
  */
 export const Sparkline = (
-  { values, height = 200, selected, onScrub, label }: {
+  { values, height = 200, selected = null, onScrub, guides = true, label }: {
     // Only the values are drawn; x is the index. Widened from DatedValue so the
     // bitcoin chart, whose points are timestamps rather than calendar days,
     // can use the same one.
     values: readonly { readonly value: Money }[];
     height?: number;
-    selected: number | null;
-    onScrub: (index: number | null) => void;
+    selected?: number | null;
+    /**
+     * Omitted for a line that is only looked at, never explored: the overview
+     * cards draw one each, and a chart that answers the pointer but has
+     * nowhere to report what it found would be a promise it cannot keep. With
+     * no handler the canvas takes no pointer events at all, so the tap goes to
+     * the card underneath and opens the screen that owns the series.
+     */
+    onScrub?: (index: number | null) => void;
+    /** The two horizontal rules. Noise at a glanceable size. */
+    guides?: boolean;
     /** What the line is of, for screen readers: "Evolución del valor de la UF". */
     label: string;
   },
@@ -238,10 +247,12 @@ export const Sparkline = (
     const xAt = (i: number) => (w * i) / (values.length - 1);
     const yAt = (v: number) => height - padV - ((v - min) / span) * (height - 2 * padV);
 
-    ctx.strokeStyle = grid;
-    ctx.lineWidth = 1;
-    for (const y of [padV, height - padV]) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    if (guides) {
+      ctx.strokeStyle = grid;
+      ctx.lineWidth = 1;
+      for (const y of [padV, height - padV]) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
     }
 
     ctx.beginPath();
@@ -284,6 +295,12 @@ export const Sparkline = (
   };
 
   if (values.length < 2) return <div style={{ height }} />;
+
+  if (onScrub === undefined) {
+    return (
+      <canvas ref={ref} class="chart chart-static" style={{ height }} role="img" aria-label={label} />
+    );
+  }
 
   return (
     <canvas

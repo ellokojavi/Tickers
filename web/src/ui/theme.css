@@ -159,21 +159,58 @@ nav.tabs {
   background: var(--surface); border-top: 1px solid var(--outline-variant);
   padding: 8px 0 max(8px, env(safe-area-inset-bottom));
 }
-nav.tabs > button {
+/* Every slot in the bar: the four indicator links, and the button that opens
+   the tools menu. They are different elements because one navigates and one
+   does not, and they have to look identical anyway. */
+nav.tabs > a,
+nav.tabs .tab-menu > button {
   border: none; background: transparent; color: var(--on-surface-variant);
+  font-family: inherit; text-decoration: none; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   font-size: 12px; padding: 4px 2px;
-  /* Five destinations is the most this bar holds. They share the width evenly
-     rather than each taking what its label wants, which is what pushed the
-     fifth one off the edge of a 375px screen. */
+  /* Five slots is the most this bar holds. They share the width evenly rather
+     than each taking what its label wants, which is what pushed the fifth one
+     off the edge of a 375px screen. */
   flex: 1 1 0; min-width: 0;
 }
-nav.tabs > button > .tab-label {
+nav.tabs > a > .tab-label,
+nav.tabs .tab-menu > button > .tab-label {
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-nav.tabs > button[aria-current="page"] { color: var(--on-primary-container); }
-nav.tabs > button[aria-current="page"] .tab-icon { background: var(--primary-container); }
+nav.tabs > a[aria-current="page"],
+nav.tabs .tab-menu > button[aria-current="page"] { color: var(--on-primary-container); }
+nav.tabs > a[aria-current="page"] .tab-icon,
+nav.tabs .tab-menu > button[aria-current="page"] .tab-icon { background: var(--primary-container); }
 .tab-icon { border-radius: 999px; padding: 4px 16px; display: flex; }
+
+/* ------------------------------------------------------ the tools menu --
+   One slot of the five, opening upwards. On a phone the two calculators live
+   in here; on the rail they are plain items and this is not rendered. */
+/* The one slot that does not share the width evenly. "Herramientas" is twice
+   the length of "UF", and a fifth of a 390px screen truncates it to
+   "Herramien…". It takes what its label needs and the four indicators, whose
+   labels are short, divide what is left. */
+.tab-menu { position: relative; display: flex; flex: 0 0 auto; }
+.tab-menu > button { width: 100%; padding: 4px 10px; }
+.tab-popup {
+  position: absolute; bottom: calc(100% + 12px); right: 8px; z-index: 20;
+  min-width: 208px; padding: 6px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--surface); color: var(--on-surface);
+  border: 1px solid var(--outline-variant); border-radius: 18px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18);
+}
+.tab-popup > a {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 13px;
+  color: inherit; text-decoration: none; font-size: 15px;
+}
+.tab-popup > a[aria-current="page"] {
+  background: var(--primary-container); color: var(--on-primary-container);
+}
+.tab-popup .tab-icon { padding: 0; }
+/* The rail's copy of the tools, which a phone never shows. */
+nav.tabs > a.rail-only { display: none; }
 /* Along the bottom bar the separator between the two sections stands on end:
    a hairline between the third and fourth buttons, inset so it does not
    touch the bar's own edges. */
@@ -185,6 +222,9 @@ nav.tabs > .tab-divider {
 nav.tabs > .tab-group { display: none; }
 
 .chart { width: 100%; display: block; touch-action: pan-y; }
+/* A line that is only looked at. It lets the tap through to the card around
+   it, which is a link to the screen that can actually answer questions. */
+.chart-static { touch-action: auto; pointer-events: none; }
 
 dialog.sheet {
   position: fixed; inset: 0; width: 100%; max-width: 100%; height: 100%; max-height: 100%;
@@ -207,6 +247,29 @@ table.schedule th:nth-child(2), table.schedule td:nth-child(2) { text-align: lef
 .footer { text-align: center; padding: 24px 8px 8px; }
 /* Room for the floating button, which would otherwise sit on the last line. */
 .view-creditos > .footer { padding-bottom: 72px; }
+
+/* ---------------------------------------------------------- the overview --
+   Each indicator is a card that is entirely a link, so it behaves like one:
+   it can be middle-clicked, opened in a tab, and its address copied. The
+   padding lives on the anchor rather than the card so the whole surface is
+   the target, not just the text inside it. */
+.card.glance { padding: 0; }
+.glance-link {
+  display: block; padding: 18px; border-radius: var(--radius);
+  color: inherit; text-decoration: none;
+}
+.glance-link:hover { background: var(--surface-variant); }
+.glance-link:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.glance-value {
+  font-size: 32px; font-weight: 300; letter-spacing: -0.6px; margin: 6px 0 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.glance-second {
+  font-size: 22px; font-weight: 400; margin: 2px 0 0; color: var(--on-surface-variant);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* The chevron says the card goes somewhere, at the weight of a hint. */
+.glance-go { color: var(--outline); font-size: 20px; line-height: 1; padding-right: 2px; }
 .empty { text-align: center; padding: 40px 16px; color: var(--on-surface-variant); }
 .fab {
   position: fixed; right: 20px; bottom: calc(84px + env(safe-area-inset-bottom));
@@ -263,15 +326,19 @@ kbd {
     border-top: none; border-right: 1px solid var(--outline-variant);
     padding: 20px 16px;
   }
-  nav.tabs > button {
+  nav.tabs > a {
     flex-direction: row; justify-content: flex-start; gap: 14px;
     width: 100%; border-radius: 999px; padding: 12px 18px;
     font-size: 15px; text-align: left;
-    /* The bottom bar divides its width between five items; the rail is a
+    /* The bottom bar divides its width between its slots; the rail is a
        column, where growing to fill would make each item a tall blob. */
     flex: 0 0 auto;
   }
-  nav.tabs > button[aria-current="page"] { background: var(--primary-container); }
+  nav.tabs > a[aria-current="page"] { background: var(--primary-container); }
+  /* A rail has no five-slot problem, so the tools are items like any other
+     and the menu that stands in for them on a phone is not rendered at all. */
+  nav.tabs > a.rail-only { display: flex; }
+  .tab-menu { display: none; }
   /* Down the rail the separator lies flat again, and each section gets its
      name above it in the same small capitals the cards use for theirs. */
   nav.tabs > .tab-divider {
@@ -284,7 +351,7 @@ kbd {
     color: var(--on-surface-variant);
   }
   /* The pill is the rail item itself up here, so the icon drops its own. */
-  nav.tabs > button[aria-current="page"] .tab-icon { background: transparent; }
+  nav.tabs > a[aria-current="page"] .tab-icon { background: transparent; }
   .tab-icon { padding: 0; }
 
   .rail-head {
@@ -341,6 +408,12 @@ kbd {
 
      Placement is by grid area rather than by source order, so the phone keeps
      the order it already had: price, chart, converter. */
+  /* Three indicators and the companion list, two across: the cards are peers,
+     so they get a grid rather than the masonry columns the other views use. */
+  .view-resumen {
+    columns: auto; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0 20px; align-items: start;
+  }
   .view-btc { columns: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; align-items: start; }
   .view-btc > .btc-hero { grid-column: 1; grid-row: 1; }
   .view-btc > .btc-conv { grid-column: 2; grid-row: 1; }

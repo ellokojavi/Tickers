@@ -74,7 +74,7 @@ it cannot read is on you.
 ## Before you commit
 
 ```bash
-cd web && npm test && npx tsc --noEmit    # 118 tests, includes the docs check
+cd web && npm test && npx tsc --noEmit    # 125 tests, includes the docs check
 ```
 
 The manual checklist in `docs/TESTING.md` is worked through before a release.

@@ -19,13 +19,13 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
 </p>
 
-| UF | Dólar observado | Bitcoin |
-|:---:|:---:|:---:|
-| <img src="docs/screenshots/01-uf.png" width="230" alt="Today's UF, with its daily and 30-day change and a three-way converter"> | <img src="docs/screenshots/02-dolar.png" width="230" alt="The observed dollar, with its change since the previous publication"> | <img src="docs/screenshots/03-bitcoin.png" width="230" alt="Bitcoin in dollars, pesos and UF, with a 30-day chart"> |
+| Resumen | UF | Dólar observado | Bitcoin |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/01-resumen.png" width="200" alt="Every indicator at once, each with its value, its change and a trend line"> | <img src="docs/screenshots/02-uf.png" width="200" alt="Today's UF, with its daily and 30-day change and a three-way converter"> | <img src="docs/screenshots/03-dolar.png" width="200" alt="The observed dollar, with its change since the previous publication"> | <img src="docs/screenshots/04-bitcoin.png" width="200" alt="Bitcoin in dollars, pesos and UF, with a 30-day chart"> |
 
 | Inflación | Créditos hipotecarios | Tema oscuro |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/04-inflacion.png" width="230" alt="Four thousand pesos of 1990 restated to today"> | <img src="docs/screenshots/05-creditos.png" width="230" alt="A mortgage simulation with its monthly payment and CAE"> | <img src="docs/screenshots/06-oscuro.png" width="230" alt="The UF screen in the dark theme"> |
+| <img src="docs/screenshots/05-inflacion.png" width="200" alt="Four thousand pesos of 1990 restated to today"> | <img src="docs/screenshots/06-creditos.png" width="200" alt="A mortgage simulation with its monthly payment and CAE"> | <img src="docs/screenshots/07-oscuro.png" width="200" alt="The UF screen in the dark theme"> |
 
 <sub>On a phone-sized screen. A wide window uses a navigation rail and two columns.</sub>
 
@@ -37,6 +37,10 @@
 toda su historia, y dos herramientas para trabajar con ellos: una calculadora
 de inflación exacta al día y un simulador de créditos hipotecarios.
 
+- **Resumen.** La pantalla con que abre: la UF, el dólar y el bitcoin uno bajo
+  otro, cada uno con su valor de hoy, cuánto se movió, su fuente y una línea de
+  tendencia, más el IVP, el euro, la UTM y el IPC. Cada tarjeta es un enlace a
+  la pantalla completa de ese indicador.
 - **UF.** El valor de hoy, cuánto se movió respecto de ayer y en 30 días, un
   conversor UF ⇄ pesos ⇄ dólares, toda la serie diaria desde agosto de 1977 en
   un gráfico que se recorre con el dedo, la consulta de cualquier fecha y los
@@ -54,6 +58,10 @@ de inflación exacta al día y un simulador de créditos hipotecarios.
   impuesto de timbres, comisiones, prepagos y CAE, con la tabla de pagos
   completa y exportación a CSV. Las simulaciones quedan guardadas.
 
+Los tres indicadores y el resumen están siempre a la vista en la barra
+inferior; las dos herramientas viven detrás del botón **Herramientas**, porque
+se visitan a propósito y no todos los días.
+
 **Funciona sin conexión.** Las series completas vienen dentro de la app, así que
 todos los gráficos y todas las fechas funcionan desde la primera carga, sin
 internet. Cuando lo hay, actualiza el valor del día.
@@ -63,6 +71,10 @@ Las simulaciones se guardan solo en tu navegador y no salen de él.
 
 **Nunca inventa un número.** Un valor que no está publicado no se proyecta ni se
 estima: la app dice que no existe. Cada cifra lleva su fuente y su fecha.
+
+**Cada pantalla tiene su dirección.** Se puede mandar un enlace directo al
+bitcoin o a la calculadora, guardarlo en marcadores y volver con el botón atrás
+del navegador, como en cualquier sitio.
 
 **Cómo tenerla.** Anda a
 [ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/). Funciona
@@ -77,6 +89,10 @@ propia app explica los pasos que pide tu navegador.
 whole history, plus two tools to work with them: a day-exact inflation
 calculator and a mortgage simulator.
 
+- **Resumen.** The screen it opens on: the UF, the dollar and bitcoin one under
+  the next, each with today's value, how it moved, where it came from and a
+  trend line, plus the IVP, the euro, the UTM and the CPI. Every card is a link
+  into that indicator's full screen.
 - **UF.** Today's value, its change since yesterday and over 30 days, a UF ⇄
   peso ⇄ dollar converter, the entire daily series since August 1977 in a chart
   you can scrub, a lookup for any date, and the days already published into the
@@ -93,6 +109,10 @@ calculator and a mortgage simulator.
   prepayments and the CAE, the full payment schedule and a CSV export.
   Simulations are saved.
 
+The overview and the three indicators are always in the bottom bar; the two
+tools sit behind a **Herramientas** button, because they are visited on purpose
+rather than daily.
+
 **It works offline.** The complete series ship inside the app, so every chart
 and every date works from the first load with no connection. When there is one,
 it refreshes the day's value.
@@ -103,6 +123,10 @@ Simulations are stored in your browser only and never leave it.
 **It never makes a number up.** A value that has not been published is neither
 projected nor estimated: the app says it does not exist. Every figure carries
 its source and its date.
+
+**Every screen has its own address.** A link to bitcoin or to the calculator
+can be sent, bookmarked and walked back out of with the browser's back button,
+like anywhere else on the web.
 
 **Getting it.** Go to [ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/).
 It runs in any current browser and works offline once opened. On a phone it can
@@ -159,7 +183,7 @@ Node 22:
 cd web
 npm ci
 npm run dev       # serves on :5173
-npm test          # 118 tests, the last seven of them checking this page
+npm test          # 125 tests, the last seven of them checking this page
 npx tsc --noEmit  # types
 npm run build     # type-check, then a static build in web/dist
 ```

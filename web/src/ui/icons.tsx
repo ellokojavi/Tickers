@@ -17,6 +17,24 @@ const svg = (children: JSX.Element, label?: string): JSX.Element => (
 
 export const ChartIcon = () => svg(<polyline points="3,17 9,11 13,15 21,6" />);
 
+/** The overview: the indicators as stacked cards, which is what it draws. */
+export const OverviewIcon = () => svg(
+  <>
+    <rect x="3.5" y="3.5" width="17" height="6" rx="1.8" />
+    <rect x="3.5" y="12" width="17" height="3.2" rx="1.4" />
+    <rect x="3.5" y="17.8" width="17" height="3.2" rx="1.4" />
+  </>,
+);
+
+/** The tools menu, closed. Three dots read as "there is more behind this". */
+export const MoreIcon = () => svg(
+  <>
+    {[5.5, 12, 18.5].map((cx) => (
+      <circle key={cx} cx={cx} cy="12" r="1.5" fill="currentColor" stroke="none" />
+    ))}
+  </>,
+);
+
 export const CalculatorIcon = () => svg(
   <>
     <rect x="4.5" y="2.5" width="15" height="19" rx="2.5" />

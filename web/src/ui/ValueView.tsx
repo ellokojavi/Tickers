@@ -239,18 +239,9 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
         </Card>
       )}
 
-      {data.indicators.length > 0 && (
-        <Card>
-          <SectionTitle>Otros indicadores</SectionTitle>
-          {data.indicators.map((i) => (
-            <KeyValue
-              key={i.code}
-              label={i.name}
-              value={i.unit.toLowerCase() === "porcentaje" ? Fmt.pct1(i.value) : Fmt.clpExact(i.value)}
-            />
-          ))}
-        </Card>
-      )}
+      {/* "Otros indicadores" used to sit here, which meant a general list of
+          every indicator lived at the bottom of one indicator's screen. It is
+          on the overview now, where it belongs. */}
 
       {/* Header and list travel together: in the desktop column layout they
           would otherwise be free to land in different columns. */}

@@ -88,9 +88,34 @@ Anyone typing in what they earn and what they owe deserves to be told.
 
 ## Navigation
 
-Five destinations in two groups: the indicators (UF, dólar, bitcoin) and the
-tools (inflación, créditos). On a phone they are a bottom bar with a hairline
-between the groups; on a wide screen they are a rail with the group names
-above each section, collapsible to icons. Five is the most a bottom bar can
-hold and still be tapped accurately, so it is the ceiling: anything further has
-to live inside one of these rather than beside them.
+Six destinations in two groups, and the groups are not equals. The indicators
+— resumen, UF, dólar, bitcoin — are what the app is opened for, and all four
+sit in the bottom bar where a thumb reaches them. The tools — inflación,
+créditos — are behind one more tap, in a menu the bar's fifth slot opens.
+
+Five slots is the most a bottom bar can hold and still be tapped accurately.
+That is the constraint, and the way to spend it is on the things people check
+daily, not to divide it evenly among everything that exists. **Anything added
+from here goes inside a destination or into the tools menu, never beside
+them.**
+
+Hiding the tools costs something, and it is paid for in two places. The menu's
+button becomes the tool you are on — its icon, its name, marked as the current
+page — so depth never costs you knowing where you are. And on a wide screen
+there is no five-slot problem at all, so the rail shows both groups in full,
+with their names above them, collapsible to icons. It is the same navigation
+with the same two groups, sized to the room available.
+
+**The overview is a doorway, not a screen to work on.** It carries what
+someone checking in the morning wants — the figure, how it moved, where it came
+from, the shape of the last few months — and nothing to interact with. Its
+charts take no pointer events, so a tap anywhere on a card opens the screen
+that has the converter, the date lookup and the chart you can actually scrub.
+Every card is a link, so it can be middle-clicked and opened in a tab like any
+other.
+
+**Every screen has an address.** `#/uf`, `#/bitcoin`, `#/creditos`; the
+overview is the bare one. A screen that cannot be linked to cannot be
+recommended, and the back button leaving the app entirely is a bug people
+blame on themselves. A hash that no longer resolves opens the overview rather
+than nothing, which is the same promise as everywhere else here.
