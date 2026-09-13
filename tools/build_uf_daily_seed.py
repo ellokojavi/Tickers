@@ -2,21 +2,21 @@
 """Build the bundled full daily UF series.
 
 The whole series is ~18.000 days and compresses to a few tens of kilobytes, so
-shipping it inside the APK is cheaper than fetching years on demand: charts
-work offline from first launch and the app only ever has to ask for the current
+serving it with the page is cheaper than fetching years on demand: charts work
+offline from the first load and the app only ever has to ask for the current
 year afterwards.
 
 Format is deliberately not JSON. Days are contiguous, so only the first date is
 stored and each following line is one day's value in centavos. An empty line is
 a day the source has no value for — never interpolated. Parsing is a readLines
-plus toInt, with no tokeniser, which matters when it runs at startup.
+plus a parseInt, with no tokeniser, which matters when it runs at startup.
 
-Output: app/src/main/assets/uf_daily.txt
+Output: web/public/uf_daily.txt
 """
 import json, sys, time, urllib.request
 from datetime import date, timedelta
 
-OUT = "app/src/main/assets/uf_daily.txt"
+OUT = "web/public/uf_daily.txt"
 START_YEAR, END_YEAR = 1977, date.today().year
 
 

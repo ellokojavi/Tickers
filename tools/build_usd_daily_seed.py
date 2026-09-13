@@ -11,12 +11,12 @@ Gaps are never filled. A Saturday has no dólar observado, and inventing one
 would be inventing a rate people might quote. Screens carry the last published
 value forward and say which day it is from.
 
-Output: app/src/main/assets/usd_daily.txt
+Output: web/public/usd_daily.txt
 """
 import json, sys, time, urllib.request
 from datetime import date, timedelta
 
-OUT = "app/src/main/assets/usd_daily.txt"
+OUT = "web/public/usd_daily.txt"
 START_YEAR, END_YEAR = 1984, date.today().year
 
 # The dollar is a floating rate and moves far more than the UF, which is an

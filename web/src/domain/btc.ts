@@ -12,9 +12,8 @@ import { usdToClp } from "./fx.ts";
  * pretends to a precision it does not have.
  *
  * Money stays Money here for the same reason it does everywhere else in this
- * app. The Android app this logic came from used Double; a satoshi is 1e-8 of a
- * bitcoin and eight decimals of a five-figure price is exactly where float64
- * starts lying.
+ * app, and more so: a satoshi is 1e-8 of a bitcoin, and eight decimals of a
+ * five-figure price is exactly where float64 starts lying.
  */
 
 /** A bitcoin has eight decimals, and the last one is a satoshi. */

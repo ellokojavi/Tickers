@@ -32,7 +32,6 @@ const exists = (path: string): boolean => {
 const DOCS = [
   "README.md",
   "CLAUDE.md",
-  "shared/PARITY.md",
   ...readdirSync(join(ROOT, "docs"))
     .filter((name) => name.endsWith(".md"))
     .map((name) => `docs/${name}`),
@@ -55,22 +54,17 @@ const walk = (dir: string, ext: string): string[] =>
  */
 const GENERATED: Record<string, () => number> = {
   "goldenVectors.test.ts": () =>
-    (JSON.parse(read("shared/golden/mortgage.json")) as { cases: unknown[] }).cases.length,
+    (JSON.parse(read("web/golden/mortgage.json")) as { cases: unknown[] }).cases.length,
 };
 
-// A Kotlin test is an @Test annotation on its own line; a web test is an it()
-// or test() opening a statement. Commented-out ones start with a slash and are
-// therefore not counted, which is the intent.
-const androidTests = (file: string): number =>
-  (read(file).match(/^[ \t]*@Test\b/gm) ?? []).length;
+// A test is an it() or test() opening a statement. Commented-out ones start
+// with a slash and are therefore not counted, which is the intent.
 const webTests = (file: string): number => {
   const written = (read(file).match(/^[ \t]*(?:it|test)[ \t]*\(/gm) ?? []).length;
   const generated = GENERATED[basename(file)];
   return generated === undefined ? written : written - 1 + generated();
 };
 
-const ANDROID_UNIT = walk("app/src/test", ".kt");
-const ANDROID_UI = walk("app/src/androidTest", ".kt");
 const WEB = walk("web/src", ".test.ts");
 
 const sum = (files: string[], count: (f: string) => number): number =>
@@ -82,45 +76,29 @@ const sum = (files: string[], count: (f: string) => number): number =>
  * table be checked: a new test file that fits no row fails the last test in
  * this file until someone decides where it belongs.
  */
-const LAYERS: { row: string; android: string[]; web: string[] }[] = [
+const LAYERS: { row: string; web: string[] }[] = [
   {
     row: "Pure calculation",
-    android: ["MortgageEngineTest", "UfEngineTest", "UfReajusteTest", "UfLookupTest", "UfSanityTest"],
     web: ["mortgageEngine", "ufEngine", "ufReajuste", "ufLookup", "ufSanity"],
   },
   {
-    row: "Parity with the other channel",
-    android: ["GoldenVectorTest", "UfGoldenVectorTest", "BtcGoldenVectorTest", "ConverterGoldenVectorTest"],
-    web: ["goldenVectors", "ufGoldenVectors", "btcGoldenVectors", "converterGoldenVectors", "parity"],
+    row: "Pinned expectations",
+    web: ["goldenVectors", "ufGoldenVectors", "btcGoldenVectors", "converterGoldenVectors"],
   },
-  {
-    row: "Formatting and input",
-    android: ["FormatTest", "ThousandsTransformationTest", "NumericDefaultsTest"],
-    web: ["format"],
-  },
-  {
-    row: "Data contracts and assets",
-    android: ["DtoParsingTest", "UfDailySeedParseTest", "UfSeedTest"],
-    web: ["seed", "usdSeed"],
-  },
-  { row: "Persistence", android: ["DatabaseCrudTest", "UfDaoTest"], web: [] },
-  { row: "Share text", android: ["ShareReajusteTest"], web: [] },
-  { row: "Documentation", android: [], web: ["docs"] },
-  { row: "UI flows", android: ["NavigationSmokeTest"], web: [] },
+  { row: "Formatting and input", web: ["format"] },
+  { row: "Data contracts and assets", web: ["seed", "usdSeed"] },
+  { row: "Documentation", web: ["docs"] },
 ];
 
-/** The two counts a row of that table declares; null where the cell is blank. */
-const declaredBy = (row: string): { android: number | null; web: number | null } => {
+/** The count a row of that table declares. */
+const declaredBy = (row: string): number | null => {
   const line = read("docs/TESTING.md")
     .split("\n")
     .find((l) => l.startsWith(`| ${row} |`));
   expect(line, `no row "${row}" in the layer table of docs/TESTING.md`).toBeDefined();
   const cells = line!.split("|").map((c) => c.trim());
-  const number = (cell: string): number | null => {
-    const found = /(\d+)/.exec(cell);
-    return found === null ? null : Number(found[1]);
-  };
-  return { android: number(cells[2] ?? ""), web: number(cells[3] ?? "") };
+  const found = /(\d+)/.exec(cells[2] ?? "");
+  return found === null ? null : Number(found[1]);
 };
 
 /** GitHub's heading slug, near enough for the anchors these documents use. */
@@ -141,14 +119,13 @@ const linksOf = (markdown: string): string[] =>
     .filter((link) => !/^(https?:|mailto:|#)/.test(link));
 
 describe("the documentation describes the app that exists", () => {
-  it("gives the version both manifests declare", () => {
-    const gradle = /versionName\s*=\s*"([^"]+)"/.exec(read("app/build.gradle.kts"))?.[1];
-    expect(gradle, "versionName not found in app/build.gradle.kts").toBeDefined();
+  it("gives the version the manifest declares", () => {
+    const version = (JSON.parse(read("web/package.json")) as { version: string }).version;
 
     expect(
       read("README.md"),
-      `the README should say Version **${gradle}**`,
-    ).toContain(`Version **${gradle}**`);
+      `the README should say Version **${version}**`,
+    ).toContain(`Version **${version}**`);
   });
 
   it("links every document, and every document it links exists", () => {
@@ -203,42 +180,27 @@ describe("the documentation describes the app that exists", () => {
     }
   });
 
-  it("states the number of tests each suite actually has", () => {
-    const counts = {
-      "JVM tests": sum(ANDROID_UNIT, androidTests),
-      "instrumented tests": sum(ANDROID_UI, androidTests),
-      tests: sum(WEB, webTests),
-    };
+  it("states the number of tests the suite actually has", () => {
+    const count = sum(WEB, webTests);
 
-    for (const [noun, count] of Object.entries(counts)) {
-      for (const doc of ["README.md", "docs/TESTING.md", "CLAUDE.md"]) {
-        expect(read(doc), `${doc} should say "${count} ${noun}"`).toContain(`${count} ${noun}`);
-      }
+    for (const doc of ["README.md", "docs/TESTING.md", "CLAUDE.md"]) {
+      expect(read(doc), `${doc} should say "${count} tests"`).toContain(`${count} tests`);
     }
   });
 
   it("accounts for every test file in the layer table", () => {
-    const claimed = (names: string[], files: string[], suffix: string): string[] =>
-      files.filter((f) => names.some((n) => basename(f) === `${n}${suffix}`));
-
     const seen = new Set<string>();
     for (const layer of LAYERS) {
-      const android = claimed(layer.android, ANDROID_UNIT.concat(ANDROID_UI), ".kt");
-      const web = claimed(layer.web, WEB, ".test.ts");
-      for (const f of android.concat(web)) seen.add(f);
+      const files = WEB.filter((f) => layer.web.some((n) => basename(f) === `${n}.test.ts`));
+      for (const f of files) seen.add(f);
 
-      const declared = declaredBy(layer.row);
       expect(
-        declared.android,
-        `docs/TESTING.md row "${layer.row}" (Android)`,
-      ).toBe(android.length === 0 ? null : sum(android, androidTests));
-      expect(
-        declared.web,
-        `docs/TESTING.md row "${layer.row}" (Web)`,
-      ).toBe(web.length === 0 ? null : sum(web, webTests));
+        declaredBy(layer.row),
+        `docs/TESTING.md row "${layer.row}"`,
+      ).toBe(files.length === 0 ? null : sum(files, webTests));
     }
 
-    const unclassified = ANDROID_UNIT.concat(ANDROID_UI, WEB).filter((f) => !seen.has(f));
+    const unclassified = WEB.filter((f) => !seen.has(f));
     expect(
       unclassified,
       "add these to LAYERS here and to the layer table in docs/TESTING.md",

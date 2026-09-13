@@ -1,7 +1,7 @@
 # Requirements
 
-What the app is held to, on both channels unless a row says otherwise. The
-tests that enforce most of these are listed in [Testing](TESTING.md).
+What the app is held to. The tests that enforce most of these are listed in
+[Testing](TESTING.md).
 
 ## Functional
 
@@ -75,27 +75,27 @@ tests that enforce most of these are listed in [Testing](TESTING.md).
 |----|-------------|
 | RF-20b | Share any card as preformatted text, containing what the card shows and nothing more |
 | RF-20c | On a phone or a tablet share through the share sheet; on a laptop or a desktop copy to the clipboard, and say which |
-| RF-21 | Refresh data in the background (Android) or on opening (web), and on demand |
+| RF-21 | Refresh data when the app is opened, and on demand |
 | RF-22 | Operate fully offline from the bundled series |
 | RF-22b | Ship the complete daily series and refresh only what is genuinely new |
 | RF-22c | Reject implausible values from any source rather than storing them |
 | RF-23 | Label the origin of every value and whether the source is official |
-| RF-34 | Web only: offer to install on the home screen on a phone or a tablet, and to bookmark on a computer; remember a dismissal |
+| RF-34 | Offer to install on the home screen on a phone or a tablet, and to bookmark on a computer; remember a dismissal |
 
 ## Non-functional
 
 | ID | Requirement |
 |----|-------------|
-| RNF-1 | Android 8.0+ (minSdk 26), targetSdk 35; any current browser for the web app |
+| RNF-1 | Any current browser, on a phone, a tablet or a computer |
 | RNF-2 | Spanish (Chile) throughout; `es-CL` number formatting (`$40.880,36`) on input as well as output, and on **every** figure, counts included |
 | RNF-3 | Functional with no network connection; never a blank screen |
-| RNF-4 | APK under 15 MB; the minified release build is about 1,8 MB. The web bundle is under 100 kB gzipped |
-| RNF-5 | Cold start under 1,5 s |
-| RNF-6 | No analytics, no account, no personal data. No runtime permission prompts on Android: `INTERNET` and `ACCESS_NETWORK_STATE`, plus the normal-level permissions WorkManager merges in |
-| RNF-7 | All monetary arithmetic in exact decimals (`BigDecimal`, `big.js`); a float never holds money |
+| RNF-4 | The bundle under 100 kB gzipped, excluding the two bundled series |
+| RNF-5 | First paint under 1,5 s, including parsing the bundled series |
+| RNF-6 | No analytics, no account, no personal data. No permission prompt of any kind |
+| RNF-7 | All monetary arithmetic in exact decimals (`big.js`); a `number` never holds money |
 | RNF-8 | WCAG AA contrast, font-scaling support, screen-reader labels on every control |
 | RNF-9 | Light and dark themes, following the system until set manually |
-| RNF-10 | Calculation engines are pure code with no platform imports, testable without a device or a browser |
-| RNF-11 | The two channels produce identical numbers, enforced by shared golden vectors run in CI on every commit |
+| RNF-10 | Calculation engines are pure code with no DOM and no `fetch`, testable without a browser |
+| RNF-11 | Every figure a user could quote is pinned in `web/golden/` as an exact string, checked in CI on every commit |
 | RNF-12 | State independence from the CMF, the Banco Central, the INE and every exchange, and attribute sources as their terms require, without interrupting the user |
-| RNF-13 | One mark, a candlestick chart, generated for every icon on both channels from a single description |
+| RNF-13 | One mark, a candlestick chart, generated for every icon from a single description |

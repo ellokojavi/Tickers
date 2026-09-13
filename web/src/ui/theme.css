@@ -1,5 +1,4 @@
-/* The Android app's palette, carried over so both platforms read as one product.
-   A single deep-teal accent over cool neutrals; green and red are reserved
+/* A single deep-teal accent over cool neutrals; green and red are reserved
    strictly for the sign of a variation, never for decoration. */
 :root {
   --primary: #0d5c63;

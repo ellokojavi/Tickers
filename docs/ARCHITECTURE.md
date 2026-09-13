@@ -1,91 +1,37 @@
 # Architecture
 
-Tickers ships twice: an Android app and a web app. They are two
-implementations, not one codebase compiled twice, and this document describes
-each, the decisions they share, and the machinery that keeps them one product.
-The contract between them is in [Parity](../shared/PARITY.md).
+Tickers is a static web app: no server of its own, no build-time secret, and
+data read either from files that ship with the page or from endpoints that send
+CORS headers. This document describes its shape, the decisions behind it, and
+the machinery that keeps its numbers honest.
 
-## The shape of both channels
-
-Both apps have the same three layers, and the boundary between them is the
-same on each side:
+## The three layers
 
 ```
-ui/       screens and their state       Compose + ViewModels    Preact + hooks
-domain/   pure calculation, no I/O      Kotlin, no Android      TypeScript, no DOM
-data/     sources, storage, refresh     Retrofit, Room, DataStore   fetch, localStorage
+ui/       screens and their state       Preact + hooks
+domain/   pure calculation, no I/O      TypeScript, no DOM
+data/     sources, storage, refresh     fetch, localStorage
 ```
 
-`domain/` is where every number is made, and it has no platform imports on
-either side. That is what makes the engines testable without a device or a
-browser, and what makes the golden vectors possible: the same inputs go into
-both implementations and the outputs are compared as strings.
+`domain/` is where every number is made, and it has no DOM and no `fetch` in
+it. That is what makes the engines testable without a browser, and what makes
+the golden fixtures possible: inputs go in, and the outputs are compared as
+strings.
 
-The engines, one for one:
+The engines:
 
-| Concern | Kotlin | TypeScript |
-|---|---|---|
-| UF: current value, deltas, chart windows, downsampling, summaries | `UfEngine` | `ufEngine.ts` |
-| Date lookup with a closed set of outcomes | `UfLookup` | `ufLookup.ts` |
-| Restating an amount between dates | `UfReajuste` | `ufReajuste.ts` |
-| Rejecting implausible values, reconstructing gaps | `UfSanity` | `ufSanity.ts` |
-| Dollar conversions | `FxEngine` | `fx.ts` |
-| Bitcoin conversions, chart plan, failure wording | `BtcEngine` | `btc.ts` |
-| Three-field converters | `ConverterEngine` | `converter.ts` |
-| Mortgage schedule, prepayments, CAE | `MortgageEngine` | `mortgageEngine.ts` |
+| Concern | Module |
+|---|---|
+| UF: current value, deltas, chart windows, downsampling, summaries | `ufEngine.ts` |
+| Date lookup with a closed set of outcomes | `ufLookup.ts` |
+| Restating an amount between dates | `ufReajuste.ts` |
+| Rejecting implausible values, reconstructing gaps | `ufSanity.ts` |
+| Dollar conversions | `fx.ts` |
+| Bitcoin conversions, chart plan, failure wording | `btc.ts` |
+| Three-field converters | `converter.ts` |
+| Mortgage schedule, prepayments, CAE | `mortgageEngine.ts` |
 
-## Android
-
-```
-Kotlin 2.0 · Jetpack Compose (Material 3) · MVVM · unidirectional state
-│
-├── ui/
-│   ├── value/       UF today, converter, history, lookup, future values (one screen)
-│   ├── usd/         Dólar observado
-│   ├── btc/         Bitcoin
-│   ├── inflation/   The restatement calculator
-│   ├── credit/      Simulation list, editor, payment table, CSV export
-│   ├── components/  The history chart card, fields, pills, headers
-│   ├── about/       Independence notice, sources, disclaimer
-│   ├── nav/         The five destinations, in two groups
-│   └── theme/
-├── domain/
-│   ├── model/       Data classes; DatedValue is a day and an amount
-│   └── engine/      The eight engines above
-├── data/
-│   ├── remote/      Retrofit + OkHttp + kotlinx.serialization
-│   │                CMF (primary, needs a key) → mindicador.cl (fallback); the bitcoin chain
-│   ├── local/       Room: uf_values · indicators · simulations
-│   ├── seed/        Parsers for the bundled series
-│   ├── prefs/       DataStore: theme, last sync
-│   └── repo/        Cache-first repositories
-├── core/            Formatting, locale, the share sheet
-├── work/            WorkManager daily sync
-└── di/              A hand-written dependency container
-```
-
-Reads always come from Room, so every screen renders offline. The network is
-only ever a way to refresh that cache; a failed refresh degrades to a visible
-staleness warning, never to an empty screen or a fabricated number. WorkManager
-is initialised on demand and its scheduling is wrapped so that background sync,
-a convenience, can never prevent the app from starting.
-
-**Manual DI instead of Hilt.** The object graph is single-level and shallow. A
-hand-written container removes an annotation processor, a plugin and an entire
-class of build failures, at the cost of about forty lines.
-
-**A hand-drawn chart instead of a charting library.** The app needs one line,
-one gradient fill, two endpoint labels and a scrub cursor. A dependency for
-that would cost more in size and API surface than it saves. The minified
-release APK is about 1,8 MB.
-
-**Numeric fields group thousands as you type.** The field's state stays raw and
-only the display is grouped, so the separator is never something the user has
-to type, and a typed "." or "," is always the decimal separator. Android's
-numeric keypad offers one or the other depending on the phone's locale, not
-the app's.
-
-## Web
+## The layout
 
 ```
 TypeScript · Preact · Vite · Vitest · big.js · a service worker
@@ -94,14 +40,30 @@ TypeScript · Preact · Vite · Vitest · big.js · a service worker
 ├── src/domain/      The eight engines, money and dates
 ├── src/data/        mindicador.cl, the bitcoin chain, the seed parser, localStorage
 ├── src/core/        Formatting
-├── public/          manifest, icons, the service worker, the two series (copied in)
-└── scripts/         sync-data.mjs: copies the series from the Android assets
+├── golden/          The fixtures the suite pins every figure against
+├── public/          manifest, icons, the service worker, the two bundled series
+└── scripts/         screenshots.mjs
 ```
 
-The web app is a static site: no server of its own, no build-time secret, and
-data read either from the bundled files or from endpoints that send CORS
-headers. It is deployed to GitHub Pages by `deploy-web.yml` on every push that
-touches `web/` or the series, after the test suite has passed.
+**A hand-drawn chart instead of a charting library.** The app needs one line,
+one gradient fill, two endpoint labels and a scrub cursor. A dependency for
+that would cost more in bundle size and API surface than it saves. The whole
+bundle is under 100 kB gzipped.
+
+**One history card.** Every history chart in the app — UF, dollar, bitcoin —
+is drawn by `ui/HistoryCard.tsx` and reads its summary from `chartSummary` in
+the domain. A chart that needs something the card lacks gets the card extended
+for everything, never a local exception. The three had quietly drifted apart
+once: different heights, different chip spellings, and one of them moved the
+headline while scrubbing.
+
+**Numeric fields group thousands when they lose focus.** The field's state
+stays raw and only the display is grouped, so the separator is never something
+the user has to type, and a typed "." or "," is always the decimal separator —
+which one a phone's numeric keypad offers depends on the phone's locale, not
+the app's. Grouping on blur rather than on every keystroke means there is no
+caret to map across inserted separators, which is where this class of field
+usually goes wrong.
 
 **The service worker** caches the app shell and both series on install, so the
 page opens and every chart and date works with no connection. Requests to the
@@ -130,78 +92,50 @@ goes through the share sheet; on a laptop or a desktop it is copied, even in
 browsers that offer a share panel there, because the natural next step on a
 computer is pasting. The button says which it is about to do.
 
-## Keeping the two one app
+## Keeping the numbers honest
 
-Three mechanisms, all in the repository:
+Two mechanisms, both in the repository:
 
-1. **Golden vectors**, `shared/golden/*.json`. Inputs and exact expected
-   outputs for the mortgage engine, the UF engine, bitcoin and the converters.
-   Neither side generates the files; both suites read them and must match to
-   the last decimal, string equality and not a tolerance. Every reported
-   miscalculation arrives as a new case before it is fixed.
-2. **One copy of the data.** Both series live in the Android assets and are
-   copied into the web build. The daily refresh updates both channels from the
-   same commit.
-3. **CI on the same commit**, `.github/workflows/checks.yml`. The Android unit
-   tests and the web tests run on every push and every pull request. An engine
-   change on one side that is not mirrored on the other turns the build red
-   rather than shipping two answers to the same question.
+1. **Golden fixtures**, `web/golden/*.json`. Inputs and exact expected outputs
+   for the mortgage engine, the UF engine, bitcoin and the converters, checked
+   as strings rather than within a tolerance. They are never generated from the
+   engines: a fixture the engine wrote would agree with whatever the engine
+   currently does. Changing a figure on purpose means editing the file
+   deliberately, which is exactly the moment worth pausing at, and every
+   reported miscalculation arrives as a new case before it is fixed.
+2. **CI on every commit**, `.github/workflows/checks.yml`, which runs the type
+   check and the suite on every push and every pull request.
 
-The version string is the same on both sides, `versionName` in
-`app/build.gradle.kts` and `version` in `web/package.json`, and a release
-bumps both.
+## Building and deploying
 
-## Building and releasing
+Node 22. `npm ci`, then `npm run dev` for a dev server or `npm run build` for
+`web/dist`; `build` type-checks before bundling. The version string lives in
+`web/package.json` and is read into the app at build time.
 
-**Web:** Node 22. `npm ci`, then `npm run dev` for a dev server or `npm run
-build` for `web/dist`. Both first run `sync-data`, which copies the series in
-from the Android assets, then `build` type-checks before bundling.
+`deploy-web.yml` publishes to GitHub Pages on every push that touches `web/`,
+after the suite has passed. Because the bundled series live in `web/public/`,
+the daily data refresh redeploys the app by itself.
 
-**Android:** JDK 17 and Android SDK Platform 35. `./gradlew assembleDebug`
-produces an installable APK; debug builds use the `.debug` application ID
-suffix so they install alongside a release. `./gradlew assembleRelease` builds
-the minified release, signed when a `keystore.properties` at the project root
-(gitignored) names the keystore:
-
-```properties
-storeFile=tickers-release.jks
-storePassword=...
-keyAlias=...
-keyPassword=...
-```
-
-Without that file the release variant still builds, unsigned. Releases are
-published on GitHub with the APK attached, which is what the download link in
-the README and Obtainium follow.
-
-**Data:** the two generators in `tools/` and the daily workflow are described
-in [Data](DATA.md#regenerating-the-bundled-series). **Icons:** every icon on
-both channels is generated from one script, `tools/build_icons.py`; see
-[Design](DESIGN.md).
+The data generators in `tools/` and the daily workflow are described in
+[Data](DATA.md#regenerating-the-bundled-series). **Icons:** every icon is
+generated from one script, `tools/build_icons.py`; see [Design](DESIGN.md).
 
 ## Project layout
 
 ```
 Tickers/
-├── app/                         Android
-│   ├── src/main/assets/         uf_daily.txt · usd_daily.txt, the bundled series
-│   ├── src/main/java/cl/tickers/app/
-│   ├── src/test/                JVM unit tests, including the parity suites
-│   └── src/androidTest/         Instrumented tests
-├── web/                         The web app
+├── web/
 │   ├── src/                     ui · domain · data · core
-│   ├── public/                  manifest, icons, service worker
-│   └── scripts/sync-data.mjs
-├── shared/
-│   ├── golden/                  The fixtures both channels must match
-│   └── PARITY.md                The contract between the channels
+│   ├── golden/                  The fixtures every figure is pinned against
+│   ├── public/                  manifest, icons, service worker, the two series
+│   └── scripts/screenshots.mjs
 ├── tools/
 │   ├── build_uf_daily_seed.py   Regenerates the UF series
 │   ├── build_usd_daily_seed.py  Regenerates the dollar series
 │   └── build_icons.py           Generates every icon from one description
 ├── docs/                        This documentation, and the screenshots
 └── .github/workflows/
-    ├── checks.yml               Both test suites, every commit
+    ├── checks.yml               Types and tests, every commit
     ├── deploy-web.yml           GitHub Pages
     └── refresh-data.yml         The daily data refresh
 ```

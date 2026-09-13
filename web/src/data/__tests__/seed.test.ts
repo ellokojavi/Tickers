@@ -12,13 +12,14 @@ const lines = (...data: string[]) =>
   ["# comentario", "# inicio: 2026-09-01", "# unidad: centavos", ...data];
 
 /**
- * The source of truth, not the copy the web build makes of it. Validating the
- * file that feeds both platforms is the point, and it means these run without
- * a build step having happened first.
+ * The file the app actually ships, read straight off disk rather than through
+ * the bundler, so these run without a build step having happened first. It is
+ * regenerated every morning by a workflow and committed without a human
+ * looking at it, which is why it is tested at all.
  */
 const shipped = () =>
   parseSeedText(readFileSync(
-    resolvePath(here, "../../../../app/src/main/assets/uf_daily.txt"), "utf8",
+    resolvePath(here, "../../../public/uf_daily.txt"), "utf8",
   ));
 
 describe("bundled series", () => {

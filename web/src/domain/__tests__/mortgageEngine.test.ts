@@ -6,9 +6,11 @@ import { monthlyRate, payment, simulate } from "../mortgageEngine.ts";
 import { expectWithin, num } from "../testing.ts";
 
 /**
- * A direct port of MortgageEngineTest from the Android app. The numbers are
- * identical on purpose: if this file passes, the TypeScript engine agrees with
- * the Kotlin one, which is the only way to know the port is faithful.
+ * The amortisation engine's own tests: the properties a schedule must have,
+ * rather than the specific figures, which are pinned separately in
+ * goldenVectors.test.ts. A schedule that fully amortises, a balance chain that
+ * is consistent row by row, and a CAE that converges on the effective annual
+ * rate when there are no fees are three independent ways of being right.
  */
 const input = (o: Partial<{
   property: string; down: string; rate: string; years: number;

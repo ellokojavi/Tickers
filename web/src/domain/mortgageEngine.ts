@@ -20,7 +20,7 @@ import {
  */
 export const MONEY_SCALE = 4;
 const RATE_SCALE = 12;
-/** (1+i)^n keeps about this many places, matching the Kotlin's DECIMAL64. */
+/** (1+i)^n keeps about this many places, roughly a DECIMAL64's worth. */
 const POWER_SCALE = 20;
 
 export const monthlyRate = (annualRatePct: Money, convention: RateConventionKey): Money => {

@@ -2,7 +2,7 @@ import type { Money } from "../domain/money.ts";
 import { dayOfMonth, daysBetween, month, today as todayIso, year, type IsoDate } from "../domain/dates.ts";
 
 /**
- * Chilean number and date formatting, ported from the Android app.
+ * Chilean number and date formatting.
  *
  * Separators are chosen explicitly rather than inherited from the browser's
  * locale: the app is Chile-only and must read the same on a phone set to
@@ -101,9 +101,9 @@ export const monthYearShort = (d: IsoDate): string => `${MONTHS_SHORT[month(d) -
 // ------------------------------------------------ instants, in Chilean time
 //
 // A bitcoin chart is labelled with moments, not calendar days, and a moment
-// has to be pinned to a zone or the two channels label the same candle
-// differently depending on where the device thinks it is. This app is for
-// Chile, so Chile is the zone, stated rather than inherited.
+// has to be pinned to a zone or the same candle is labelled differently
+// depending on where the device thinks it is. This app is for Chile, so Chile
+// is the zone, stated rather than inherited.
 //
 // Only the numeric parts come from Intl; the month names are this file's own,
 // so the output cannot shift when the platform's locale data does.

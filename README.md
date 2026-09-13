@@ -4,21 +4,18 @@
 </h1>
 
 <p align="center">
-  <b>The numbers Chilean money is measured in, on your phone and in your browser.</b><br>
-  <sub>Las cifras con que se mide el dinero en Chile, en tu teléfono y en tu navegador.</sub>
+  <b>The numbers Chilean money is measured in, in your browser.</b><br>
+  <sub>Las cifras con que se mide el dinero en Chile, en tu navegador.</sub>
 </p>
 
 <p align="center">
   <a href="https://ellokojavi.github.io/Tickers/"><b>🌐 Open the web app · Abrir la app web</b></a>
-  &nbsp;·&nbsp;
-  <a href="https://github.com/ellokojavi/Tickers/releases/latest"><b>⬇ Android APK</b></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/ellokojavi/Tickers/actions/workflows/checks.yml"><img src="https://github.com/ellokojavi/Tickers/workflows/Checks/badge.svg" alt="Checks"></a>
   <a href="https://github.com/ellokojavi/Tickers/actions/workflows/deploy-web.yml"><img src="https://github.com/ellokojavi/Tickers/workflows/Deploy%20the%20web%20app/badge.svg" alt="Deploy"></a>
   <a href="https://github.com/ellokojavi/Tickers/actions/workflows/refresh-data.yml"><img src="https://github.com/ellokojavi/Tickers/workflows/Refresh%20the%20UF%20series/badge.svg" alt="Data refresh"></a>
-  <a href="https://github.com/ellokojavi/Tickers/releases/latest"><img src="https://img.shields.io/github/v/release/ellokojavi/Tickers?label=release" alt="Release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
 </p>
 
@@ -30,7 +27,7 @@
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/04-inflacion.png" width="230" alt="Four thousand pesos of 1990 restated to today"> | <img src="docs/screenshots/05-creditos.png" width="230" alt="A mortgage simulation with its monthly payment and CAE"> | <img src="docs/screenshots/06-oscuro.png" width="230" alt="The UF screen in the dark theme"> |
 
-<sub>The web app on a phone-sized screen. The Android app shows the same screens, natively.</sub>
+<sub>On a phone-sized screen. A wide window uses a navigation rail and two columns.</sub>
 
 ---
 
@@ -58,26 +55,21 @@ de inflación exacta al día y un simulador de créditos hipotecarios.
   completa y exportación a CSV. Las simulaciones quedan guardadas.
 
 **Funciona sin conexión.** Las series completas vienen dentro de la app, así que
-todos los gráficos y todas las fechas funcionan desde el primer arranque, sin
+todos los gráficos y todas las fechas funcionan desde la primera carga, sin
 internet. Cuando lo hay, actualiza el valor del día.
 
 **No recoge nada.** Sin cuenta, sin publicidad, sin seguimiento, sin analítica.
-Las simulaciones se guardan solo en tu dispositivo y no salen de él.
+Las simulaciones se guardan solo en tu navegador y no salen de él.
 
 **Nunca inventa un número.** Un valor que no está publicado no se proyecta ni se
 estima: la app dice que no existe. Cada cifra lleva su fuente y su fecha.
 
-**Cómo tenerla.**
-
-- **En el navegador**, en [ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/).
-  Funciona en cualquier navegador actual, también sin conexión una vez abierta,
-  y se puede dejar en la pantalla de inicio del teléfono. Es la forma de usarla
-  en un iPhone.
-- **En Android**, con el [APK de la última versión](https://github.com/ellokojavi/Tickers/releases/latest).
-  Requiere Android 8.0 o superior. El APK está firmado pero no se distribuye por
-  Google Play, así que Android pedirá autorizar la instalación la primera vez.
-  Para recibir actualizaciones solas, agrega este repositorio a
-  [Obtainium](https://github.com/ImranR98/Obtainium).
+**Cómo tenerla.** Anda a
+[ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/). Funciona
+en cualquier navegador actual, también sin conexión una vez abierta. En un
+teléfono se puede dejar en la pantalla de inicio y queda como cualquier otra
+app, tanto en Android como en iPhone; en un computador, como marcador. La
+propia app explica los pasos que pide tu navegador.
 
 ## For users
 
@@ -102,43 +94,39 @@ calculator and a mortgage simulator.
   Simulations are saved.
 
 **It works offline.** The complete series ship inside the app, so every chart
-and every date works from the first launch with no connection. When there is
-one, it refreshes the day's value.
+and every date works from the first load with no connection. When there is one,
+it refreshes the day's value.
 
 **Nothing is collected.** No account, no ads, no tracking, no analytics.
-Simulations are stored on your device only and never leave it.
+Simulations are stored in your browser only and never leave it.
 
 **It never makes a number up.** A value that has not been published is neither
 projected nor estimated: the app says it does not exist. Every figure carries
 its source and its date.
 
-**Getting it.** The [web app](https://ellokojavi.github.io/Tickers/) runs in
-any current browser, works offline once opened and can be added to a phone's
-home screen, which is the way to use it on an iPhone. The
-[Android APK](https://github.com/ellokojavi/Tickers/releases/latest) needs
-Android 8.0 or newer; it is signed but not on Google Play, so Android asks you
-to allow the install the first time. [Obtainium](https://github.com/ImranR98/Obtainium)
-can follow this repository for updates.
+**Getting it.** Go to [ellokojavi.github.io/Tickers](https://ellokojavi.github.io/Tickers/).
+It runs in any current browser and works offline once opened. On a phone it can
+be added to the home screen, where it behaves like any other app on both
+Android and iOS; on a computer, as a bookmark. The app itself gives the steps
+your browser needs.
 
 ---
 
 ## For engineers
 
-Tickers ships twice: a native Android app in Kotlin and Jetpack Compose, and a
-web app in TypeScript and Preact served from GitHub Pages as a PWA. They are
-two implementations of one product, held to the same numbers by a shared set
-of golden vectors that both test suites read. The rest of the documentation
-lives in [`docs/`](docs/):
+Tickers is a web app in TypeScript and Preact, served from GitHub Pages as a
+PWA with no backend of its own. Everything that produces a number lives in
+`domain/`, with no DOM in it, and is pinned by golden fixtures that the test
+suite reads. The rest of the documentation lives in [`docs/`](docs/):
 
 | Document | What it covers |
 |---|---|
-| [Architecture](docs/ARCHITECTURE.md) | Both channels, layer by layer; the decisions behind them; the project layout; how the two stay one app |
+| [Architecture](docs/ARCHITECTURE.md) | The app layer by layer, the decisions behind it, and the project layout |
 | [Data](docs/DATA.md) | Where every number comes from, what the sources' terms require, how the data is validated and repaired, and how it is refreshed daily |
 | [Calculations](docs/CALCULATIONS.md) | The inflation index derived from the UF, the mortgage model and its rate conventions, the CAE solver, bitcoin in UF |
 | [Requirements](docs/REQUIREMENTS.md) | The functional and non-functional requirements the app is held to |
-| [Testing](docs/TESTING.md) | What each suite asserts on each channel, the bugs the suites caught, a postmortem, and the manual checklist |
-| [Design](docs/DESIGN.md) | The mark and its icons, and the interface rules that hold across both channels |
-| [Parity](shared/PARITY.md) | The contract between the channels: what may differ, what may not, and what to do when a feature arrives |
+| [Testing](docs/TESTING.md) | What each suite asserts, the bugs the suites caught, a postmortem, and the manual checklist |
+| [Design](docs/DESIGN.md) | The mark and its icons, and the interface rules |
 | [Working agreements](CLAUDE.md) | The rules for changing this repository, starting with the one that keeps this page true |
 
 This page is not maintained on trust. Its version, its test counts, its links,
@@ -151,60 +139,51 @@ change that outdates the README fails in the commit that made it.
 - **Never invent a value.** Unpublished days are refused, not extrapolated.
   Weekends have no dollar. A chart ends today even when the series runs past
   it. A lookup never answers with a neighbouring day's value.
-- **Money is exact.** `BigDecimal` on Android, `big.js` on the web; a `Double`
-  never touches a peso. Formatting is `es-CL` on every figure, counts included.
-- **Offline first.** The complete UF and dollar series ship inside both apps,
+- **Money is exact.** `big.js` throughout; a `number` never touches a peso.
+  Formatting is `es-CL` on every figure, counts included, and the separators
+  and month names are the app's own rather than the browser's.
+- **Offline first.** The complete UF and dollar series ship with the page,
   regenerated every morning by a workflow and validated before they land. The
   network only ever refreshes the day's value.
-- **Same numbers everywhere.** Every engine exists twice, in Kotlin and in
-  TypeScript, and both must agree with the fixtures in `shared/golden/` to the
-  last decimal. CI runs both suites on every commit.
+- **The figures are pinned.** Every engine's output is fixed in `web/golden/`
+  as exact strings, never generated from the engine itself, so changing a
+  figure is always a deliberate edit.
 - **Nothing leaves the device.** No analytics, no account. Simulations live in
-  Room on Android and in `localStorage` on the web.
+  `localStorage`.
 
 ### Building
 
-**Web** (Node 22):
+Node 22:
 
 ```bash
 cd web
 npm ci
-npm run dev       # copies the bundled series in, then serves on :5173
-npm test          # 119 tests, the last seven of them checking this page
+npm run dev       # serves on :5173
+npm test          # 118 tests, the last seven of them checking this page
+npx tsc --noEmit  # types
 npm run build     # type-check, then a static build in web/dist
 ```
 
-**Android** (JDK 17, Android SDK Platform 35):
-
-```bash
-echo "sdk.dir=/path/to/android/sdk" > local.properties
-./gradlew assembleDebug           # app/build/outputs/apk/debug/
-./gradlew test                    # 157 JVM tests, no device needed
-./gradlew connectedAndroidTest    # 13 instrumented tests, needs a device or emulator
-```
-
-The CMF's official API needs a free key; put it in `local.properties` as
-`CMF_API_KEY=...`. Without it the Android app falls back to mindicador.cl, as
-the web app always does. Release signing and the data-regeneration scripts are
-described in [Architecture](docs/ARCHITECTURE.md#building-and-releasing) and
-[Data](docs/DATA.md#regenerating-the-bundled-series).
+The data generators in `tools/` and the daily refresh are described in
+[Data](docs/DATA.md#regenerating-the-bundled-series); deployment is in
+[Architecture](docs/ARCHITECTURE.md#building-and-deploying).
 
 ### Status
 
-Version **0.9.1** on both channels, in daily use. It is held below 1.0 for one
-reason: the mortgage simulator's default annual-to-monthly rate convention has
-not yet been checked against a published bank quote. Both conventions are
-selectable and the screen says so, but until that check is done, calling it 1.0
-would overstate it.
+Version **0.9.1**, in daily use. It is held below 1.0 for one reason: the
+mortgage simulator's default annual-to-monthly rate convention has not yet been
+checked against a published bank quote. Both conventions are selectable and the
+screen says so, but until that check is done, calling it 1.0 would overstate it.
 
 **Toward 1.0:** validate the default rate convention against bank quotes; PDF
-export of payment schedules; side-by-side comparison of simulations; a
-home-screen widget. **Considered, not committed:** UF change notifications, UTM
-and tax calculators, iOS.
+export of payment schedules; side-by-side comparison of simulations.
+**Considered, not committed:** UF change notifications, UTM and tax
+calculators.
 
-The app has no proprietary dependencies, no Play Services and no secrets in the
-build, which makes it eligible for [IzzyOnDroid](https://apt.izzysoft.de/fdroid/)
-and F-Droid as well as Google Play.
+Tickers shipped as a native Android app in Kotlin and Jetpack Compose until
+September 2026, alongside this one and held to the same numbers by shared
+golden vectors. It was removed to make this a single product on a single
+channel; `android-final` is the last commit that contains it.
 
 ---
 

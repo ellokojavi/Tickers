@@ -1,6 +1,6 @@
 # Design
 
-The mark, its icons, and the interface rules that hold on both channels. The
+The mark, its icons, and the interface rules that hold across the app. The
 rules are here because they are decisions, not accidents, and a screen added
 later should follow them.
 
@@ -9,17 +9,16 @@ later should follow them.
 The app mark is a **candlestick chart**: seven candles, three red and four
 green, climbing left to right on a black card with a green frame. Every icon is
 generated from one description of that geometry by `tools/build_icons.py`,
-which writes the SVG favicon, the PWA and apple-touch PNGs, the maskable PWA
-icon and the Android vector drawables. Edit the script, not the outputs; the
-script needs Pillow and runs from the repository root.
+which writes the SVG favicon, the PWA and apple-touch PNGs and the maskable
+PWA icon. Edit the script, not the outputs; the script needs Pillow and runs
+from the repository root.
 
-A launcher crops the central 72×72 of a 108×108 adaptive icon and may mask it
-to a circle, so the Android foreground scales the candles to fit the 66 dp safe
-zone and drops the frame, which no mask would preserve. The PWA ships a
-separate maskable icon for the same reason: full bleed, no frame, candles
-inside the safe zone. The apple-touch icon is opaque to the edge because iOS
-rounds the corners itself. The themed (monochrome) Android variant keeps the
-same candle silhouettes in one tone.
+A launcher that installs the app to a home screen may crop the icon and mask it
+to a circle, so the PWA ships a separate maskable variant: full bleed, no
+frame — which no mask would preserve — and the candles scaled to stay inside
+the safe zone, since the leftmost and rightmost are the ones that would be cut.
+The apple-touch icon is opaque to the edge because iOS rounds the corners
+itself.
 
 Empty states reuse the symbol of the thing that is missing: the simulation
 list shows the same bank mark its tab carries.
@@ -47,9 +46,11 @@ through a rate says which day's rate.
 Counts get their separators too, which is why day spans and row counts go
 through the formatter rather than being interpolated.
 
-**Numeric fields group as you type** and accept either "." or "," as the
-decimal separator, because which one the phone's keypad offers depends on its
-locale, not the app's.
+**Numeric fields group when they lose focus**, never while the caret is in
+them, so nothing moves under the fingers of someone still typing. They accept
+either "." or "," as the decimal separator, because which one a phone's keypad
+offers depends on its locale, not the app's. The separator is always supplied
+by the display and never typed.
 
 **A card shares itself, and only itself.** The share button on a card sends
 the card as text: the same figures, the same source line, nothing from the

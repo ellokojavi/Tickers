@@ -1,14 +1,14 @@
 # Calculations
 
 Everything in Tickers that produces a number, and why it is computed the way it
-is. Each of these exists twice, in Kotlin under `app/.../domain/engine/` and in
-TypeScript under `web/src/domain/`, and both implementations must agree with
-the fixtures in `shared/golden/` exactly. See [Parity](../shared/PARITY.md).
+is. Each of these lives in `web/src/domain/`, with no DOM in it, and every
+figure it produces is pinned in `web/golden/` as an exact string. See
+[Testing](TESTING.md#the-golden-fixtures).
 
 ## Money
 
-All monetary arithmetic is exact decimal: `BigDecimal` on Android, `big.js` on
-the web. A floating-point number never holds a peso. The UF is carried at the
+All monetary arithmetic is exact decimal, through `big.js`. A floating-point
+number never holds a peso. The UF is carried at the
 two decimals it is published with, pesos are whole (Chile has not used centavos
 for decades), dollars and UF amounts are shown to two decimals, and UF units in
 the inflation calculator to four. Rounding happens once, at the point a figure
@@ -60,7 +60,7 @@ and it is published to two decimals on a value in the tens of thousands, about
 one-decimal percentage. So the monthly price index is simply the UF on the 9th
 of the month two months later.
 
-**This is verified, not assumed.** The seed tests on both channels reproduce
+**This is verified, not assumed.** The seed tests reproduce
 every monthly CPI figure the INE published for 2024 from the bundled UF series,
 within the published figure's own single decimal, and check that the December
 2008 deflation of −1,2 % survives in it. The calculator no longer needs this
@@ -92,19 +92,20 @@ published value forward and say which day it is from.
 
 ## Charts
 
-Every history chart draws the same way on both channels. The window for a
-range ends today, never on a published future day, because a historical chart
-is a record of what has happened and the days already published beyond it have
-a card of their own. The window is thinned to at most 400 points before drawing,
-since a phone cannot resolve more and rebuilding an 18.000-segment path on
-every pointer event would make scrubbing crawl. Downsampling keeps both
-endpoints and the overall movement.
+Every history chart in the app is drawn by one component and reads its summary
+from one function, so they cannot drift apart. The window for a range ends
+today, never on a published future day, because a historical chart is a record
+of what has happened and the days already published beyond it have a card of
+their own. The window is thinned to at most 400 points before drawing, since a
+phone screen cannot resolve more and rebuilding an 18.000-segment path on every
+pointer event would make scrubbing crawl. Downsampling keeps both endpoints and
+the overall movement.
 
 The summary above the line reports the change over the window and, when the
 window is long enough for it to mean anything, the annualised rate. Whether a
 window is long enough is a design decision, so it is pinned in the golden
-vectors: the two channels disagreeing about it would show as one chart saying
-more than the other.
+fixtures: a threshold that moved while someone was editing something else
+would make one chart say more than another for no reason anyone chose.
 
 Scrubbing never changes the headline. The explored day is reported separately,
 so a screen cannot misstate what the UF is worth today.
@@ -127,8 +128,8 @@ span.
 
 Chart horizons run from one hour to five years. Each horizon has a candle
 width, chosen so the chart reads well and costs one request, and that plan is
-in the golden vectors because two channels drawing the same span at different
-resolutions would be a difference nobody would think to look for.
+in the golden fixtures because a span quietly changing resolution would be a
+difference nobody would think to look for.
 
 ## Converters
 
@@ -137,7 +138,7 @@ derive both other fields from the one that was typed, through the engine,
 never from each other's already-rounded display. The distinction matters: one
 bitcoin once read 72.476.915 pesos on load and 72.476.920 after an edit,
 because the peso figure was being derived from the rounded dollar figure. The
-converter fixtures in `shared/golden/converter.json` were written after that.
+converter fixtures in `web/golden/converter.json` were written after that.
 
 ## Mortgage model
 
@@ -185,5 +186,4 @@ The *Carga Anual Equivalente* is solved by bisection: the app finds the monthly
 rate at which the present value of every payment the borrower makes (dividend,
 insurance, prepayments) equals the loan amount net of upfront costs, then
 annualises it. With no fees and no insurance it converges on the effective
-annual rate, which both test suites assert as an independent check on the
-solver.
+annual rate, which the suite asserts as an independent check on the solver.

@@ -12,8 +12,8 @@ import {
  * page read them with no server of its own — the same property that makes the
  * rest of the app static. Buda would give BTC/CLP directly, and is the Chilean
  * reference, but it sends no CORS header at all and so is unreachable from a
- * browser. Binance is in the Android app's chain and not in this one: it
- * answers 451 to some regions and sends no CORS header when it does.
+ * browser. Binance is left out for the same reason, and because it answers 451
+ * to some regions.
  */
 
 interface Source {
@@ -57,8 +57,8 @@ export interface SpotFailure {
 
 /**
  * A browser can say it has no network; it cannot tell a captive portal from a
- * working one, so UNVALIDATED never arises here and the shared classifier
- * simply never returns NO_INTERNET on this channel.
+ * working one, so UNVALIDATED never arises and the classifier never has cause
+ * to return NO_INTERNET.
  */
 const networkStatus = (): NetworkStatus => (navigator.onLine ? "ONLINE" : "NONE");
 

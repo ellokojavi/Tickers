@@ -9,15 +9,14 @@ import {
 import * as Fmt from "../../core/format.ts";
 
 /**
- * The bitcoin half of the parity contract. `shared/golden/btc.json` is read by
- * this test and by app/src/test/java/cl/tickers/app/parity/BtcGoldenVectorTest.kt,
- * and both must agree with it exactly. See shared/PARITY.md.
+ * The bitcoin conversions, the chart plan and the wording of a failed fetch,
+ * pinned in `web/golden/btc.json` as exact strings.
  *
  * The chart plan is in here because it is a design decision, not an
  * implementation detail: which candle width each span uses decides how the
- * chart reads and how many requests it costs, and the two channels drawing the
- * same span at different resolutions would be a real difference nobody would
- * think to look for.
+ * chart reads and how many requests it costs. Changing it by accident, while
+ * touching something else, would be a real difference nobody would think to
+ * look for.
  */
 
 interface Golden {
@@ -44,7 +43,7 @@ interface Golden {
 }
 
 const golden: Golden = JSON.parse(
-  readFileSync(new URL("../../../../shared/golden/btc.json", import.meta.url), "utf8"),
+  readFileSync(new URL("../../../golden/btc.json", import.meta.url), "utf8"),
 ) as Golden;
 
 /** Every expectation carries its own label so a failure names the input. */
@@ -52,7 +51,7 @@ const check = (label: string, actual: string, expected: string) =>
   expect(`${label} -> ${actual}`).toBe(`${label} -> ${expected}`);
 
 describe("bitcoin conversions", () => {
-  it("match the shared fixture", () => {
+  it("match the fixture", () => {
     for (const c of golden.btcUsdToClp) {
       check(`btcUsdToClp(${c.btcUsd}, ${c.usdClp})`,
         btcUsdToClp(money(c.btcUsd), money(c.usdClp)).toFixed(0), c.expected);
@@ -73,7 +72,7 @@ describe("bitcoin conversions", () => {
 });
 
 describe("the chart plan", () => {
-  it("matches the shared fixture", () => {
+  it("matches the fixture", () => {
     const seen = new Set<Horizon>();
     for (const c of golden.chartPlan) {
       seen.add(c.horizon);
@@ -83,14 +82,14 @@ describe("the chart plan", () => {
       check(`${c.horizon} refreshMs`, String(plan.refreshMs), String(c.refreshMs));
       check(`${c.horizon} candlesNeeded`, String(candlesNeeded(c.horizon)), String(c.candlesNeeded));
     }
-    // A horizon added on one channel and not the other would otherwise pass by
-    // simply not being in the fixture.
+    // A horizon added to the app and not to the fixture would otherwise pass
+    // by simply not being checked.
     expect([...seen].sort()).toEqual([...HORIZONS].sort());
   });
 });
 
 describe("error classification", () => {
-  it("and its wording match the shared fixture", () => {
+  it("and its wording match the fixture", () => {
     for (const c of golden.classify) {
       const kind = classifyFetchError(c.network, c.failures);
       check(c.name, kind, c.expected);
@@ -108,7 +107,7 @@ describe("error classification", () => {
 });
 
 describe("chart labels", () => {
-  it("and the formatters match the shared fixture", () => {
+  it("and the formatters match the fixture", () => {
     for (const c of golden.stampKind) {
       check(`stampKind(${c.horizon})`, stampKind(c.horizon), c.expected);
     }
@@ -116,7 +115,7 @@ describe("chart labels", () => {
       check(`usd(${c.v})`, Fmt.usd(money(c.v)), c.expected);
     }
     // These straddle Chile's daylight saving change and local midnight, which
-    // is where two implementations quietly stop agreeing.
+    // is where a zone-handling mistake stops being invisible.
     const byInstant: [string, (at: number) => string][] = [
       ["timeHm", Fmt.timeHm], ["dayMonthNum", Fmt.dayMonthNum], ["monthYearOf", Fmt.monthYearOf],
     ];
