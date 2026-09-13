@@ -6,7 +6,7 @@ without a browser**, and the figures a user could quote must be pinned so that
 changing one is always deliberate.
 
 ```bash
-cd web && npm test        # 125 tests, seconds
+cd web && npm test        # 133 tests, seconds
 cd web && npx tsc --noEmit
 ```
 
@@ -17,7 +17,7 @@ cd web && npx tsc --noEmit
 | Layer | Suite | What it protects |
 |---|---|---|
 | Pure calculation | Vitest, 69 | Mortgage maths, due dates, UF conversions and windows, the restatement, date-lookup rules, sanity filtering |
-| Pinned expectations | Vitest, 17 | The golden fixtures: mortgage, UF, bitcoin, converters |
+| Pinned expectations | Vitest, 25 | The golden fixtures: mortgage, UF, bitcoin, converters; and the companion-indicator list |
 | Formatting and input | Vitest, 10 | `es-CL` output and parsing |
 | Data contracts and assets | Vitest, 15 | The bundled series, read from the shipped files |
 | Navigation | Vitest, 7 | What a hash means, and what each screen's address is |
@@ -212,6 +212,22 @@ been out in the world:
 - **a route that no longer exists opens the overview, never nothing**, which is
   the same rule as everywhere else here: never a blank screen
 
+### The companion indicators, 8 tests
+
+Which figures are listed beside the three cards, in what order, and which are
+asked for without being listed. A list of decisions rather than a calculation,
+pinned for the same reason the chart plan is: it changes by hand, and a hand
+can change it while meaning to change something else.
+
+- the dólar observado is not listed, because it has a card of its own — and is
+  still fetched, because three screens convert through it
+- everything listed is fetched
+- a series the source has abandoned (`dolar_intercambio`, frozen since 2014) or
+  that the app already has live (`bitcoin`) is never listed
+- the order is the one that was decided, spelled out in full
+- a monthly figure is dated to its month and a daily one to its day, and an
+  indicator the app has never heard of is treated as daily
+
 ## Bugs the suites found
 
 Worth recording, because each would have shipped otherwise.
@@ -230,6 +246,14 @@ Worth recording, because each would have shipped otherwise.
 4. **A chart's range chips went off screen when the history expanded.** The
    chips sat below a chart that grows to 200 px, which pushed them past the
    fold. They now sit above it.
+5. **Removing a figure from a list stopped it being fetched.** The dólar
+   observado was dropped from the companion list, correctly, since the overview
+   gives it a card of its own — but the list was also the request, so three
+   screens quietly lost the rate they convert through. The bitcoin card lost
+   its peso figure, the bitcoin screen lost its peso and UF readings, and the
+   UF converter lost its dollar field. Nothing threw and nothing was wrong on
+   screen; the figures were simply absent. What is fetched and what is shown
+   are now two lists, and the suite above was written before the fix.
 
 ## The one that escaped: a postmortem
 

@@ -111,6 +111,10 @@ input { font: inherit; font-variant-numeric: tabular-nums; }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .kv { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; }
 .kv > span:first-child { color: var(--on-surface-variant); }
+/* A companion indicator's own date, under its name. These arrive on different
+   clocks — some daily, some monthly and months behind — and undated they all
+   read as today's. */
+.kv-note { display: block; color: var(--outline); font-size: 12px; margin-top: 1px; }
 .kv.strong { font-size: 16px; font-weight: 600; }
 .kv.strong > span:first-child { font-weight: 400; }
 hr { border: none; border-top: 1px solid var(--outline-variant); margin: 10px 0; }

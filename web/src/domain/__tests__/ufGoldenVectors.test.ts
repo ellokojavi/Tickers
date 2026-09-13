@@ -129,6 +129,7 @@ describe("formatting", () => {
     const byDate: Record<string, (d: string) => string> = {
       longDate: Fmt.longDate, shortDate: Fmt.shortDate,
       dayMonth: Fmt.dayMonth, monthYearShort: Fmt.monthYearShort,
+      monthYear: Fmt.monthYear,
     };
     for (const [name, f] of Object.entries(byDate)) {
       for (const c of golden.format[name]!) {

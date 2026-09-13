@@ -8,7 +8,7 @@ import {
 } from "../domain/ufEngine.ts";
 import { btcUsdToClp } from "../domain/btc.ts";
 import { fetchErrorCopy } from "../domain/btc.ts";
-import { DataSource } from "../domain/models.ts";
+import { DataSource, cadenceOf, isCompanion, type Indicator } from "../domain/models.ts";
 import type { UfData } from "../data/useUfData.ts";
 import type { UsdData } from "../data/useUsdData.ts";
 import { useBtcGlance } from "../data/useBtcGlance.ts";
@@ -44,6 +44,18 @@ const USD_MONTHS = 12;
 const toneOf = (v: Money): string => (v.cmp(0) > 0 ? "positive" : v.cmp(0) < 0 ? "negative" : "");
 
 const isOk = (r: Spot | SpotFailure | null): r is Spot => r !== null && "usd" in r;
+
+/**
+ * A companion indicator is not always in pesos: a rate is a percentage and the
+ * copper price is in dollars, so the figure is punctuated by what the source
+ * says it is rather than assumed.
+ */
+const valueOf = (i: Indicator): string => {
+  const unit = i.unit.toLowerCase();
+  if (unit === "porcentaje") return Fmt.pct1(i.value);
+  if (unit === "dólar" || unit === "dolar") return Fmt.usd(i.value);
+  return Fmt.clpExact(i.value);
+};
 
 /**
  * One indicator, as a card that is entirely a link. The chart inside it takes
@@ -145,6 +157,14 @@ export const OverviewView = ({ data, usd }: { data: UfData; usd: UsdData }) => {
     () => data.indicators.find((i) => i.code === "dolar") ?? null,
     [data.indicators],
   );
+  // What is listed, as opposed to what is fetched: the dollar is asked for
+  // because three screens convert through it, and shown here it would be the
+  // same figure the card above already carries.
+  const companions = useMemo(
+    () => data.indicators.filter((i) => isCompanion(i.code)),
+    [data.indicators],
+  );
+
   const btcUsd = isOk(btc.spot) ? btc.spot.usd : null;
   const btcClp = btcUsd !== null && btcRate !== null ? btcUsdToClp(btcUsd, btcRate.value) : null;
 
@@ -214,14 +234,20 @@ export const OverviewView = ({ data, usd }: { data: UfData; usd: UsdData }) => {
         note={btc.spot !== null && !isOk(btc.spot) ? fetchErrorCopy[btc.spot.kind].hint : null}
       />
 
-      {data.indicators.length > 0 && (
+      {companions.length > 0 && (
         <Card class="glance-others">
           <SectionTitle>Otros indicadores</SectionTitle>
-          {data.indicators.map((i) => (
+          {companions.map((i) => (
             <KeyValue
               key={i.code}
               label={i.name}
-              value={i.unit.toLowerCase() === "porcentaje" ? Fmt.pct1(i.value) : Fmt.clpExact(i.value)}
+              // Every figure carries its date. These arrive on different
+              // clocks — some daily, some monthly and months behind — and
+              // undated they all read as today's.
+              note={cadenceOf(i.code) === "monthly"
+                ? Fmt.monthYear(i.date)
+                : Fmt.dayMonth(i.date)}
+              value={valueOf(i)}
             />
           ))}
         </Card>

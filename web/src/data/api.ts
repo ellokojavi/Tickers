@@ -1,6 +1,6 @@
 import { money } from "../domain/money.ts";
 import { parseIso, type IsoDate } from "../domain/dates.ts";
-import type { Indicator, DatedValue } from "../domain/models.ts";
+import { FETCHED_CODES, type Indicator, type DatedValue } from "../domain/models.ts";
 
 /**
  * mindicador.cl, which mirrors Banco Central data and sends
@@ -58,7 +58,10 @@ export const fetchIndicators = async (signal?: AbortSignal): Promise<Indicator[]
   const response = await fetch(BASE, { signal });
   if (!response.ok) throw new Error(`mindicador respondió ${response.status}`);
   const body = (await response.json()) as Record<string, IndicatorPayload | undefined>;
-  return (["ivp", "dolar", "euro", "utm", "ipc"] as const)
-    .map((key) => toIndicator(body[key]))
+  // The order is the domain's, not the payload's: which figures matter most is
+  // a decision. What is fetched is a superset of what is listed, because some
+  // screens convert through a rate they never show.
+  return FETCHED_CODES
+    .map((code) => toIndicator(body[code]))
     .filter((v): v is Indicator => v !== null);
 };
