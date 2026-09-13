@@ -6,15 +6,17 @@ import { convert } from "../ufReajuste.ts";
 import * as Fmt from "../../core/format.ts";
 
 /**
- * The conversion, re-adjustment and formatting half of the parity contract.
- * `shared/golden/uf.json` is read by this test and by
- * app/src/test/java/cl/tickers/app/parity/UfGoldenVectorTest.kt, and both must
- * agree with it exactly. See shared/PARITY.md.
+ * Conversions, deltas, the re-adjustment, the chart summary and formatting,
+ * pinned in `web/golden/uf.json` as exact strings.
+ *
+ * The chart summary is in here because whether a window is long enough to
+ * annualise at all is a design decision rather than an implementation detail,
+ * and every history chart in the app reads its summary through it.
  *
  * Formatting is in here because a thousands separator or a month name that
- * differs between the channels is as visible as a wrong figure, and the two
- * implementations get there by completely different routes: ICU on Android and
- * hand-rolled grouping here.
+ * quietly changes is as visible to a user as a wrong figure, and none of it is
+ * inherited from the browser's locale: the separators and the month names are
+ * this app's own.
  */
 
 interface Case { expected: string }
@@ -38,7 +40,7 @@ interface Golden {
 }
 
 const golden: Golden = JSON.parse(
-  readFileSync(new URL("../../../../shared/golden/uf.json", import.meta.url), "utf8"),
+  readFileSync(new URL("../../../golden/uf.json", import.meta.url), "utf8"),
 ) as Golden;
 
 /** Every expectation carries its own label so a failure names the input. */
@@ -46,7 +48,7 @@ const check = (label: string, actual: string, expected: string) =>
   expect(`${label} -> ${actual}`).toBe(`${label} -> ${expected}`);
 
 describe("uf conversions", () => {
-  it("match the shared fixture", () => {
+  it("match the fixture", () => {
     for (const c of golden.ufToClp) {
       check(`ufToClp(${c.uf}, ${c.rate})`, ufToClp(money(c.uf), money(c.rate)).toFixed(0), c.expected);
     }
@@ -71,11 +73,11 @@ describe("uf conversions", () => {
 
 /**
  * The line above every history chart. In the fixture because whether a window
- * is annualised at all is a design decision, and the two channels disagreeing
- * about it would show as one chart saying more than the other.
+ * is annualised at all is a design decision: changing the threshold makes one
+ * chart say more than another, and that should never happen by accident.
  */
 describe("chart summary", () => {
-  it("matches the shared fixture", () => {
+  it("matches the fixture", () => {
     for (const c of golden.chartSummary) {
       const label = `chartSummary(${c.from}, ${c.to}, ${c.days})`;
       const s = chartSummary(money(c.from), money(c.to), c.days);
@@ -90,7 +92,7 @@ describe("chart summary", () => {
 });
 
 describe("reajuste", () => {
-  it("matches the shared fixture", () => {
+  it("matches the fixture", () => {
     for (const c of golden.reajuste) {
       const r = convert(
         money(c.amount),
@@ -109,7 +111,7 @@ describe("reajuste", () => {
 });
 
 describe("formatting", () => {
-  it("matches the shared fixture", () => {
+  it("matches the fixture", () => {
     const byMoney: Record<string, (v: Money) => string> = {
       clp: Fmt.clp, clpExact: Fmt.clpExact, clpSigned: Fmt.clpSigned,
       uf: Fmt.uf, uf4: Fmt.uf4, factor: Fmt.factor,

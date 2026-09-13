@@ -10,12 +10,12 @@ import { daysBetween, of } from "../../domain/dates.ts";
  * by a workflow and committed without a human looking at it. These are the
  * checks that stop a bad regeneration from shipping.
  *
- * The file is read from the Android assets rather than the web copy, because
- * that is the source of truth and the web copy is a build artefact.
+ * The file is read straight off disk rather than through the bundler, so these
+ * run without a build step having happened first.
  */
 const here = dirname(fileURLToPath(import.meta.url));
 const series = parseSeedText(
-  readFileSync(resolvePath(here, "../../../../app/src/main/assets/usd_daily.txt"), "utf8"),
+  readFileSync(resolvePath(here, "../../../public/usd_daily.txt"), "utf8"),
 );
 
 describe("the bundled dollar series", () => {

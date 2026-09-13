@@ -4,9 +4,9 @@ import type { MortgageInput, Simulation } from "../domain/models.ts";
 /**
  * Saved simulations, in localStorage.
  *
- * Everything stays on the device, which is the same promise the Android app
- * makes. Money is stored as its decimal string, never as a JavaScript number,
- * for the same reason it is never a Double there.
+ * Everything stays on the device; nothing here is ever sent anywhere. Money is
+ * stored as its decimal string, never as a JavaScript number, for the same
+ * reason a float never holds a peso anywhere else in the app.
  */
 // The "ufchile" prefix outlives the app's rename on purpose. These keys are
 // where a browser already holds someone's saved simulations and settings;

@@ -72,7 +72,7 @@ describe("es-CL formatting", () => {
     expect(Fmt.parseNumber("abc")).toBeNull();
   });
 
-  /** The same separators the Android app writes, so shared text matches. */
+  /** What the app writes, it must be able to read back. */
   it("formatting and parsing round trip", () => {
     expect(Fmt.parseNumber(Fmt.clpExact(money("1234567.89")))).toBe(1234567.89);
   });

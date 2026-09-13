@@ -70,10 +70,10 @@ export const AboutSheet = ({ onClose }: { onClose: () => void }) => (
 
     <Card>
       <SectionTitle>Versión</SectionTitle>
-      <p class="muted">Tickers {__APP_VERSION__} · versión web</p>
+      <p class="muted">Tickers {__APP_VERSION__}</p>
       <p>
         <a href="https://github.com/ellokojavi/Tickers" target="_blank" rel="noreferrer">
-          Código fuente, app para Android y licencia MIT
+          Código fuente y licencia MIT
         </a>
       </p>
     </Card>

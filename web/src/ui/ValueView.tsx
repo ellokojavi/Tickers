@@ -81,9 +81,8 @@ export const ValueView = ({ data, onAbout }: { data: UfData; onAbout: () => void
 
   /**
    * One value is typed, the other two follow. The arithmetic lives in the
-   * domain because it has to give the same answers here and on Android, and
-   * because deriving one rounded figure from another is how a converter starts
-   * disagreeing with itself.
+   * domain, where it is pinned by a fixture, because deriving one rounded
+   * figure from another is how a converter starts disagreeing with itself.
    */
   const setConverter = (field: "uf" | "clp" | "usd", raw: string) => {
     if (field === "uf") setUfText(raw);

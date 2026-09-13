@@ -77,9 +77,8 @@ export const BtcView = ({ data }: { data: UfData }) => {
 
   /**
    * One value is typed, the other two follow. The arithmetic lives in the
-   * domain because it has to give the same answers here and on Android, and
-   * because deriving one rounded figure from another is how a converter starts
-   * disagreeing with itself.
+   * domain, where it is pinned by a fixture, because deriving one rounded
+   * figure from another is how a converter starts disagreeing with itself.
    */
   const setConverter = (field: "btc" | "usd" | "clp", raw: string, price: Money, rate: Money) => {
     if (field === "btc") setBtcText(raw);

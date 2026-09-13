@@ -16,8 +16,8 @@ import { Card, Chips, SectionTitle, Sparkline } from "./components.tsx";
  *    showing today's value, because that is what the screen is for.
  *
  * The view decides what a point's moment and amount look like (`stamp`,
- * `amount`) and where the data comes from; this decides everything else. The
- * Android twin is ui/components/HistoryChartCard.kt.
+ * `amount`) and where the data comes from; this decides everything else. Every
+ * history chart in the app goes through here, so they cannot drift apart.
  */
 export const HistoryCard = <R extends string, P extends { readonly value: Money }>(
   { ranges, range, onRange, points, stamp, amount, summary, scrub, onScrub,
@@ -91,7 +91,7 @@ export const HistoryCard = <R extends string, P extends { readonly value: Money 
   );
 };
 
-/** The one chart height. Android draws its charts at the same 200 dp. */
+/** The one chart height, for every history chart in the app. */
 const CHART_HEIGHT = 200;
 
 /** Green up, red down, neutral at zero: each figure by its own sign. */

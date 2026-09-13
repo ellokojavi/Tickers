@@ -5,10 +5,10 @@
 // no longer exists. Regenerating them is therefore one command, for the same
 // reason the icons and the bundled series are.
 //
-// One shot per tab plus the dark theme, taken from the web app at a phone's
-// size, because that is the shape both channels are designed at first. The
-// data comes from the running app, so what lands in docs/ is what the app
-// shows today. A test checks that the README shows every file written here.
+// One shot per tab plus the dark theme, taken at a phone's size, because that
+// is the shape the app is designed at first. The data comes from the running
+// app, so what lands in docs/ is what the app shows today. A test checks that
+// the README shows every file written here.
 //
 // Usage, with the dev server already running (npm run dev):
 //

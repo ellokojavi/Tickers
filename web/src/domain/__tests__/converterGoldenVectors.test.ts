@@ -8,9 +8,10 @@ import { btcConvert, ufConvert } from "../converter.ts";
  * quantity is shown three ways at once and so the one place where a rounding
  * mistake shows itself as two different answers on one screen.
  *
- * `shared/golden/converter.json` is read by this test and by
- * app/src/test/java/cl/tickers/app/parity/ConverterGoldenVectorTest.kt.
- * See shared/PARITY.md.
+ * `web/golden/converter.json` pins every field against the engine. It was
+ * written after exactly that failure: one bitcoin read 72.476.915 pesos on
+ * load and 72.476.920 after an edit, because the peso figure was being derived
+ * from the already-rounded dollar figure instead of from the engine.
  */
 interface Golden {
   rates: { uf: string; usdClp: string; btcUsd: string };
@@ -25,14 +26,14 @@ interface Golden {
 }
 
 const golden: Golden = JSON.parse(
-  readFileSync(new URL("../../../../shared/golden/converter.json", import.meta.url), "utf8"),
+  readFileSync(new URL("../../../golden/converter.json", import.meta.url), "utf8"),
 ) as Golden;
 
 const check = (label: string, actual: string | null, expected: string | null) =>
   expect(`${label} -> ${actual}`).toBe(`${label} -> ${expected}`);
 
 describe("the uf converter", () => {
-  it("matches the shared fixture", () => {
+  it("matches the fixture", () => {
     for (const c of golden.uf) {
       const r = ufConvert(
         c.field, money(c.amount), money(golden.rates.uf),
@@ -48,7 +49,7 @@ describe("the uf converter", () => {
 });
 
 describe("the bitcoin converter", () => {
-  it("matches the shared fixture", () => {
+  it("matches the fixture", () => {
     for (const c of golden.btc) {
       const r = btcConvert(
         c.field, money(c.amount), money(golden.rates.btcUsd), money(golden.rates.usdClp),

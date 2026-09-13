@@ -3,7 +3,7 @@ import type { JSX } from "preact";
 /**
  * Inline SVG rather than emoji: emoji render in each platform's own colours and
  * style, which reads as decoration pasted into an otherwise restrained
- * interface. These inherit currentColor and match the Android app's set.
+ * interface. These inherit currentColor.
  */
 const svg = (children: JSX.Element, label?: string): JSX.Element => (
   <svg

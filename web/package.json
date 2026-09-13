@@ -4,9 +4,8 @@
   "version": "0.9.1",
   "type": "module",
   "scripts": {
-    "sync-data": "node scripts/sync-data.mjs",
-    "dev": "npm run sync-data && vite",
-    "build": "npm run sync-data && tsc --noEmit && vite build",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "screenshots": "node scripts/screenshots.mjs",
     "test": "vitest run"
