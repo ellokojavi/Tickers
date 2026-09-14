@@ -75,6 +75,7 @@ it cannot read is on you.
 
 ```bash
 cd web && npm test && npx tsc --noEmit    # 133 tests, includes the docs check
+python3 -m unittest discover -s tools -p "test_*.py"   # the source chain
 ```
 
 The manual checklist in `docs/TESTING.md` is worked through before a release.
@@ -93,3 +94,9 @@ with a body explaining why rather than what. The diff already says what.
 
 Edit the script and re-run it. The bundled series additionally have to pass the
 seed tests before they land, which is what the daily refresh workflow does.
+
+**Where a series comes from is decided in one place**, `tools/sources.py`: the
+CMF when `CMF_API_KEY` is in the environment, mindicador.cl when it is not. Add
+a source there, never in a generator. The reasoning, the measured evidence for
+every candidate and what is still unverified are in
+[`docs/DATA.md`](docs/DATA.md).

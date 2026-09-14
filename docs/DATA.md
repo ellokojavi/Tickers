@@ -45,6 +45,95 @@ value came from mindicador.cl, from the bundled data or from the local cache,
 and whether that source is official. The bitcoin card names the exchange that
 answered and the date of the dollar used to convert it.
 
+### The two paths, and why they take different sources
+
+Data reaches the app two ways, and they have opposite constraints. Confusing
+them is what made a single unauthorised source look inevitable.
+
+| | The generators, `tools/` | The live refresh |
+|---|---|---|
+| Runs in | a GitHub Actions job | the reader's browser |
+| A secret key? | **yes**, a repository secret | no — it would be public |
+| CORS needed? | no | **yes** |
+| Feeds | the complete series: almost every figure shown | only the day's value |
+
+The generators can therefore use a source the browser cannot. They do:
+`tools/sources.py` tries the **CMF** first when `CMF_API_KEY` is set in the
+environment, and falls back to mindicador.cl when it is not. Without the secret
+nothing changes and nothing breaks — the series is byte-identical either way,
+since both ultimately publish the Banco Central's figures — and setting it moves
+the bundled data onto the source whose terms actually authorise this.
+
+The live refresh has no such option and stays on mindicador.cl.
+
+**Do not put the CMF key in the page.** It is not a security risk — the data is
+public — but the quota is 10.000 requests a month and a key visible in a bundle
+can be spent by anyone.
+
+### What each source actually offers
+
+Measured against the live endpoints in September 2026, with an `Origin` header
+set, rather than taken from documentation:
+
+| Source | CORS | Key | Verdict |
+|---|---|---|---|
+| [CMF](https://api.cmfchile.cl) | `*` | free, required | **Official.** UF, UTM, dólar, euro, IPC, and the interest-rate series. Its terms explicitly authorise republishing. Used by the generators when the secret is set |
+| [Banco Central, API BDE](https://si3.bcentral.cl/Siete/es/Siete/API) | **none** | free, required | The most complete source and the only one carrying the TPM, the Imacec, unemployment and copper. Unusable from a browser; usable from CI. **Not yet wired up** — see below |
+| [mindicador.cl](https://mindicador.cl) | `*` | none | Mirrors Banco Central data. Publishes **no terms of use at all**. The only keyless CORS source covering the whole set, so the live refresh has no alternative |
+| [datos.gob.cl](https://datos.gob.cl) (CKAN) | `*` | none | Correct licence (ODC-BY) and an official publisher, but the Cochilco copper dataset is **empty and untouched since 2020** |
+| api.gael.cloud | `*` | none | **Rejected.** Served a UTM of 69.265 against a real 71.721 |
+| cl.dolarapi.com | `*` | none | **Rejected.** Publishes a *market* dollar, not the dólar observado |
+| open.er-api.com | `*` | none | **Rejected.** A market euro cross, not the Banco Central's published euro |
+| exchangerate.host | `*` | now required | No longer keyless |
+| stooq, Yahoo Finance | none | none | No CORS; unusable from the browser |
+
+**The rule those rejections follow is worth stating on its own: a backup has to
+publish the same figure, not a similar one.** dolarapi and open.er-api work
+perfectly and would quietly replace an official published rate with a market
+average. A number that is plausible and different is worse than no number,
+which is the same principle as never inventing a value for a day that has none.
+
+### Primary and backup, per indicator
+
+| Indicator | Primary | Backup | Last resort |
+|---|---|---|---|
+| UF | CMF | Banco Central | mindicador.cl |
+| Dólar observado | CMF | Banco Central | mindicador.cl |
+| UTM | CMF | Banco Central | mindicador.cl |
+| Euro | CMF | Banco Central | mindicador.cl |
+| IPC | CMF | Banco Central / INE | mindicador.cl |
+| IVP | CMF | — | mindicador.cl |
+| TPM | Banco Central | — | mindicador.cl |
+| Imacec | Banco Central | — | mindicador.cl |
+| Unemployment | Banco Central / INE | — | mindicador.cl |
+| Copper | Banco Central | — | mindicador.cl |
+| Bitcoin | Coinbase | CoinGecko, Kraken | — |
+
+The first six have a genuine official fallback. The four after them exist
+**only** in the Banco Central's API: the CMF does not publish them and no
+official source with CORS was found. For those, mindicador.cl is currently the
+only route to the browser.
+
+### What is left undone, and what it would take
+
+- **The Banco Central's API is not wired up.** It is the better source and the
+  only one with the whole set. It needs free credentials from
+  [its API page](https://si3.bcentral.cl/Siete/es/Siete/API), and its response
+  shape could not be verified without them, so nothing was written against a
+  guess. Its documentation page currently 404s.
+- **The CMF path has not run against a real key.** Its request shape and its
+  number format are taken from the Android app's own client, which ran against
+  the live API for a year, and its captured payload is pinned in
+  `tools/test_sources.py`. The refusal path was exercised with an invalid key.
+  The first real run will be the first proof.
+- **The CMF's array key is guessed for everything except the UF.** It names the
+  array after the resource — `UFs` — and only that one was ever verified, so
+  the parser takes whichever value in the object is a list rather than keeping
+  a table of plurals.
+- **Copper, TPM, Imacec and unemployment have no official fallback**, and the
+  source's IPC ran nine months behind in September 2026. Every companion figure
+  carries its own date on screen for exactly this reason.
+
 ### Terms, and what they require
 
 The figures ultimately originate with the Banco Central de Chile and the CMF,
@@ -58,15 +147,15 @@ mindicador.cl publishes **no terms of use at all**: no licence, no stated
 permission to redistribute, no rate limits. It mirrors Banco Central data and
 is credited in the same screen, but its legal position is undefined.
 
-**It is now the only live source, and that is worth stating plainly.** The app
-used to call the CMF's own API — the source that explicitly authorises what
-this app does — but that path needed a key, and a key cannot be kept secret
-inside a public page, so it only ever existed on the Android channel. When that
-channel was removed in September 2026 the CMF path went with it. The bundled
-series, which is where almost every figure the app shows actually comes from,
-is generated from mindicador.cl too. Moving the daily generators onto an
-authorised source, or onto the Banco Central's own published series, is the
-obvious way to close this and is not done.
+**It is the only source the live refresh can use**, and that is worth stating
+plainly. A key cannot be kept secret inside a public page, so the CMF path can
+never exist in the browser; when the Android channel was removed in September
+2026 it went with it, and for a while the bundled series was generated from
+mindicador.cl as well. That second half is now closed: the generators run in
+CI, where a key is a secret like any other, and they pull from the CMF whenever
+`CMF_API_KEY` is set. Almost every figure the app shows comes from the bundled
+series, so with the secret in place the unauthorised source is reduced to
+refreshing a single day's value.
 
 The bitcoin sources are public price endpoints used within their published
 limits, at most one request every thirty seconds for the spot price and one per
@@ -124,13 +213,17 @@ day, and that the series still reproduces the monthly CPI the INE published for
 ## Regenerating the bundled series
 
 ```bash
+export CMF_API_KEY=...      # optional; without it, mindicador.cl is used
+python3 -m unittest discover -s tools -p "test_*.py"
 python3 tools/build_uf_daily_seed.py
 python3 tools/build_usd_daily_seed.py
 cd web && npm test          # the seed tests must pass before the change lands
 ```
 
-Both generators pull from mindicador.cl, refuse to write a truncated series and
-print every value they reject. The same two commands run every morning in
+Both generators pull through `tools/sources.py`, refuse to write a truncated
+series and print every value they reject, along with which source answered for
+each year. That last line is also written into the file's own header, so the
+provenance of a shipped series is recorded rather than assumed. The same two commands run every morning in
 `.github/workflows/refresh-data.yml` at 12:00 UTC, after the Banco Central has
 published the day's value. The workflow validates the regenerated files with
 the test suite and commits them only when something changed. Because the files

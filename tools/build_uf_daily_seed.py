@@ -13,31 +13,21 @@ plus a parseInt, with no tokeniser, which matters when it runs at startup.
 
 Output: web/public/uf_daily.txt
 """
-import json, sys, time, urllib.request
+import sys, time
 from datetime import date, timedelta
+
+import sources
 
 OUT = "web/public/uf_daily.txt"
 START_YEAR, END_YEAR = 1977, date.today().year
 
 
-def fetch(year):
-    for attempt in range(4):
-        try:
-            with urllib.request.urlopen(f"https://mindicador.cl/api/uf/{year}", timeout=30) as r:
-                return json.load(r).get("serie", [])
-        except Exception as e:
-            if attempt == 3:
-                print(f"  !! {year} failed: {e}", file=sys.stderr)
-                return []
-            time.sleep(2 * (attempt + 1))
-
-
 daily = {}
 for y in range(START_YEAR, END_YEAR + 1):
-    serie = fetch(y)
+    serie, who = sources.fetch_year("uf", y)
     for item in serie:
-        daily[item["fecha"][:10]] = item["valor"]
-    print(f"  {y}: {len(serie):>3}")
+        daily[item["fecha"]] = item["valor"]
+    print(f"  {y}: {len(serie):>3}  {who or '-'}")
     time.sleep(0.15)
 
 if len(daily) < 17000:
@@ -123,7 +113,7 @@ end = date.fromisoformat(keys[-1])
 
 lines = [
     "# Tickers - serie diaria completa de la Unidad de Fomento",
-    "# fuente: Banco Central de Chile / CMF, via mindicador.cl",
+    f"# fuente: Banco Central de Chile / CMF, via {sources.provenance()}",
     f"# generado: {date.today().isoformat()}",
     f"# inicio: {start.isoformat()}",
     f"# fin: {end.isoformat()}",
@@ -148,3 +138,4 @@ total = (end - start).days + 1
 print(f"\ndias: {total}  con dato: {total - missing}  sin dato: {missing}")
 print(f"rango: {start} .. {end}")
 print(f"escrito: {OUT}")
+sources.report()
