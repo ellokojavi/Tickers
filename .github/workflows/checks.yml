@@ -18,6 +18,19 @@ permissions:
   contents: read
 
 jobs:
+  # The generators produce every figure the app ships, so the code that reads a
+  # source is tested on every commit rather than only when the daily refresh
+  # runs it. Stdlib unittest, no dependency, no network.
+  tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Source chain
+        run: python3 -m unittest discover -s tools -p "test_*.py"
+
   web:
     runs-on: ubuntu-latest
     steps:

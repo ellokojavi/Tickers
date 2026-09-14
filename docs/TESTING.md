@@ -8,9 +8,17 @@ changing one is always deliberate.
 ```bash
 cd web && npm test        # 133 tests, seconds
 cd web && npx tsc --noEmit
+python3 -m unittest discover -s tools -p "test_*.py"   # 17 more, no network
 ```
 
-`.github/workflows/checks.yml` runs both on every push and pull request.
+`.github/workflows/checks.yml` runs all three on every push and pull request.
+
+The Python suite sits apart from the layer table below because it tests the
+build tools rather than the app: `tools/sources.py`, which decides where the
+bundled series come from. It reads the CMF's Chilean-formatted numbers against
+the payload the Android app captured from the live API, finds the rows whatever
+the response names them, and checks that a failing source hands its year to the
+next one rather than losing it. None of it touches the network.
 
 ## Layers
 

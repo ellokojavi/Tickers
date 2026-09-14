@@ -1,5 +1,5 @@
 # Tickers - serie diaria del dolar observado
-# fuente: Banco Central de Chile, via mindicador.cl
+# fuente: Banco Central de Chile, via mindicador.cl (43 anos)
 # generado: 2026-09-13
 # inicio: 1984-01-02
 # fin: 2026-09-14

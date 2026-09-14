@@ -1,5 +1,5 @@
 # Tickers - serie diaria completa de la Unidad de Fomento
-# fuente: Banco Central de Chile / CMF, via mindicador.cl
+# fuente: Banco Central de Chile / CMF, via mindicador.cl (50 anos)
 # generado: 2026-09-13
 # inicio: 1977-08-01
 # fin: 2026-10-09

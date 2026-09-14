@@ -26,7 +26,20 @@ jobs:
         with:
           python-version: "3.12"
 
+      # The source chain's own tests, before spending a run on the network.
+      - name: Test the source chain
+        run: python3 -m unittest discover -s tools -p "test_*.py"
+
+      # CMF_API_KEY is the CMF's own API, whose terms explicitly authorise
+      # republishing its data. It is a repository secret, which is possible
+      # here and impossible in the browser — that asymmetry is the whole
+      # reason this job pulls from a different source than the app does.
+      # Unset, the secret interpolates to an empty string and the generators
+      # fall back to mindicador.cl, which is what they did before. Nothing
+      # breaks; it just runs on the unauthorised source. See docs/DATA.md.
       - name: Regenerate the series
+        env:
+          CMF_API_KEY: ${{ secrets.CMF_API_KEY }}
         run: |
           python3 tools/build_uf_daily_seed.py
           python3 tools/build_usd_daily_seed.py

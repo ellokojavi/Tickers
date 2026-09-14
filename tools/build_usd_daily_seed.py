@@ -13,8 +13,10 @@ value forward and say which day it is from.
 
 Output: web/public/usd_daily.txt
 """
-import json, sys, time, urllib.request
+import sys
 from datetime import date, timedelta
+
+import sources
 
 OUT = "web/public/usd_daily.txt"
 START_YEAR, END_YEAR = 1984, date.today().year
@@ -25,27 +27,14 @@ START_YEAR, END_YEAR = 1984, date.today().year
 MAX_DAILY_CHANGE = 0.15
 
 
-def fetch(year):
-    for attempt in range(4):
-        try:
-            url = f"https://mindicador.cl/api/dolar/{year}"
-            with urllib.request.urlopen(url, timeout=30) as r:
-                return json.load(r).get("serie", [])
-        except Exception as e:
-            if attempt == 3:
-                print(f"  !! {year} failed: {e}", file=sys.stderr)
-                return []
-            time.sleep(2 * (attempt + 1))
-
-
 daily = {}
 for y in range(START_YEAR, END_YEAR + 1):
-    serie = fetch(y)
+    serie, who = sources.fetch_year("dolar", y)
     for item in serie:
         value = item.get("valor")
         if isinstance(value, (int, float)) and value > 0:
-            daily[item["fecha"][:10]] = value
-    print(f"  {y}: {len(serie):>3}")
+            daily[item["fecha"]] = value
+    print(f"  {y}: {len(serie):>3}  {who or '-'}")
 
 if not daily:
     sys.exit("no data fetched")
@@ -140,7 +129,7 @@ start, end = date.fromisoformat(keys[0]), date.fromisoformat(keys[-1])
 
 lines = [
     "# Tickers - serie diaria del dolar observado",
-    "# fuente: Banco Central de Chile, via mindicador.cl",
+    f"# fuente: Banco Central de Chile, via {sources.provenance()}",
     f"# generado: {date.today().isoformat()}",
     f"# inicio: {start.isoformat()}",
     f"# fin: {end.isoformat()}",
@@ -164,3 +153,4 @@ with open(OUT, "w") as f:
 total = (end - start).days + 1
 print(f"\n{OUT}: {total} dias, {total - missing} con valor, {missing} sin publicacion")
 print(f"periodo {start} .. {end}")
+sources.report()
