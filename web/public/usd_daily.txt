@@ -1,8 +1,8 @@
 # Tickers - serie diaria del dolar observado
 # fuente: Banco Central de Chile, via mindicador.cl (43 anos)
-# generado: 2026-10-18
+# generado: 2026-10-24
 # inicio: 1984-01-02
-# fin: 2026-10-19
+# fin: 2026-10-26
 # unidad: centavos de peso (valor x 100); linea vacia = dia sin publicacion
 8754
 8762
@@ -15636,3 +15636,10 @@
 
 
 98165
+98186
+97856
+97682
+98658
+
+
+99035
