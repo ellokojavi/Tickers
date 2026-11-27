@@ -8,6 +8,11 @@ on:
     # 12:00 UTC, after the Banco Central has published the day's value.
     - cron: "0 12 * * *"
   workflow_dispatch:
+    inputs:
+      full:
+        description: "Rebuild every year from the sources instead of only the recent ones"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -37,12 +42,17 @@ jobs:
       # Unset, the secret interpolates to an empty string and the generators
       # fall back to mindicador.cl, which is what they did before. Nothing
       # breaks; it just runs on the unauthorised source. See docs/DATA.md.
+      # Only the current and previous year are fetched; older years are carried
+      # over from the files already shipped, which passed these same checks the
+      # day they landed. Asking for all ~93 years every morning failed the run
+      # whenever any one of them came back empty. "full" rebuilds everything.
       - name: Regenerate the series
         env:
           CMF_API_KEY: ${{ secrets.CMF_API_KEY }}
+          FULL: ${{ inputs.full && '--full' || '' }}
         run: |
-          python3 tools/build_uf_daily_seed.py
-          python3 tools/build_usd_daily_seed.py
+          python3 tools/build_uf_daily_seed.py $FULL
+          python3 tools/build_usd_daily_seed.py $FULL
 
       - uses: actions/setup-node@v4
         with:

@@ -22,13 +22,21 @@ OUT = "web/public/uf_daily.txt"
 START_YEAR, END_YEAR = 1977, date.today().year
 
 
-daily = {}
-for y in range(START_YEAR, END_YEAR + 1):
+years, carried = sources.plan(OUT, START_YEAR, END_YEAR)
+if carried:
+    print(f"  {START_YEAR}..{years[0] - 1}: {len(carried)} dias de la serie ya publicada")
+daily = dict(carried)
+fetched = 0
+for y in years:
     serie, who = sources.fetch_year("uf", y)
     for item in serie:
         daily[item["fecha"]] = item["valor"]
+    fetched += len(serie)
     print(f"  {y}: {len(serie):>3}  {who or '-'}")
     time.sleep(0.15)
+
+if not fetched:
+    sys.exit("ninguna fuente respondio para los anos recientes; no se publica nada")
 
 if len(daily) < 17000:
     sys.exit(f"refusing to write a truncated series ({len(daily)} days)")
@@ -113,7 +121,7 @@ end = date.fromisoformat(keys[-1])
 
 lines = [
     "# Tickers - serie diaria completa de la Unidad de Fomento",
-    f"# fuente: Banco Central de Chile / CMF, via {sources.provenance()}",
+    f"# fuente: Banco Central de Chile / CMF, via {sources.carried_provenance(carried)}",
     f"# generado: {date.today().isoformat()}",
     f"# inicio: {start.isoformat()}",
     f"# fin: {end.isoformat()}",

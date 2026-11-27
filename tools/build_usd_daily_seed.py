@@ -27,14 +27,22 @@ START_YEAR, END_YEAR = 1984, date.today().year
 MAX_DAILY_CHANGE = 0.15
 
 
-daily = {}
-for y in range(START_YEAR, END_YEAR + 1):
+years, carried = sources.plan(OUT, START_YEAR, END_YEAR)
+if carried:
+    print(f"  {START_YEAR}..{years[0] - 1}: {len(carried)} dias de la serie ya publicada")
+daily = dict(carried)
+fetched = 0
+for y in years:
     serie, who = sources.fetch_year("dolar", y)
     for item in serie:
         value = item.get("valor")
         if isinstance(value, (int, float)) and value > 0:
             daily[item["fecha"]] = value
+    fetched += len(serie)
     print(f"  {y}: {len(serie):>3}  {who or '-'}")
+
+if not fetched:
+    sys.exit("ninguna fuente respondio para los anos recientes; no se publica nada")
 
 if not daily:
     sys.exit("no data fetched")
@@ -129,7 +137,7 @@ start, end = date.fromisoformat(keys[0]), date.fromisoformat(keys[-1])
 
 lines = [
     "# Tickers - serie diaria del dolar observado",
-    f"# fuente: Banco Central de Chile, via {sources.provenance()}",
+    f"# fuente: Banco Central de Chile, via {sources.carried_provenance(carried)}",
     f"# generado: {date.today().isoformat()}",
     f"# inicio: {start.isoformat()}",
     f"# fin: {end.isoformat()}",

@@ -125,7 +125,11 @@ only route to the browser.
   number format are taken from the Android app's own client, which ran against
   the live API for a year, and its captured payload is pinned in
   `tools/test_sources.py`. The refusal path was exercised with an invalid key.
-  The first real run will be the first proof.
+  The first real run will be the first proof. As of November 2026 the
+  repository's `CMF_API_KEY` secret is set but **refused** (`HTTP 421: API key
+  no valida`), so every series is in fact coming from mindicador.cl. A refused
+  key is now dropped after its first answer and named in the run's summary;
+  it needs renewing at [api.cmfchile.cl](https://api.cmfchile.cl).
 - **The CMF's array key is guessed for everything except the UF.** It names the
   array after the resource — `UFs` — and only that one was ever verified, so
   the parser takes whichever value in the object is a list rather than keeping
@@ -215,15 +219,26 @@ day, and that the series still reproduces the monthly CPI the INE published for
 ```bash
 export CMF_API_KEY=...      # optional; without it, mindicador.cl is used
 python3 -m unittest discover -s tools -p "test_*.py"
-python3 tools/build_uf_daily_seed.py
+python3 tools/build_uf_daily_seed.py     # add --full to rebuild every year
 python3 tools/build_usd_daily_seed.py
 cd web && npm test          # the seed tests must pass before the change lands
 ```
 
+By default a generator fetches only the current and the previous year and
+carries every older day over from the file already in `web/public/`, which
+passed the seed tests the day it landed. Fetching all ~93 years every morning
+made the refresh fail whenever any single one of them came back empty, and in
+November 2026 the dollar stopped updating on four days out of seven because of
+it. `--full` fetches everything from the sources again, and is what happens
+anyway when there is no published file to build on. From GitHub, it is the
+`full` option of the workflow's manual run.
+
 Both generators pull through `tools/sources.py`, refuse to write a truncated
 series and print every value they reject, along with which source answered for
 each year. That last line is also written into the file's own header, so the
-provenance of a shipped series is recorded rather than assumed. The same two commands run every morning in
+provenance of a shipped series is recorded rather than assumed; on an
+incremental run it names who answered for the recent years and says that the
+older ones were carried over from the published series. The same two commands run every morning in
 `.github/workflows/refresh-data.yml` at 12:00 UTC, after the Banco Central has
 published the day's value. The workflow validates the regenerated files with
 the test suite and commits them only when something changed. Because the files

@@ -163,5 +163,86 @@ class ErrorMessages(unittest.TestCase):
         self.assertEqual(sources._explain(OSError("timed out")), "timed out")
 
 
+class RefusedCredentials(unittest.TestCase):
+    """A refused key is refused for every year. Retrying it is what turned one
+    bad secret into twenty minutes of back-off on every run."""
+
+    def setUp(self):
+        self._chain = sources.chain_for
+        sources.served.clear()
+        sources.abandoned.clear()
+
+    def tearDown(self):
+        sources.chain_for = self._chain
+        sources.served.clear()
+        sources.abandoned.clear()
+
+    def test_a_refused_key_is_asked_once_and_then_skipped(self):
+        import io
+        import urllib.error
+
+        calls = []
+
+        def refusing(year):
+            calls.append(year)
+            raise urllib.error.HTTPError(
+                "https://api.cmfchile.cl/", 421, "", {},
+                io.BytesIO(b'{"Mensaje":"API key no valida"}'),
+            )
+
+        working = lambda _y: [{"fecha": "2026-11-26", "valor": 941.2}]
+        sources.chain_for = lambda _code: [("CMF", refusing), ("mindicador.cl", working)]
+        for year in (2024, 2025, 2026):
+            rows, who = sources.fetch_year("dolar", year, attempts=3)
+            self.assertEqual(who, "mindicador.cl")
+        self.assertEqual(calls, [2024])
+        self.assertEqual(sources.abandoned, {"CMF": "HTTP 421: API key no valida"})
+
+
+class IncrementalRefresh(unittest.TestCase):
+    """The daily run fetches the years that can still move and carries the
+    rest over from the file already shipped."""
+
+    def _write(self, text):
+        import tempfile
+
+        handle = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False)
+        handle.write(text)
+        handle.close()
+        self.addCleanup(os.unlink, handle.name)
+        return handle.name
+
+    SEED = (
+        "# Tickers - prueba\n"
+        "# inicio: 2024-12-30\n"
+        "# unidad: centavos\n"
+        "94512\n"
+        "\n"
+        "99001\n"
+        "99510\n"
+    )
+
+    def test_reads_back_exactly_what_was_shipped(self):
+        values = sources.read_published(self._write(self.SEED))
+        self.assertEqual(values, {
+            "2024-12-30": 945.12,
+            "2025-01-01": 990.01,
+            "2025-01-02": 995.10,
+        })
+
+    def test_fetches_only_the_recent_years_and_carries_the_rest(self):
+        years, carried = sources.plan(self._write(self.SEED), 1984, 2026, argv=[])
+        self.assertEqual(years, [2025, 2026])
+        self.assertEqual(carried, {"2024-12-30": 945.12})
+
+    def test_full_rebuild_on_request(self):
+        years, carried = sources.plan(self._write(self.SEED), 1984, 2026, argv=["--full"])
+        self.assertEqual((years[0], years[-1], carried), (1984, 2026, {}))
+
+    def test_nothing_published_means_a_full_rebuild(self):
+        years, carried = sources.plan("/no/existe.txt", 1984, 2026, argv=[])
+        self.assertEqual((len(years), carried), (43, {}))
+
+
 if __name__ == "__main__":
     unittest.main()

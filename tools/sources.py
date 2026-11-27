@@ -40,6 +40,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import date, timedelta
 
 CMF_BASE = "https://api.cmfchile.cl/api-sbifv3/recursos_api"
 MINDICADOR_BASE = "https://mindicador.cl/api"
@@ -51,6 +52,17 @@ _AGENT = "Tickers seed builder (+https://github.com/ellokojavi/Tickers)"
 # written into the file's header, so the provenance of a series is never a
 # guess.
 served = {}
+
+# Sources that refused the credentials themselves during this run. A refused
+# key is not an outage: it will be refused again in two seconds and for every
+# year after, so retrying it only turned one bad secret into ~280 doomed
+# requests and twenty minutes of back-off before the build reached a source
+# that works. One refusal takes the source out for the rest of the run.
+abandoned = {}
+
+# The statuses that mean "these credentials are no good", as opposed to "try
+# again later". The CMF answers an invalid key with 421.
+_REFUSED = {401, 403, 421}
 
 
 def _get(url, timeout=30):
@@ -140,6 +152,8 @@ def fetch_year(code, year, attempts=3):
     that into a failed build rather than a quietly shorter file.
     """
     for name, fetch in chain_for(code):
+        if name in abandoned:
+            continue
         for attempt in range(attempts):
             try:
                 rows = fetch(year)
@@ -148,6 +162,11 @@ def fetch_year(code, year, attempts=3):
                     return rows, name
                 break  # An empty answer is an answer; move to the next source.
             except Exception as error:  # noqa: BLE001 - any failure means "try the next"
+                if isinstance(error, urllib.error.HTTPError) and error.code in _REFUSED:
+                    abandoned[name] = _explain(error)
+                    print(f"  !! {name} rechazo las credenciales ({abandoned[name]}); "
+                          f"no se vuelve a consultar en esta corrida", file=sys.stderr)
+                    break
                 if attempt == attempts - 1:
                     print(f"  !! {code} {year} via {name}: {_explain(error)}", file=sys.stderr)
                 else:
@@ -167,8 +186,73 @@ def report():
     print("\nfuentes que respondieron:")
     for name, years in sorted(served.items()):
         print(f"  {name}: {years} ano(s)")
-    if "CMF" not in served:
+    for name, why in sorted(abandoned.items()):
+        print(f"  {name}: RECHAZADA ({why}). Revisar el secreto CMF_API_KEY.")
+    if "CMF" not in served and "CMF" not in abandoned:
         print(
             "  nota: sin CMF_API_KEY en el entorno, asi que no se consulto la\n"
             "        fuente oficial. Ver docs/DATA.md.",
         )
+
+
+# --- the incremental refresh ----------------------------------------------
+#
+# Regenerating fifty years every morning made the daily refresh hostage to
+# every one of those years answering: ~93 requests a run, any one of which
+# coming back empty aborted the build, and the dollar stopped updating on
+# four days out of seven in November 2026. A published year does not change,
+# and it already passed the seed tests the day it landed. So the daily run asks
+# only for the years that can still move and carries the rest over from the
+# file already shipped. A full rebuild remains one flag away.
+
+# The current year, plus the previous one so that the first days of January
+# still see December corrected if the source revises it.
+RECENT_YEARS = 2
+
+
+def read_published(path):
+    """The values already shipped in a seed file, as {iso date: pesos}.
+
+    Empty when the file is missing or unreadable, which makes the caller fall
+    back to a full rebuild rather than write a series that starts in 2025."""
+    try:
+        with open(path) as f:
+            text = f.read().splitlines()
+    except OSError:
+        return {}
+    start = None
+    values = {}
+    day = None
+    for line in text:
+        if line.startswith("#"):
+            if line.startswith("# inicio:"):
+                start = date.fromisoformat(line.split(":", 1)[1].strip())
+            continue
+        if start is None:
+            return {}
+        day = start if day is None else day + timedelta(days=1)
+        if line.strip():
+            values[day.isoformat()] = int(line) / 100
+    return values
+
+
+def plan(path, start_year, end_year, argv=None):
+    """Which years to fetch, and the published values to carry over.
+
+    Returns (years, carried). A full rebuild - asked for with --full, or forced
+    by having nothing published to build on - fetches every year and carries
+    nothing."""
+    argv = sys.argv[1:] if argv is None else argv
+    published = {} if "--full" in argv else read_published(path)
+    if not published:
+        return list(range(start_year, end_year + 1)), {}
+    first_fetched = max(start_year, end_year - RECENT_YEARS + 1)
+    carried = {k: v for k, v in published.items() if int(k[:4]) < first_fetched}
+    return list(range(first_fetched, end_year + 1)), carried
+
+
+def carried_provenance(carried):
+    """The header's source line when part of the series was carried over."""
+    if not carried:
+        return provenance()
+    return f"{provenance()}; anos anteriores tomados de la serie ya publicada"
